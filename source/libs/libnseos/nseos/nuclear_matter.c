@@ -1,0 +1,175 @@
+#include <math.h>
+#include <complex.h>
+
+#include "nuclear_matter.h"
+
+double calc_meta_model_low_density_correction(int max_order, int order, double xx_)
+{
+    double bb;
+    double bexp;
+    double corr;
+    bb = 10.*log(2);
+    bexp = exp(-bb*(3.*xx_+1.));
+    corr = 1. - pow(-3.*xx_,max_order+1-order)*bexp;
+    return corr;
+}
+
+double calc_meta_model_low_density_correction_derivative(int max_order, int order, double xx_)
+{
+    double bb;
+    double bexp;
+    bb = 10.*log(2);
+    bexp = exp(-bb*(3.*xx_+1.));
+
+    return bexp*pow(3.,-order+max_order+1)*pow(-xx_,max_order-order)
+        *(-order - 3.*bb*xx_ + max_order + 1.);
+}
+
+struct hnm calc_meta_model_nuclear_matter(struct parameters satdata, int max_order, double nn_, double ii_)
+{
+    double tmp;
+    double xx;
+    float t0fac, t0fg;
+    double a00, a10, a20, a30, a40;
+    double barfac;
+    double a02, a12, a22, a32, a42;
+    double rmns, rmps;
+    double u0, u1, u2, u3, u4;
+    double u0p, u1p, u2p, u3p, u4p;
+    double epotpernuc;
+    double dekinpernucdx;
+    double depotpernucdx;
+    double denpernucdx;
+    double dekinpernucdi;
+    double depotpernucdi;
+    double denpernucdi;
+    struct hnm result;
+
+    t0fac = 3.*pi2/2.*satdata.rhosat0;
+    t0fg = 3./10./rmn*(pow(t0fac,2./3.))*(pow(hbarc,2.));
+
+    // coeff
+    a00 = satdata.lasat0 - t0fg*(1. + satdata.barm);
+    a10 = - t0fg*(2. + 5.*satdata.barm);
+    a20 = satdata.ksat0 - 2.*t0fg*(5.*satdata.barm - 1.);
+    barfac = (satdata.barm + 3.*satdata.bardel);
+    a02 = satdata.jsym0 - 5./9.*t0fg*(1. + barfac);
+    a12 = satdata.lsym0 - 5./9.*t0fg*(2. + 5.*barfac);
+    a22 = satdata.ksym0 - 10./9.*t0fg*(-1. + 5.*barfac);
+
+    // x_bulk
+    tmp = log(nn_) - log(satdata.rhosat0) - log(3.);
+    xx = exp(tmp) - 1./3.;
+
+    // correction at nn=0
+    u0 = calc_meta_model_low_density_correction(max_order, 0, xx);
+    u1 = calc_meta_model_low_density_correction(max_order, 1, xx);
+    u2 = calc_meta_model_low_density_correction(max_order, 2, xx);
+    u0p = calc_meta_model_low_density_correction_derivative(max_order, 0, xx);
+    u1p = calc_meta_model_low_density_correction_derivative(max_order, 1, xx);
+    u2p = calc_meta_model_low_density_correction_derivative(max_order, 2, xx);
+
+    rmns = rmn/(1.+ (satdata.barm + ii_*satdata.bardel)*(1.+3.*xx));
+    rmps = rmn/(1.+ (satdata.barm - ii_*satdata.bardel)*(1.+3.*xx));
+
+    dekinpernucdx = t0fg*cpow((1.+3.*xx),-1./3.)
+        *( cpow((1.+ii_),5./3.)*(1.+(satdata.barm+satdata.bardel*ii_)*(1.+3.*xx))
+                +  cpow((1.-ii_),5./3.)*(1.+(satdata.barm-satdata.bardel*ii_)*(1.+3.*xx)) )
+        + 0.5*t0fg*cpow((1.+3.*xx),2./3.)
+        *( cpow((1.+ii_),5./3.)*3.*(satdata.barm+satdata.bardel*ii_)
+                + cpow((1.-ii_),5./3.)*3.*(satdata.barm-satdata.bardel*ii_));
+
+    dekinpernucdi = 5./6.*t0fg*cpow((1.+3.*xx),2./3.)
+        *(cpow((1.+ii_),2./3.)*rmn/rmns - cpow((1.-ii_),2./3.)*rmn/rmps);
+
+    if(max_order == 3)
+    {
+        a30 = satdata.qsat0 - 2.*t0fg*(4.-5.*satdata.barm);
+        a32 = satdata.qsym0 - 10./9.*t0fg*(4.-5.*barfac);
+        u3 = calc_meta_model_low_density_correction(max_order, 3, xx);
+        u3p = calc_meta_model_low_density_correction_derivative(max_order, 3, xx);
+        epotpernuc = a00*u0 + a10*xx*u1 + 0.5*a20*xx*xx*u2 + 1./6.*a30*xx*xx*xx*u3
+            + (a02*u0 + a12*xx*u1 + 0.5*a22*xx*xx*u2 + 1./6.*a32*xx*xx*xx*u3)*ii_*ii_;
+        depotpernucdx = a00*u0p + a10*u1 + a10*xx*u1p
+            +  a20*u2*xx + 0.5*a20*xx*xx*u2p 
+            + a30/6.*(3.*xx*xx*u3 + xx*xx*xx*u3p)
+            +  ii_*ii_*(a02*u0p + a12*u1 + a12*xx*u1p
+                    + a22*xx*u2 + 0.5*a22*xx*xx*u2p
+                    + a32/6.*(3.*xx*xx*u3 + xx*xx*xx*u3p));
+        depotpernucdi = 2.*ii_*(a02*u0 + a12*xx*u1 + 0.5*a22*xx*xx*u2 + 1./6.*a32*xx*xx*xx*u3);
+    }
+    else if(max_order == 4)
+    {
+        a30 = satdata.qsat0 - 2.*t0fg*(4.-5.*satdata.barm);
+        a40 = satdata.zsat0 - 8.*t0fg*(-7.+5.*satdata.barm);
+        a32 = satdata.qsym0 - 10./9.*t0fg*(4.-5.*barfac);
+        a42 = satdata.zsym0 - 40./9.*t0fg*(-7.+5.*barfac);
+        u3 = calc_meta_model_low_density_correction(max_order, 3, xx);
+        u4 = calc_meta_model_low_density_correction(max_order, 4, xx);
+        u3p = calc_meta_model_low_density_correction_derivative(max_order, 3, xx);
+        u4p = calc_meta_model_low_density_correction_derivative(max_order, 4, xx);
+        epotpernuc = a00*u0 + a10*xx*u1 + 0.5*a20*xx*xx*u2 + 1./6.*a30*xx*xx*xx*u3 + 1./24.*a40*xx*xx*xx*xx*u4
+            + (a02*u0 + a12*xx*u1 + 0.5*a22*xx*xx*u2 + 1./6.*a32*xx*xx*xx*u3 + 1./24.*a42*xx*xx*xx*xx*u4)*ii_*ii_;
+        depotpernucdx = a00*u0p + a10*u1 + a10*xx*u1p
+            +  a20*u2*xx + 0.5*a20*xx*xx*u2p 
+            + a30/6.*(3.*xx*xx*u3 + xx*xx*xx*u3p)
+            + a40/24.*(4.*xx*xx*xx*u4+xx*xx*xx*xx*u4p)
+            +  ii_*ii_*(a02*u0p + a12*u1 + a12*xx*u1p
+                    + a22*xx*u2 + 0.5*a22*xx*xx*u2p
+                    + a32/6.*(3.*xx*xx*u3 + xx*xx*xx*u3p)
+                    + a42/24.*(4.*xx*xx*xx*u4+xx*xx*xx*xx*u4p));
+        depotpernucdi = 2.*ii_*(a02*u0 + a12*xx*u1 + 0.5*a22*xx*xx*u2 + 1./6.*a32*xx*xx*xx*u3 + 1./24.*a42*xx*xx*xx*xx*u4);
+    }
+    else
+    {
+        epotpernuc = a00*u0 + a10*xx*u1 + 0.5*a20*xx*xx*u2
+            + (a02*u0 + a12*xx*u1 + 0.5*a22*xx*xx*u2)*ii_*ii_;
+        depotpernucdx = a00*u0p + a10*u1 + a10*xx*u1p
+            +  a20*u2*xx + 0.5*a20*xx*xx*u2p
+            +  ii_*ii_*(a02*u0p + a12*u1 + a12*xx*u1p
+                    + a22*xx*u2 + 0.5*a22*xx*xx*u2p);
+        depotpernucdi = 2.*ii_*(a02*u0 + a12*xx*u1 + 0.5*a22*xx*xx*u2);
+    }
+
+    result.enpernuc = 0.5*t0fg*cpow((1.+3.*xx),2./3.)
+        *(cpow((1.+ii_),5./3.)*rmn/rmns + cpow((1.-ii_),5./3.)*rmn/rmps)
+        + epotpernuc;
+
+    denpernucdx = dekinpernucdx + depotpernucdx;
+    denpernucdi = dekinpernucdi + depotpernucdi;
+
+    result.mun = result.enpernuc + nn_*(1./3./satdata.rhosat0*denpernucdx
+            + (1.-ii_)/2.*denpernucdi);
+
+    return result;
+}
+
+double calc_asymmetry_factor(double m_, double ii_)
+{
+    return 0.5*(pow(1.+ii_,m_) + pow(1.-ii_,m_));
+}
+
+struct hnm calc_skyrme_nuclear_matter(struct skyrme_parameters coeff, double nn_, double ii_)
+{
+    double f53, f2, f83;
+    struct hnm result;
+
+    f53 = calc_asymmetry_factor(5./3., ii_);
+    f2 = calc_asymmetry_factor(2., ii_);
+    f83 = calc_asymmetry_factor(8./3., ii_);
+
+    result.enpernuc = 3./5.*hbarc*hbarc/2./rmn*pow(1.5*pi2,2./3.)*pow(nn_,2./3.)*f53
+        + 1./8.*coeff.t0*nn_*(2.*(coeff.x0 + 2.) - (2.*coeff.x0 + 1.)*f2)
+        + 1./48.*coeff.t3*pow(nn_,coeff.sigma+1.)*(2.*(coeff.x3 + 2.) - (2.*coeff.x3 + 1.)*f2)
+        + 3./40.*pow(1.5*pi2,2./3.)*pow(nn_,5./3.)*((coeff.t1*(coeff.x1 + 2.) + coeff.t2*(coeff.x2 + 2.))*f53
+                + 0.5*(coeff.t2*(2.*coeff.x2 + 1.) - coeff.t1*(2.*coeff.x1 + 1.))*f83);
+
+    // a modifier
+    result.mun = hbarc*hbarc/2./rmn*pow(1.5*pi2,2./3.)*pow(nn_,2./3.)*pow(2.,2./3.)
+        + 1./4.*coeff.t0*nn_*(2.*(coeff.x0 + 2.) - (2.*coeff.x0 + 1.)*2.)
+        + 1./48.*coeff.t3*(coeff.sigma+2.)*pow(nn_,coeff.sigma+1.)*(2.*(coeff.x3 + 2.) - (2.*coeff.x3 + 1.)*2.)
+        + 3./40.*8./3.*pow(1.5*pi2,2./3.)*pow(nn_,5./3.)*((coeff.t1*(coeff.x1 + 2.) + coeff.t2*(coeff.x2 + 2.))*pow(2.,2./3.)
+                + 0.5*(coeff.t2*(2.*coeff.x2 + 1.) - coeff.t1*(2.*coeff.x1 + 1.))*pow(2.,5./3.));
+
+    return result;
+}
