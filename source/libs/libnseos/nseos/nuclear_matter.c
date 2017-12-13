@@ -149,14 +149,25 @@ double calc_asymmetry_factor(double m_, double ii_)
     return 0.5*(pow(1.+ii_,m_) + pow(1.-ii_,m_));
 }
 
+double calc_asymmetry_factor_derivative(double m_, double ii_)
+{
+    return 0.5*m_*(pow(1.+ii_,m_-1.) - pow(1.-ii_,m_-1.));
+}
+
 struct hnm calc_skyrme_nuclear_matter(struct skyrme_parameters coeff, double nn_, double ii_)
 {
     double f53, f2, f83;
+    double f53p, f2p, f83p;
+    double denpernucdn;
+    double denpernucdi;
     struct hnm result;
 
     f53 = calc_asymmetry_factor(5./3., ii_);
     f2 = calc_asymmetry_factor(2., ii_);
     f83 = calc_asymmetry_factor(8./3., ii_);
+    f53p = calc_asymmetry_factor_derivative(5./3., ii_);
+    f2p = calc_asymmetry_factor_derivative(2., ii_);
+    f83p = calc_asymmetry_factor_derivative(8./3., ii_);
 
     result.enpernuc = 3./5.*hbarc*hbarc/2./rmn*pow(1.5*pi2,2./3.)*pow(nn_,2./3.)*f53
         + 1./8.*coeff.t0*nn_*(2.*(coeff.x0 + 2.) - (2.*coeff.x0 + 1.)*f2)
@@ -170,6 +181,20 @@ struct hnm calc_skyrme_nuclear_matter(struct skyrme_parameters coeff, double nn_
         + 1./48.*coeff.t3*(coeff.sigma+2.)*pow(nn_,coeff.sigma+1.)*(2.*(coeff.x3 + 2.) - (2.*coeff.x3 + 1.)*2.)
         + 3./40.*8./3.*pow(1.5*pi2,2./3.)*pow(nn_,5./3.)*((coeff.t1*(coeff.x1 + 2.) + coeff.t2*(coeff.x2 + 2.))*pow(2.,2./3.)
                 + 0.5*(coeff.t2*(2.*coeff.x2 + 1.) - coeff.t1*(2.*coeff.x1 + 1.))*pow(2.,5./3.));
+
+    denpernucdn = 2./5.*hbarc*hbarc/2./rmn*pow(1.5*pi2,2./3.)*pow(nn_,-1./3.)*f53
+        + 1./8.*coeff.t0*(2.*(coeff.x0 + 2.) - (2.*coeff.x0 + 1.)*f2)
+        + 1./48.*(coeff.sigma+1.)*coeff.t3*pow(nn_,coeff.sigma)*(2.*(coeff.x3 + 2.) - (2.*coeff.x3 + 1.)*f2)
+        + 1./8.*pow(1.5*pi2,2./3.)*pow(nn_,2./3.)*((coeff.t1*(coeff.x1 + 2.) + coeff.t2*(coeff.x2 + 2.))*f53
+                + 0.5*(coeff.t2*(2.*coeff.x2 + 1.) - coeff.t1*(2.*coeff.x1 + 1.))*f83);
+
+    denpernucdi = 3./5.*hbarc*hbarc/2./rmn*pow(1.5*pi2,2./3.)*pow(nn_,2./3.)*f53p
+        + 1./8.*coeff.t0*nn_*(2.*(coeff.x0 + 2.) - (2.*coeff.x0 + 1.)*f2p)
+        + 1./48.*coeff.t3*pow(nn_,coeff.sigma+1.)*(2.*(coeff.x3 + 2.) - (2.*coeff.x3 + 1.)*f2p)
+        + 3./40.*pow(1.5*pi2,2./3.)*pow(nn_,5./3.)*((coeff.t1*(coeff.x1 + 2.) + coeff.t2*(coeff.x2 + 2.))*f53p
+                + 0.5*(coeff.t2*(2.*coeff.x2 + 1.) - coeff.t1*(2.*coeff.x1 + 1.))*f83p);
+
+    result.mun = result.enpernuc + nn_*(denpernucdn + (1.-ii_)/nn_*denpernucdi);
 
     return result;
 }
