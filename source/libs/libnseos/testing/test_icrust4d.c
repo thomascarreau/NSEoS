@@ -124,6 +124,7 @@ void print_state_icrust(gsl_multiroot_fsolver * s, double rhob_)
     struct hnm ngas;
     double epsg;
     double epsws;
+    double pressws;
 
     aa_eq = gsl_vector_get(s->x, 0);
     del_eq = gsl_vector_get(s->x, 1);
@@ -141,8 +142,10 @@ void print_state_icrust(gsl_multiroot_fsolver * s, double rhob_)
     ngas = calc_skyrme_nuclear_matter(coeff, rhog_eq, 1.);
     epsg = rhog_eq*ngas.enpernuc;
     epsws = calc_ws_cell_energy_density(aa_eq, rho0_eq, rhop_eq, rhog_eq, enuc, epsg, rhob_);
+    pressws = calc_ws_cell_pressure(satdata, aa_eq, del_eq, rho0_eq, rhop_eq, rhog_eq, epsg, ngas.mun);
 
-    printf ("%g %g %g %g %g %g\n", rhob_, aa_eq, del_eq, rho0_eq, rhog_eq, epsws);
+    printf ("%g %g %g %g %g %g %g\n", rhob_, aa_eq, del_eq, rho0_eq, rhog_eq,
+            epsws, pressws);
 }
 
 // ==================== MAIN ====================
