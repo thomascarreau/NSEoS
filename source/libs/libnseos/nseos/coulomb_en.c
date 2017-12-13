@@ -51,6 +51,7 @@ double calc_egas_chemical_potential(double np_)
     double t;
     double egas_chemical_potential;
 
+    t = hbarc*cpow(3.0*pi2*np_,1./3.)/mel;
     egas_chemical_potential = cpow(mel,3.)/8./cpow(3.*np_*pi2,2./3.)/cpow(hbarc,2.)
         *(cpow(t*t+1.,1./2.)*(1.+6.*t*t) + t*t*(2.*t*t+1.)/cpow(t*t+1.,1./2.)
                 - 1./cpow(t*t+1.,1./2.));

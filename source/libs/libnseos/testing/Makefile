@@ -3,10 +3,10 @@ RM = rm
 LIBDIR = ../nseos
 BUILDDIR = ../nseos/build
 OBJS = $(BUILDDIR)/nuclear_en.o $(BUILDDIR)/coulomb_en.o $(BUILDDIR)/nuclear_surface_en.o $(BUILDDIR)/nuclear_matter.o $(BUILDDIR)/empirical.o
-APP = test_binding_en
+APP = test_icrust4d
 
-$(APP) : $(OBJS) test_binding_en.c
-	$(CC) -o $(APP) test_binding_en.c $(OBJS) -Wall -lm
+$(APP) : $(OBJS) test_icrust4d.c
+	$(CC) -o $(APP) test_icrust4d.c $(OBJS) -Wall -lgsl -lgslcblas -lm
 
 $(BUILDDIR)/empirical.o : $(LIBDIR)/empirical.h $(LIBDIR)/empirical.c 
 	$(CC) -c $(LIBDIR)/empirical.c -o $(BUILDDIR)/empirical.o
