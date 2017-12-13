@@ -3,6 +3,7 @@
 #include <gsl/gsl_multiroots.h>
 
 #include "../nseos/nuclear_en.h"
+#include "../nseos/observables.h"
 
 // ==================== FUNCTIONS ====================
 
@@ -115,23 +116,33 @@ void print_state_icrust(gsl_multiroot_fsolver * s, double rhob_);
 void print_state_icrust(gsl_multiroot_fsolver * s, double rhob_)
 {
     double aa_eq, del_eq, rho0_eq, rhog_eq;
-    double vws;
-    double f0, f1, f2, f3;
+    double rhop_eq;
+    /* double f0, f1, f2, f3; */
     struct parameters satdata;
+    struct skyrme_parameters coeff;
+    double enuc;
+    struct hnm ngas;
+    double epsg;
+    double epsws;
 
     aa_eq = gsl_vector_get(s->x, 0);
     del_eq = gsl_vector_get(s->x, 1);
     rho0_eq = gsl_vector_get(s->x, 2);
     rhog_eq = gsl_vector_get(s->x, 3);
-    vws = aa_eq*(1. - rhog_eq/rho0_eq)/(rhob_ - rhog_eq);
-    f0 = gsl_vector_get(s->f, 0);
-    f1 = gsl_vector_get(s->f, 1);
-    f2 = gsl_vector_get(s->f, 2);
-    f3 = gsl_vector_get(s->f, 3);
+    rhop_eq = (rhob_-rhog_eq)*(1.-del_eq)/2./(1.-rhog_eq/rho0_eq);
+    /* f0 = gsl_vector_get(s->f, 0); */
+    /* f1 = gsl_vector_get(s->f, 1); */
+    /* f2 = gsl_vector_get(s->f, 2); */
+    /* f3 = gsl_vector_get(s->f, 3); */
     satdata = assign_param(satdata);
+    coeff = assign_skyrme_param(coeff);
 
-    printf ("%g %g %g %g %g %g %g %g %g %g\n", rhob_, aa_eq, del_eq, rho0_eq, rhog_eq, vws, 
-            f0, f1, f2, f3);
+    enuc = calc_cldm_skyrme_based_nuclear_en(satdata, coeff, aa_eq, del_eq, rho0_eq, rhop_eq);
+    ngas = calc_skyrme_nuclear_matter(coeff, rhog_eq, 1.);
+    epsg = rhog_eq*ngas.enpernuc;
+    epsws = calc_ws_cell_energy_density(aa_eq, rho0_eq, rhop_eq, rhog_eq, enuc, epsg, rhob_);
+
+    printf ("%g %g %g %g %g %g\n", rhob_, aa_eq, del_eq, rho0_eq, rhog_eq, epsws);
 }
 
 // ==================== MAIN ====================
@@ -151,7 +162,7 @@ int main(void)
     rho0_new_guess = 0.14;
     rhog_new_guess = 1.e-6;
 
-    for(irhob = 3; irhob <= 800; irhob += 1)
+    for(irhob = 3; irhob <= 748; irhob += 1)
     {
         const gsl_multiroot_fsolver_type *T;
         gsl_multiroot_fsolver *s;

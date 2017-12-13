@@ -2,7 +2,12 @@ CC = gcc
 RM = rm
 LIBDIR = ../nseos
 BUILDDIR = ../nseos/build
-OBJS = $(BUILDDIR)/nuclear_en.o $(BUILDDIR)/coulomb_en.o $(BUILDDIR)/nuclear_surface_en.o $(BUILDDIR)/nuclear_matter.o $(BUILDDIR)/empirical.o
+OBJS = $(BUILDDIR)/observables.o \
+	   $(BUILDDIR)/nuclear_en.o \
+	   $(BUILDDIR)/coulomb_en.o \
+	   $(BUILDDIR)/nuclear_surface_en.o \
+	   $(BUILDDIR)/nuclear_matter.o \
+	   $(BUILDDIR)/empirical.o
 APP = test_icrust4d
 
 $(APP) : $(OBJS) test_icrust4d.c
@@ -22,6 +27,9 @@ $(BUILDDIR)/coulomb_en.o : $(LIBDIR)/coulomb_en.h $(LIBDIR)/coulomb_en.c $(LIBDI
 
 $(BUILDDIR)/nuclear_en.o : $(LIBDIR)/nuclear_en.h $(LIBDIR)/nuclear_en.c
 	$(CC) -c $(LIBDIR)/nuclear_en.c -o $(BUILDDIR)/nuclear_en.o
+
+$(BUILDDIR)/observables.o : $(LIBDIR)/observables.h $(LIBDIR)/observables.c
+	$(CC) -c $(LIBDIR)/observables.c -o $(BUILDDIR)/observables.o
 
 clean:
 	$(RM) $(OBJS) $(APP)
