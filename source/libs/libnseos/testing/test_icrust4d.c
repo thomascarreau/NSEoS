@@ -41,7 +41,7 @@ struct icrust_fun_4d calc_icrust_fun_4d(double aa_, double del_, double rho0_, d
 
     taylor_exp_order = 4;
     /* enuc = calc_cldm_meta_model_nuclear_en(satdata, taylor_exp_order, aa_, del_, rho0_, rhop_); */
-    enuc = calc_cldm_skyrme_based_nuclear_en(satdata, coeff, aa_, del_, rho0_, rhop_);
+    enuc = calc_cldm_skyrme_based_wbbpcorr_nuclear_en(satdata, coeff, aa_, del_, rho0_, rhop_, rhog_);
     epsa = 0.001;
     epsb = 0.0001;
     epsr = 0.0001;
@@ -51,12 +51,12 @@ struct icrust_fun_4d calc_icrust_fun_4d(double aa_, double del_, double rho0_, d
     /* enuc_bm = calc_cldm_meta_model_nuclear_en(satdata, taylor_exp_order, aa_, del_-epsb, rho0_, rhop_); */
     /* enuc_rp = calc_cldm_meta_model_nuclear_en(satdata, taylor_exp_order, aa_, del_, rho0_+epsr, rhop_); */
     /* enuc_rm = calc_cldm_meta_model_nuclear_en(satdata, taylor_exp_order, aa_, del_, rho0_-epsr, rhop_); */
-    enuc_ap = calc_cldm_skyrme_based_nuclear_en(satdata, coeff, aa_+epsa, del_, rho0_, rhop_);
-    enuc_am = calc_cldm_skyrme_based_nuclear_en(satdata, coeff, aa_-epsa, del_, rho0_, rhop_);
-    enuc_bp = calc_cldm_skyrme_based_nuclear_en(satdata, coeff, aa_, del_+epsb, rho0_, rhop_);
-    enuc_bm = calc_cldm_skyrme_based_nuclear_en(satdata, coeff, aa_, del_-epsb, rho0_, rhop_);
-    enuc_rp = calc_cldm_skyrme_based_nuclear_en(satdata, coeff, aa_, del_, rho0_+epsr, rhop_);
-    enuc_rm = calc_cldm_skyrme_based_nuclear_en(satdata, coeff, aa_, del_, rho0_-epsr, rhop_);
+    enuc_ap = calc_cldm_skyrme_based_wbbpcorr_nuclear_en(satdata, coeff, aa_+epsa, del_, rho0_, rhop_, rhog_);
+    enuc_am = calc_cldm_skyrme_based_wbbpcorr_nuclear_en(satdata, coeff, aa_-epsa, del_, rho0_, rhop_, rhog_);
+    enuc_bp = calc_cldm_skyrme_based_wbbpcorr_nuclear_en(satdata, coeff, aa_, del_+epsb, rho0_, rhop_, rhog_);
+    enuc_bm = calc_cldm_skyrme_based_wbbpcorr_nuclear_en(satdata, coeff, aa_, del_-epsb, rho0_, rhop_, rhog_);
+    enuc_rp = calc_cldm_skyrme_based_wbbpcorr_nuclear_en(satdata, coeff, aa_, del_, rho0_+epsr, rhop_, rhog_);
+    enuc_rm = calc_cldm_skyrme_based_wbbpcorr_nuclear_en(satdata, coeff, aa_, del_, rho0_-epsr, rhop_, rhog_);
     denucdaa = (enuc_ap - enuc_am)/2./epsa; // 2 points derivatives
     denucddel = (enuc_bp - enuc_bm)/2./epsb;
     denucdrho0 = (enuc_rp - enuc_rm)/2./epsr;
@@ -138,7 +138,7 @@ void print_state_icrust(gsl_multiroot_fsolver * s, double rhob_)
     satdata = assign_param(satdata);
     coeff = assign_skyrme_param(coeff);
 
-    enuc = calc_cldm_skyrme_based_nuclear_en(satdata, coeff, aa_eq, del_eq, rho0_eq, rhop_eq);
+    enuc = calc_cldm_skyrme_based_wbbpcorr_nuclear_en(satdata, coeff, aa_eq, del_eq, rho0_eq, rhop_eq, rhog_eq);
     ngas = calc_skyrme_nuclear_matter(coeff, rhog_eq, 1.);
     epsg = rhog_eq*ngas.enpernuc;
     epsws = calc_ws_cell_energy_density(aa_eq, rho0_eq, rhop_eq, rhog_eq, enuc, epsg, rhob_);
@@ -165,7 +165,7 @@ int main(void)
     rho0_new_guess = 0.14;
     rhog_new_guess = 1.e-6;
 
-    for(irhob = 3; irhob <= 748; irhob += 1)
+    for(irhob = 3; irhob <= 912; irhob += 1)
     {
         const gsl_multiroot_fsolver_type *T;
         gsl_multiroot_fsolver *s;

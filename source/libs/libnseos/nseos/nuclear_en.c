@@ -31,3 +31,19 @@ double calc_cldm_meta_model_nuclear_en(struct parameters satdata, int max_order,
 
     return bulk_en + surf_en + coul_en;
 }
+
+double calc_cldm_skyrme_based_wbbpcorr_nuclear_en(struct parameters satdata, struct skyrme_parameters coeff, 
+        double aa_, double ii_, double n0_, double np_, double ng_)
+{
+    struct hnm skyrme;
+    double bulk_en;
+    double surf_en;
+    double coul_en;
+
+    skyrme = calc_skyrme_nuclear_matter(coeff, n0_, ii_);
+    bulk_en = skyrme.enpernuc*aa_;
+    surf_en = calc_ldm_wbbpcorr_surf_en(coeff, aa_, ii_, n0_, ng_);
+    coul_en = calc_coulomb_en(satdata, aa_, ii_, n0_, np_);
+
+    return bulk_en + surf_en + coul_en;
+}
