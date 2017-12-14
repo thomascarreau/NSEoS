@@ -25,6 +25,17 @@ double calc_meta_model_low_density_correction_derivative(int max_order, int orde
         *(-order - 3.*bb*xx_ + max_order + 1.);
 }
 
+double calc_meta_model_low_density_correction_second_derivative(int max_order, int order, double xx_)
+{
+    double bb;
+    double bexp;
+    bb = 10.*log(2);
+    bexp = exp(-bb*(3.*xx_+1.));
+
+    return bexp*(-pow(-3.,-order+max_order+1))*pow(-xx_,-order+max_order-1)
+        *(9.*bb*bb*xx_*xx_ + (-order + max_order + 1)*(-order - 6.*bb*xx_ + max_order));
+}
+
 struct hnm calc_meta_model_nuclear_matter(struct parameters satdata, int max_order, double nn_, double ii_)
 {
     double tmp;
