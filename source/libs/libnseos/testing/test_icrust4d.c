@@ -7,6 +7,8 @@
 
 // ==================== FUNCTIONS ====================
 
+static const int taylor_exp_order = 4;
+
 struct icrust_fun_4d
 {
     double f_stability;
@@ -20,8 +22,6 @@ struct icrust_fun_4d calc_icrust_fun_4d(double aa_, double del_, double rho0_, d
 {
     struct icrust_fun_4d result;
     struct parameters satdata;
-    struct skyrme_parameters coeff;
-    int taylor_exp_order;
     double enuc;
     double epsa;
     double epsb;
@@ -37,26 +37,17 @@ struct icrust_fun_4d calc_icrust_fun_4d(double aa_, double del_, double rho0_, d
     struct hnm ngas;
 
     satdata = assign_param(satdata);
-    coeff = assign_skyrme_param(coeff);
 
-    taylor_exp_order = 4;
-    /* enuc = calc_cldm_meta_model_nuclear_en(satdata, taylor_exp_order, aa_, del_, rho0_, rhop_); */
-    enuc = calc_cldm_skyrme_based_wbbpcorr_nuclear_en(satdata, coeff, aa_, del_, rho0_, rhop_, rhog_);
+    enuc = calc_etf_meta_model_wbbpcorr_nuclear_en(satdata, taylor_exp_order, aa_, del_, rho0_, rhop_, rhog_);
     epsa = 0.001;
     epsb = 0.0001;
     epsr = 0.0001;
-    /* enuc_ap = calc_cldm_meta_model_nuclear_en(satdata, taylor_exp_order, aa_+epsa, del_, rho0_, rhop_); */
-    /* enuc_am = calc_cldm_meta_model_nuclear_en(satdata, taylor_exp_order, aa_-epsa, del_, rho0_, rhop_); */
-    /* enuc_bp = calc_cldm_meta_model_nuclear_en(satdata, taylor_exp_order, aa_, del_+epsb, rho0_, rhop_); */
-    /* enuc_bm = calc_cldm_meta_model_nuclear_en(satdata, taylor_exp_order, aa_, del_-epsb, rho0_, rhop_); */
-    /* enuc_rp = calc_cldm_meta_model_nuclear_en(satdata, taylor_exp_order, aa_, del_, rho0_+epsr, rhop_); */
-    /* enuc_rm = calc_cldm_meta_model_nuclear_en(satdata, taylor_exp_order, aa_, del_, rho0_-epsr, rhop_); */
-    enuc_ap = calc_cldm_skyrme_based_wbbpcorr_nuclear_en(satdata, coeff, aa_+epsa, del_, rho0_, rhop_, rhog_);
-    enuc_am = calc_cldm_skyrme_based_wbbpcorr_nuclear_en(satdata, coeff, aa_-epsa, del_, rho0_, rhop_, rhog_);
-    enuc_bp = calc_cldm_skyrme_based_wbbpcorr_nuclear_en(satdata, coeff, aa_, del_+epsb, rho0_, rhop_, rhog_);
-    enuc_bm = calc_cldm_skyrme_based_wbbpcorr_nuclear_en(satdata, coeff, aa_, del_-epsb, rho0_, rhop_, rhog_);
-    enuc_rp = calc_cldm_skyrme_based_wbbpcorr_nuclear_en(satdata, coeff, aa_, del_, rho0_+epsr, rhop_, rhog_);
-    enuc_rm = calc_cldm_skyrme_based_wbbpcorr_nuclear_en(satdata, coeff, aa_, del_, rho0_-epsr, rhop_, rhog_);
+    enuc_ap = calc_etf_meta_model_wbbpcorr_nuclear_en(satdata, taylor_exp_order, aa_+epsa, del_, rho0_, rhop_, rhog_);
+    enuc_am = calc_etf_meta_model_wbbpcorr_nuclear_en(satdata, taylor_exp_order, aa_-epsa, del_, rho0_, rhop_, rhog_);
+    enuc_bp = calc_etf_meta_model_wbbpcorr_nuclear_en(satdata, taylor_exp_order, aa_, del_+epsb, rho0_, rhop_, rhog_);
+    enuc_bm = calc_etf_meta_model_wbbpcorr_nuclear_en(satdata, taylor_exp_order, aa_, del_-epsb, rho0_, rhop_, rhog_);
+    enuc_rp = calc_etf_meta_model_wbbpcorr_nuclear_en(satdata, taylor_exp_order, aa_, del_, rho0_+epsr, rhop_, rhog_);
+    enuc_rm = calc_etf_meta_model_wbbpcorr_nuclear_en(satdata, taylor_exp_order, aa_, del_, rho0_-epsr, rhop_, rhog_);
     denucdaa = (enuc_ap - enuc_am)/2./epsa; // 2 points derivatives
     denucddel = (enuc_bp - enuc_bm)/2./epsb;
     denucdrho0 = (enuc_rp - enuc_rm)/2./epsr;
@@ -64,8 +55,7 @@ struct icrust_fun_4d calc_icrust_fun_4d(double aa_, double del_, double rho0_, d
     muel = calc_egas_chemical_potential(rhop_);
     dmu = calc_screening_derivative(satdata, aa_, del_, rho0_, rhop_);
 
-    /* ngas = calc_meta_model_nuclear_matter(satdata, taylor_exp_order, rhog_, 1.); */
-    ngas = calc_skyrme_nuclear_matter(coeff, rhog_, 1.);
+    ngas = calc_meta_model_nuclear_matter(satdata, taylor_exp_order, rhog_, 1.);
 
     result.f_stability = denucdaa/aa_ - enuc/aa_/aa_;
     result.f_beta = denucddel*2./aa_ - muel - dmu - rmp + rmn;
@@ -118,9 +108,8 @@ void print_state_icrust(gsl_multiroot_fsolver * s, double rhob_)
     double aa_eq, del_eq, rho0_eq, rhog_eq;
     double rhop_eq;
     struct parameters satdata;
-    struct skyrme_parameters coeff;
     double enuc;
-    double esurf, ecoul;
+    double esurf;
     struct hnm ngas;
     double epsg;
     double epsws;
@@ -132,18 +121,16 @@ void print_state_icrust(gsl_multiroot_fsolver * s, double rhob_)
     rhog_eq = gsl_vector_get(s->x, 3);
     rhop_eq = (rhob_-rhog_eq)*(1.-del_eq)/2./(1.-rhog_eq/rho0_eq);
     satdata = assign_param(satdata);
-    coeff = assign_skyrme_param(coeff);
 
-    enuc = calc_cldm_skyrme_based_wbbpcorr_nuclear_en(satdata, coeff, aa_eq, del_eq, rho0_eq, rhop_eq, rhog_eq);
-    esurf = calc_ldm_wbbpcorr_surf_en(coeff, aa_eq, del_eq, rho0_eq, rhog_eq);
-    ecoul = calc_coulomb_en(satdata, aa_eq, del_eq, rho0_eq, rhop_eq);
-    ngas = calc_skyrme_nuclear_matter(coeff, rhog_eq, 1.);
+    enuc = calc_etf_meta_model_wbbpcorr_nuclear_en(satdata, taylor_exp_order, aa_eq, del_eq, rho0_eq, rhop_eq, rhog_eq);
+    esurf = calc_etf_wbbpcorr_surface_en(satdata, taylor_exp_order, aa_eq, del_eq, rho0_eq, rhog_eq);
+    ngas = calc_meta_model_nuclear_matter(satdata, taylor_exp_order, rhog_eq, 1.);
     epsg = rhog_eq*ngas.enpernuc;
     epsws = calc_ws_cell_energy_density(aa_eq, rho0_eq, rhop_eq, rhog_eq, enuc, epsg, rhob_);
     pressws = calc_ws_cell_pressure(satdata, aa_eq, del_eq, rho0_eq, rhop_eq, rhog_eq, epsg, ngas.mun);
 
-    printf ("%g %g %g %g %g %g %g %g %g\n", rhob_, aa_eq, del_eq, rho0_eq, rhog_eq,
-            epsws, pressws, esurf, 2.*ecoul);
+    printf ("%g %g %g %g %g %g %g %g\n", rhob_, aa_eq, del_eq, rho0_eq, rhog_eq,
+            epsws, pressws, esurf);
 }
 
 // ==================== MAIN ====================
@@ -163,7 +150,7 @@ int main(void)
     rho0_new_guess = 0.14;
     rhog_new_guess = 1.e-6;
 
-    for(irhob = 3; irhob <= 912; irhob += 1)
+    for(irhob = 3; irhob <= 43; irhob += 1)
     {
         const gsl_multiroot_fsolver_type *T;
         gsl_multiroot_fsolver *s;
@@ -220,7 +207,7 @@ int main(void)
                 break;
 
             // dirty backstepping
-            while (gsl_vector_get (s->x, 0) < 50. || gsl_vector_get (s->x, 0) > 10000.) {
+            while (gsl_vector_get (s->x, 0) < 50.) {
                 astep = astep/4.;
                 aa_new = aa_old + astep;
                 gsl_vector_set (x, 0, aa_new);
@@ -240,7 +227,7 @@ int main(void)
                 gsl_multiroot_fsolver_set (s, &f, x);
                 basym_new = gsl_vector_get (s->x, 1);
             }
-            while (gsl_vector_get (s->x, 2) < 0. || gsl_vector_get (s->x, 2) > 0.16) { // SLy4 value
+            while (gsl_vector_get (s->x, 2) < 0. || gsl_vector_get (s->x, 2) > 0.155) { // SkI' value
                 rstep = rstep/4.;
                 rho0_new = rho0_old + rstep;
                 gsl_vector_set (x, 0, aa_new);
