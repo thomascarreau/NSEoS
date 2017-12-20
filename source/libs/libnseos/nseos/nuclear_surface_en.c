@@ -4,7 +4,7 @@
 #include "nuclear_matter.h"
 #include "nuclear_surface_en.h"
 
-double calc_ldm_surf_en(double aa_)
+double calc_ldm_surface_en(double aa_)
 {
     float as;
 
@@ -13,7 +13,7 @@ double calc_ldm_surf_en(double aa_)
     return as*pow(aa_,2./3.);
 }
 
-double calc_ldm_wbbpcorr_surf_en(struct skyrme_parameters coeff,
+double calc_ldm_wbbpcorr_surface_en(struct parameters satdata, int max_order,
         double aa_, double ii_, double n0_, double ng_)
 {
     double surf_en_vac;
@@ -21,9 +21,9 @@ double calc_ldm_wbbpcorr_surf_en(struct skyrme_parameters coeff,
     struct hnm ngas;
     double surf_en_ns;
 
-    surf_en_vac = calc_ldm_surf_en(aa_);
-    bulk = calc_skyrme_nuclear_matter(coeff, n0_, ii_);
-    ngas = calc_skyrme_nuclear_matter(coeff, ng_, 1.);
+    surf_en_vac = calc_ldm_surface_en(aa_);
+    bulk = calc_meta_model_nuclear_matter(satdata, max_order, n0_, ii_);
+    ngas = calc_meta_model_nuclear_matter(satdata, max_order, ng_, 1.);
     surf_en_ns = surf_en_vac*(1.-ngas.enpernuc/bulk.enpernuc)*pow(1.-ng_/n0_,2./3.);
 
     return surf_en_ns;
@@ -62,7 +62,7 @@ double eta_function(int a, double b)
     return result;
 }
 
-double calc_etf_surface_energy(struct parameters satdata, double aa_, double ii_, double n0_)
+double calc_etf_surface_en(struct parameters satdata, double aa_, double ii_, double n0_)
 {
     double ckin;
     double alphanum, alphadenom, alpha;
@@ -110,7 +110,7 @@ double calc_etf_surface_energy(struct parameters satdata, double aa_, double ii_
     rmsat = rmn/(1. + satdata.barm*(1. + 3.*xsat));
     delmsat = (rmn - rmsat)/rmsat;
 
-    hnm12 = calc_hnm(satdata, satdata.rhosat0/2., ii_);
+    hnm12 = calc_meta_model_nuclear_matter(satdata, 4, satdata.rhosat0/2., ii_);
 
     clsurf = 3.*ckin*pow(n0_,2./3.)*(eta_function(0,5./3.)*rmn/rmsat - 3./5.*delmsat) 
         - 3.*c0*n0_ + 3.*c3*pow(n0_,alpha+1)*eta_function(0,alpha+2) ; 
@@ -195,4 +195,57 @@ double calc_etf_surface_energy(struct parameters satdata, double aa_, double ii_
     esurf = esurfis + esurfiv;
 
     return esurf;
+}
+
+double calc_etf_wbbpcorr_surface_en(struct parameters satdata, int max_order,
+        double aa_, double ii_, double n0_, double ng_)
+{
+    double surf_en_vac;
+    struct hnm bulk;
+    struct hnm ngas;
+    double surf_en_ns;
+
+    surf_en_vac = calc_etf_surface_en(satdata, aa_, ii_, n0_);
+    bulk = calc_meta_model_nuclear_matter(satdata, max_order, n0_, ii_);
+    ngas = calc_meta_model_nuclear_matter(satdata, max_order, ng_, 1.);
+    surf_en_ns = surf_en_vac*(1.-ngas.enpernuc/bulk.enpernuc)*pow(1.-ng_/n0_,2./3.);
+
+    return surf_en_ns;
+}
+
+double calc_ls_surface_en(struct parameters satdata, double aa_, double ii_)
+{
+    double surf_energy;
+    double r0;
+    double sig;
+    double sigs, ss;
+    double q;
+    double ypnuc;
+
+    // SkI' values
+    r0 = pow(4.*pi*satdata.rhosat0/3.,-1./3.);
+    sigs = 1.15;
+    ss = 45.8;
+    q = 384.*pi*r0*r0*sigs/ss - 16.;
+    ypnuc = (1. - ii_)/2.;
+    sig = sigs*(16. + q)/(pow(ypnuc,-3.) + q + pow(1.-ypnuc,-3.));
+    surf_energy = 4.*pi*r0*r0*sig*pow(aa_,2./3.);
+
+    return surf_energy;
+}
+
+double calc_ls_wbbpcorr_surface_en(struct parameters satdata, int max_order,
+        double aa_, double ii_, double n0_, double ng_)
+{
+    double surf_en_vac;
+    struct hnm bulk;
+    struct hnm ngas;
+    double surf_en_ns;
+
+    surf_en_vac = calc_ls_surface_en(satdata, aa_, ii_);
+    bulk = calc_meta_model_nuclear_matter(satdata, max_order, n0_, ii_); // max order = 2 in [LS91]
+    ngas = calc_meta_model_nuclear_matter(satdata, max_order, ng_, 1.);
+    surf_en_ns = surf_en_vac*(1.-ngas.enpernuc/bulk.enpernuc)*pow(1.-ng_/n0_,2./3.);
+
+    return surf_en_ns;
 }
