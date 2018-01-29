@@ -58,19 +58,17 @@ int main(void)
     //========================== TABLE ============================
     double aa;
     double zz;
-    int iaa;
-    int izz;
     double surface_energy_per_nucleon;
-    for(iaa = 40; iaa < 209; iaa += 4)
+    for(aa = 60.; aa < 401.; aa += 4.)
     {
-        for(izz = iaa/4; izz < iaa/2+1; izz += 1)
+        for(zz = (3.*aa+160.)/17. ; zz < aa/2.+1.; zz += 1.)
         {
-            aa = iaa;
-            zz = izz;
             surface_energy_per_nucleon = calc_surface_energy_per_nucleon(aa,zz);
             printf("%g %g %g\n", aa, zz, surface_energy_per_nucleon);
         }
     }
+
+
 
     return 0;
 }
@@ -341,7 +339,7 @@ double calc_binding_energy_per_nucleon(double aa_, double zz_)
 
     eb_plus_es = calc_energy(aa_,zz_);
     ec = calc_coulomb_energy(aa_,zz_);
-    
+
     return (eb_plus_es + ec)/aa_;
 }
 
@@ -402,7 +400,7 @@ double calc_surface_energy_per_nucleon(double aa_, double zz_)
     double energy;
     double energy_per_nucleon;
     double bulk_energy_per_nucleon;
-    
+
     energy = calc_energy(aa_,zz_);
     energy_per_nucleon = energy/aa_;
     bulk_energy_per_nucleon = calc_bulk_energy_per_nucleon(aa_,zz_);
