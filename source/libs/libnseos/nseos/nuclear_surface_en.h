@@ -14,7 +14,11 @@ double my_integrand(double x, void *params_ptr);
 double eta_function(int a, double b);
 double calc_etf_surface_en(struct parameters satdata, double aa_, double ii_, double n0_);
 
-// LS (see: Lattimer and Swesty, 1991)
+// LS corrected surface energy (see: Lattimer and Swesty, 1991)
 double calc_ls_surface_en(struct parameters satdata, double aa_, double ii_);
+
+// LS(ETF) (w/ sigmas and ss fitted out of the ETF numerical calculation)
+double calc_bulk_asymmetry(struct parameters satdata, double aa_, double ii_);
+double calc_ls_etf_surface_en(struct parameters satdata, double aa_, double ii_, double n0_);
 
 #endif // H_NUCLEAR_SURFACE_EN

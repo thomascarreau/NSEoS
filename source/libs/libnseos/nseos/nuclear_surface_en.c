@@ -203,3 +203,43 @@ double calc_ls_surface_en(struct parameters satdata, double aa_, double ii_)
 
     return surf_energy;
 }
+
+double calc_bulk_asymmetry(struct parameters satdata, double aa_, double ii_)
+{
+    double rsat;
+    double ac;
+    double qq; // surface stiffness coefficient (see: 10.1103/PhysRevC.80.024316) 
+    double factor_num;
+    double factor_denom;
+    double zz;
+    double basym;
+
+    rsat = pow(3./4./PI/satdata.rhosat0,1./3.);
+    ac = 3./5.*ALPHAFS*HBARC/rsat;
+    qq = 144.5*satdata.jsym0/(satdata.lsym0+55.5);
+    factor_num = 3.*ac/8./qq;
+    factor_denom = 9.*satdata.jsym0/4./qq;
+
+    zz = aa_*(1.-ii_)/2.;
+
+    basym = (ii_ + factor_num*zz*zz/pow(aa_,5./3.))/(1.+factor_denom*pow(aa_,-1./3.));
+    
+    return basym;
+}
+
+double calc_ls_etf_surface_en(struct parameters satdata, double aa_, double ii_, double n0_)
+{
+    double sigmas, ss;
+    double r0;
+    double basym;
+    double ls_etf_surface_en;
+                                        // !!!!!!!!!!!!!!!!!!!!!!!!!!
+    sigmas = 1.06054; // in MeV/fm^2    // !!!! Reference values !!!! 
+    ss = 46.3042; // in MeV             // !!!!!!!!!!!!!!!!!!!!!!!!!!
+
+    r0 = pow(3./4./PI/n0_,1./3.);
+    basym = calc_bulk_asymmetry(satdata, aa_, ii_);
+    ls_etf_surface_en = (4.*PI*r0*r0*sigmas + ss*basym*basym)*pow(aa_,2./3.);
+
+    return ls_etf_surface_en;
+}
