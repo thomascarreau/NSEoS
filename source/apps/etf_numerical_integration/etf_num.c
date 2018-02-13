@@ -1,3 +1,10 @@
+  /* source/apps/etf_numerical_integration/etf_num.c 
+   * AUTHOR: Thomas Carreau
+   *
+   * Quick-and-dirty code to calculate the energy 
+   * within the Extended Thomas-Fermi approximation.
+   */
+
 #include <stdio.h>
 #include <math.h>
 #include <gsl/gsl_integration.h>
@@ -50,7 +57,8 @@ double calc_coulomb_energy(double aa_, double zz_);
 double calc_binding_energy_per_nucleon(double aa_, double zz_);
 double calc_bulk_energy_per_nucleon(double aa_, double zz_);
 double calc_surface_energy_per_nucleon(double aa_, double zz_);
-double calc_evacpernucleon_etf_para(double aa_, double zz_);
+double calc_evacpernucleon_ls_elfc2(double aa_, double zz_);
+double calc_evacpernucleon_dl_elfc2(double aa_, double zz_);
 
 int main(void)
 {
@@ -58,17 +66,53 @@ int main(void)
     //========================== TABLE ============================
     double aa;
     double zz;
-    double surface_energy_per_nucleon;
+    /* double surface_energy_per_nucleon; */
+    double energy; // bulk + surf
+    double energy_per_nucleon;
     for(aa = 60.; aa < 401.; aa += 4.)
     {
         for(zz = (3.*aa+160.)/17. ; zz < aa/2.+1.; zz += 1.)
         {
-            surface_energy_per_nucleon = calc_surface_energy_per_nucleon(aa,zz);
-            printf("%g %g %g\n", aa, zz, surface_energy_per_nucleon);
+            /* surface_energy_per_nucleon = calc_surface_energy_per_nucleon(aa,zz); */
+            energy = calc_energy(aa,zz);
+            energy_per_nucleon = energy/aa;
+            printf("%g %g %g\n", aa, zz, energy_per_nucleon);
         }
     }
 
+    /* //========================= TEST OF THE FIT (I) ======================== */
+    /* double aa; */
+    /* int iii; */
+    /* double ii; */
+    /* double zz; */
+    /* double binding_energy_per_nucleon; */
+    /* double evacpernucleon_dl_elfc2; */
+    /* aa = 400.; */
+    /* for(iii = 0; iii < 80; iii += 1) */
+    /* { */
+    /*     ii = iii/100.; */
+    /*     zz = aa*(1.-ii)/2.; */
+    /*     binding_energy_per_nucleon = calc_binding_energy_per_nucleon(aa,zz); */
+    /*     evacpernucleon_dl_elfc2 = calc_evacpernucleon_dl_elfc2(aa,zz); */
+    /*     printf("%g %g\n", ii, evacpernucleon_dl_elfc2 - binding_energy_per_nucleon); */
+    /* } */
 
+    /* //========================= TEST OF THE FIT (A) ======================== */
+    /* int iaa; */
+    /* double aa; */
+    /* double ii; */
+    /* double zz; */
+    /* double binding_energy_per_nucleon; */
+    /* double evacpernucleon_dl_elfc2; */
+    /* ii = 0.8; */
+    /* for(iaa = 50; iaa < 401; iaa += 1) */
+    /* { */
+    /*     aa = iaa; */
+    /*     zz = aa*(1.-ii)/2.; */
+    /*     binding_energy_per_nucleon = calc_binding_energy_per_nucleon(aa,zz); */
+    /*     evacpernucleon_dl_elfc2 = calc_evacpernucleon_dl_elfc2(aa,zz); */
+    /*     printf("%g %g\n", aa, evacpernucleon_dl_elfc2 - binding_energy_per_nucleon); */
+    /* } */
 
     return 0;
 }
@@ -86,7 +130,7 @@ double calc_basym(double aa_, double zz_)
     qq = 144.5*jsym/(lsym + 55.5); 
 
     return (ii + 3.*ac*zz_*zz_/8./qq/pow(aa_,5./3.))/(1.+9.*jsym/4./qq/pow(aa_,1./3.));
-    /* return ii; */ // to explore symmetric nuclei according to the 1st paper
+    /* return ii; */ // to explore symmetric nuclei according to the 1st paper of Aymard et al.
 }
 
 double calc_n0(double aa_, double zz_)
@@ -257,7 +301,7 @@ double calc_hmeta(double r_, double aa_, double zz_)
     u2 = calc_meta_model_low_density_correction(2, xx);
     /* u3 = calc_meta_model_low_density_correction(3, xx); */
     /* u4 = calc_meta_model_low_density_correction(4, xx); */
-    u3 = 0.; // up to N=2
+    u3 = 0.; // limit to N=2
     u4 = 0.;
 
     return mass_density.function*(a00*u0 + a10*xx*u1 + 0.5*a20*xx*xx*u2
@@ -339,6 +383,8 @@ double calc_binding_energy_per_nucleon(double aa_, double zz_)
 
     eb_plus_es = calc_energy(aa_,zz_);
     ec = calc_coulomb_energy(aa_,zz_);
+    
+    /* ec = 0.; // test */
 
     return (eb_plus_es + ec)/aa_;
 }
@@ -400,7 +446,7 @@ double calc_surface_energy_per_nucleon(double aa_, double zz_)
     double energy;
     double energy_per_nucleon;
     double bulk_energy_per_nucleon;
-
+    
     energy = calc_energy(aa_,zz_);
     energy_per_nucleon = energy/aa_;
     bulk_energy_per_nucleon = calc_bulk_energy_per_nucleon(aa_,zz_);
@@ -408,7 +454,7 @@ double calc_surface_energy_per_nucleon(double aa_, double zz_)
     return energy_per_nucleon - bulk_energy_per_nucleon;
 }
 
-double calc_evacpernucleon_etf_para(double aa_, double zz_)
+double calc_evacpernucleon_ls_elfc2(double aa_, double zz_)
 {
     double basym;
     double bulk_energy_per_nucleon;
@@ -421,8 +467,10 @@ double calc_evacpernucleon_etf_para(double aa_, double zz_)
 
     basym = calc_basym(aa_,zz_);
     bulk_energy_per_nucleon = calc_bulk_energy_per_nucleon(aa_,zz_);
-    sigmas = 1.0723; // [MeV/fm^2]
-    ss = 47.7291; // [MeV]
+    /* sigmas = 1.0723; // [MeV/fm^2] // old fit */
+    /* ss = 47.7291; // [MeV] */
+    sigmas = 1.06054; // [MeV/fm^2]
+    ss = 46.3042; // [MeV]
     n0 = calc_n0(aa_,zz_);
     r0 = pow(3./4./pi/n0,1./3.);
     surface_energy_per_nucleon = (4.*pi*r0*r0*sigmas + ss*basym*basym)*pow(aa_,-1./3.);
@@ -431,4 +479,66 @@ double calc_evacpernucleon_etf_para(double aa_, double zz_)
     evacpernucleon_etf_para = bulk_energy_per_nucleon + surface_energy_per_nucleon + coulomb_energy_per_nucleon;
 
     return evacpernucleon_etf_para;
+}
+
+double calc_evacpernucleon_dl_elfc2(double aa_, double zz_)
+{
+    float t0fac, t0fg;
+    double tmp, xx;
+    double saturation_density;
+    double a00, a10, a20, a30, a40;
+    double a02, a12, a22, a32, a42;
+    double u0, u1, u2, u3, u4;
+    double bulk_0;
+    double bulk_sym;
+
+    double sigmas, ss;
+    double n0, r0;
+    double coulomb_energy;
+    double coulomb_energy_per_nucleon;
+    double evacpernucleon_dl_elfc2;
+
+    saturation_density = calc_n0(aa_,zz_);
+    t0fac = 3.*pi2/2.*nsat;
+    t0fg = 3./10./rmn*(pow(t0fac,2./3.))*(pow(hbarc,2.));
+    tmp = log(saturation_density) - log(nsat) - log(3.);
+    xx = exp(tmp) - 1./3.;
+
+    t0fac = 3.*pi2/2.*nsat;
+    t0fg = 3./10./rmn*(pow(t0fac,2./3.))*(pow(hbarc,2.));
+
+    a00 = lasat - t0fg*(1. + barm);
+    a10 = - t0fg*(2. + 5.*barm);
+    a20 = ksat - 2.*t0fg*(5.*barm - 1.);
+    a30 = qsat - 2.*t0fg*(4.-5.*barm);
+    a40 = zsat - 8.*t0fg*(-7.+5.*barm);
+    a02 = jsym - 5./9.*t0fg*(1. + barm);
+    a12 = lsym - 5./9.*t0fg*(2. + 5.*barm);
+    a22 = ksym - 10./9.*t0fg*(-1. + 5.*barm);
+    a32 = qsym - 10./9.*t0fg*(4.-5.*barm);
+    a42 = zsym - 40./9.*t0fg*(-7.+5.*barm);
+
+    u0 = calc_meta_model_low_density_correction(0, xx);
+    u1 = calc_meta_model_low_density_correction(1, xx);
+    u2 = calc_meta_model_low_density_correction(2, xx);
+    /* u3 = calc_meta_model_low_density_correction(3, xx); */
+    /* u4 = calc_meta_model_low_density_correction(4, xx); */
+    u3 = 0.; // up to N=2
+    u4 = 0.;
+
+    bulk_0 = t0fg*pow(1.+3.*xx,2./3.)*(1.+barm*(1.+3.*xx)) + a00*u0 + a10*xx*u1 + 0.5*a20*xx*xx*u2
+        + 1./6.*a30*xx*xx*xx*u3 + 1./24.*a40*xx*xx*xx*xx*u4;
+    bulk_sym = 5./9.*t0fg*pow(1.+3.*xx,2./3.)*(1.+barm*(1.+3.*xx)) + a02*u0 + a12*xx*u1 + 0.5*a22*xx*xx*u2
+        + 1./6.*a32*xx*xx*xx*u3 + 1./24.*a42*xx*xx*xx*xx*u4;
+
+    sigmas = 1.07763; // [MeV/fm^2]
+    ss = 11.5514; // [MeV]
+    n0 = calc_n0(aa_,zz_);
+    r0 = pow(3./4./pi/n0,1./3.);
+    coulomb_energy = calc_coulomb_energy(aa_,zz_);
+    coulomb_energy_per_nucleon = coulomb_energy/aa_;
+    evacpernucleon_dl_elfc2 = bulk_0 + 4.*pi*r0*r0*sigmas*pow(aa_,-1./3.) 
+        + bulk_sym/(1.+bulk_sym/ss/pow(aa_,1./3.))*pow(1.-2.*zz_/aa_,2.) + coulomb_energy_per_nucleon;
+
+    return evacpernucleon_dl_elfc2;
 }
