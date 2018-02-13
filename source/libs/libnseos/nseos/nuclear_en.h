@@ -5,22 +5,28 @@
 #include "nuclear_surface_en.h"
 #include "coulomb_en.h"
 
-// CLDM meta (ELFc)
-double calc_cldm_meta_model_nuclear_en(struct parameters satdata, int max_order, 
+//=============================
+//      LDM(SLy4)-ELFc(N)     
+//=============================
+// bulk: ELFc(N) meta-modeling
+// surface: LDM (SLy4 value)
+double calc_sly4_ldm_meta_model_nuclear_en(struct parameters satdata, int max_order, 
         double aa_, double ii_, double n0_, double np_);
-double calc_cldm_meta_model_wbbpcorr_nuclear_en(struct parameters satdata, int max_order, 
-        double aa_, double ii_, double n0_, double np_, double ng_);
 
-// ETF meta (ELFc)
+//=============================
+//         ETF-ELFc(N)         
+//=============================
+// bulk: ELFc(N) meta-modeling
+// surface: ETF analytical formula w/ Cfin reference value
 double calc_etf_meta_model_nuclear_en(struct parameters satdata, int max_order, 
         double aa_, double ii_, double n0_, double np_);
-double calc_etf_meta_model_wbbpcorr_nuclear_en(struct parameters satdata, int max_order, 
-        double aa_, double ii_, double n0_, double np_, double ng_);
 
-// LS meta (ELFc; SkI' values)
+//=============================
+//      LS(SkI')-ELFc(N)     
+//=============================
+// bulk: ELFc(N) meta-modeling
+// surface: LS corrected surface energy w/ SkI' values
 double calc_ls_meta_model_nuclear_en(struct parameters satdata, int max_order, 
         double aa_, double ii_, double n0_, double np_);
-double calc_ls_meta_model_wbbpcorr_nuclear_en(struct parameters satdata, int max_order, 
-        double aa_, double ii_, double n0_, double np_, double ng_);
 
 #endif // H_NUCLEAR_EN

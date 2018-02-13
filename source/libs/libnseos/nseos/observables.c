@@ -17,7 +17,7 @@ double calc_ws_cell_energy_density(double aa_, double n0_, double np_, double ng
     epseltot = calc_egas_energy_density(np_);
 
     epsws = enuc/vws + epseltot + epsg*(1.-aa_/n0_/vws)
-        + np_*(rmp-rmn) + nb_*(rmn-amu);
+        + np_*(RMP-RMN) + nb_*(RMN-AMU);
 
     return epsws;
 }
@@ -42,8 +42,8 @@ double calc_lattice_pressure(struct parameters satdata, double aa_, double ii_, 
     double rpt;
     double lattice_pressure;
 
-    rsat = pow(3./4./pi/satdata.rhosat0,1./3.);
-    ac = 3./5.*alphafs*hbarc/rsat;
+    rsat = pow(3./4./PI/satdata.rhosat0,1./3.);
+    ac = 3./5.*ALPHAFS*HBARC/rsat;
     rpt = 2.*np_/(1.-ii_)/n0_;
     lattice_pressure = 0.5*ac*pow(aa_,2./3.)*np_*np_/n0_
         *(1.-pow(rpt,-2/3.));
