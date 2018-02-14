@@ -8,10 +8,10 @@ OBJS = $(BUILDDIR)/observables.o \
 	   $(BUILDDIR)/nuclear_surface_en.o \
 	   $(BUILDDIR)/nuclear_matter.o \
 	   $(BUILDDIR)/empirical.o
-APP = test_icrust4d
+APP = test_new_models
 
-$(APP) : $(OBJS) test_icrust4d.c
-	$(CC) -o $(APP) test_icrust4d.c $(OBJS) -Wall -lgsl -lgslcblas -lm
+$(APP) : $(OBJS) test_new_models.c
+	$(CC) -o $(APP) test_new_models.c $(OBJS) -Wall -lgsl -lgslcblas -lm
 
 $(BUILDDIR)/empirical.o : $(LIBDIR)/empirical.h \
 	$(LIBDIR)/empirical.c 
