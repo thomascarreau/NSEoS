@@ -51,12 +51,14 @@ double calc_ls_meta_model_nuclear_en(struct parameters satdata, int max_order,
 double calc_ls_etf_meta_model_nuclear_en(struct parameters satdata, int max_order, 
         double aa_, double ii_, double n0_, double np_)
 {
+    double basym;
     struct hnm meta;
     double bulk_en;
     double surf_en;
     double coul_en;
 
-    meta = calc_meta_model_nuclear_matter(satdata, max_order, n0_, ii_);
+    basym = calc_bulk_asymmetry(satdata, aa_, ii_);
+    meta = calc_meta_model_nuclear_matter(satdata, max_order, n0_, basym);
     bulk_en = meta.enpernuc*aa_;
     surf_en = calc_ls_etf_surface_en(satdata, aa_, ii_,n0_);
     coul_en = calc_coulomb_en(satdata, aa_, ii_, n0_, np_);
