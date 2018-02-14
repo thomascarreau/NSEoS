@@ -5,9 +5,12 @@
 #include "../nseos/nuclear_en.h"
 #include "../nseos/observables.h"
 
+#define NUCLEAR_EN (calc_sly4_ldm_meta_model_nuclear_en)
+#define PARAM (assign_param_sly4)
+
 // ==================== FUNCTIONS ====================
 
-static const int taylor_exp_order = 4;
+static const int taylor_exp_order = 2;
 
 struct icrust_fun_4d
 {
@@ -36,18 +39,18 @@ struct icrust_fun_4d calc_icrust_fun_4d(double aa_, double del_, double rho0_, d
     double dmu;
     struct hnm ngas;
 
-    satdata = assign_param(satdata);
+    satdata = PARAM(satdata);
 
-    enuc = calc_etf_meta_model_wbbpcorr_nuclear_en(satdata, taylor_exp_order, aa_, del_, rho0_, rhop_, rhog_);
+    enuc = NUCLEAR_EN(satdata, taylor_exp_order, aa_, del_, rho0_, rhop_);
     epsa = 0.001;
     epsb = 0.0001;
     epsr = 0.0001;
-    enuc_ap = calc_etf_meta_model_wbbpcorr_nuclear_en(satdata, taylor_exp_order, aa_+epsa, del_, rho0_, rhop_, rhog_);
-    enuc_am = calc_etf_meta_model_wbbpcorr_nuclear_en(satdata, taylor_exp_order, aa_-epsa, del_, rho0_, rhop_, rhog_);
-    enuc_bp = calc_etf_meta_model_wbbpcorr_nuclear_en(satdata, taylor_exp_order, aa_, del_+epsb, rho0_, rhop_, rhog_);
-    enuc_bm = calc_etf_meta_model_wbbpcorr_nuclear_en(satdata, taylor_exp_order, aa_, del_-epsb, rho0_, rhop_, rhog_);
-    enuc_rp = calc_etf_meta_model_wbbpcorr_nuclear_en(satdata, taylor_exp_order, aa_, del_, rho0_+epsr, rhop_, rhog_);
-    enuc_rm = calc_etf_meta_model_wbbpcorr_nuclear_en(satdata, taylor_exp_order, aa_, del_, rho0_-epsr, rhop_, rhog_);
+    enuc_ap = NUCLEAR_EN(satdata, taylor_exp_order, aa_+epsa, del_, rho0_, rhop_);
+    enuc_am = NUCLEAR_EN(satdata, taylor_exp_order, aa_-epsa, del_, rho0_, rhop_);
+    enuc_bp = NUCLEAR_EN(satdata, taylor_exp_order, aa_, del_+epsb, rho0_, rhop_);
+    enuc_bm = NUCLEAR_EN(satdata, taylor_exp_order, aa_, del_-epsb, rho0_, rhop_);
+    enuc_rp = NUCLEAR_EN(satdata, taylor_exp_order, aa_, del_, rho0_+epsr, rhop_);
+    enuc_rm = NUCLEAR_EN(satdata, taylor_exp_order, aa_, del_, rho0_-epsr, rhop_);
     denucdaa = (enuc_ap - enuc_am)/2./epsa; // 2 points derivatives
     denucddel = (enuc_bp - enuc_bm)/2./epsb;
     denucdrho0 = (enuc_rp - enuc_rm)/2./epsr;
@@ -58,9 +61,9 @@ struct icrust_fun_4d calc_icrust_fun_4d(double aa_, double del_, double rho0_, d
     ngas = calc_meta_model_nuclear_matter(satdata, taylor_exp_order, rhog_, 1.);
 
     result.f_stability = denucdaa/aa_ - enuc/aa_/aa_;
-    result.f_beta = denucddel*2./aa_ - muel - dmu - rmp + rmn;
+    result.f_beta = denucddel*2./aa_ - muel - dmu - RMP + RMN;
     result.f_muneq = enuc/aa_ - (ngas.mun)*(1.-rhog_/rho0_) 
-        + (1.-del_)/2.*(muel + dmu + rmp - rmn) - rhog_*(ngas.enpernuc)/rho0_ ;
+        + (1.-del_)/2.*(muel + dmu + RMP - RMN) - rhog_*(ngas.enpernuc)/rho0_ ;
     result.f_presseq = rho0_*rho0_*denucdrho0/aa_ - rhog_*ngas.mun + rhog_*ngas.enpernuc;
 
     return result;
@@ -82,7 +85,7 @@ int assign_icrust_fun_4d(const gsl_vector * x, void *params, gsl_vector * f)
     const double x3 = gsl_vector_get (x, 3);
 
     struct parameters satdata;
-    satdata = assign_param(satdata);
+    satdata = PARAM(satdata);
 
     rhop = (rhop-x3)*(1.-x1)/2./(1.-x3/x2);
 
@@ -109,7 +112,6 @@ void print_state_icrust(gsl_multiroot_fsolver * s, double rhob_)
     double rhop_eq;
     struct parameters satdata;
     double enuc;
-    double esurf;
     struct hnm ngas;
     double epsg;
     double epsws;
@@ -120,17 +122,16 @@ void print_state_icrust(gsl_multiroot_fsolver * s, double rhob_)
     rho0_eq = gsl_vector_get(s->x, 2);
     rhog_eq = gsl_vector_get(s->x, 3);
     rhop_eq = (rhob_-rhog_eq)*(1.-del_eq)/2./(1.-rhog_eq/rho0_eq);
-    satdata = assign_param(satdata);
+    satdata = PARAM(satdata);
 
-    enuc = calc_etf_meta_model_wbbpcorr_nuclear_en(satdata, taylor_exp_order, aa_eq, del_eq, rho0_eq, rhop_eq, rhog_eq);
-    esurf = calc_etf_wbbpcorr_surface_en(satdata, taylor_exp_order, aa_eq, del_eq, rho0_eq, rhog_eq);
+    enuc = NUCLEAR_EN(satdata, taylor_exp_order, aa_eq, del_eq, rho0_eq, rhop_eq);
     ngas = calc_meta_model_nuclear_matter(satdata, taylor_exp_order, rhog_eq, 1.);
     epsg = rhog_eq*ngas.enpernuc;
     epsws = calc_ws_cell_energy_density(aa_eq, rho0_eq, rhop_eq, rhog_eq, enuc, epsg, rhob_);
     pressws = calc_ws_cell_pressure(satdata, aa_eq, del_eq, rho0_eq, rhop_eq, rhog_eq, epsg, ngas.mun);
 
-    printf ("%g %g %g %g %g %g %g %g\n", rhob_, aa_eq, del_eq, rho0_eq, rhog_eq,
-            epsws, pressws, esurf);
+    printf ("%g %g %g %g %g %g %g\n", rhob_, aa_eq, del_eq, rho0_eq, rhog_eq,
+            epsws, pressws);
 }
 
 // ==================== MAIN ====================
@@ -150,7 +151,7 @@ int main(void)
     rho0_new_guess = 0.14;
     rhog_new_guess = 1.e-6;
 
-    for(irhob = 3; irhob <= 43; irhob += 1)
+    for(irhob = 5; irhob <= 1000; irhob += 1)
     {
         const gsl_multiroot_fsolver_type *T;
         gsl_multiroot_fsolver *s;

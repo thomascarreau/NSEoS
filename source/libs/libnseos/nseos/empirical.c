@@ -1,13 +1,41 @@
-#include <stdio.h>
-
 #include "empirical.h"
 
-struct parameters assign_param(struct parameters satdata)
+struct parameters assign_param_ref(struct parameters satdata)
 {
     FILE *fin;
     float effm;
 
-    fin = fopen("../testing/satdata.in", "r");
+    fin = fopen("../testing/satdata/ref.in", "r");
+    fscanf(fin, "%f %f %f %f %f", &satdata.rhosat0, &satdata.lasat0, &satdata.ksat0, &satdata.qsat0, &satdata.zsat0);
+    fscanf(fin, "%f %f %f %f %f", &satdata.jsym0, &satdata.lsym0, &satdata.ksym0, &satdata.qsym0, &satdata.zsym0);
+    fscanf(fin, "%f %f", &effm, &satdata.bardel);
+    satdata.barm = 1./effm - 1.;
+    fclose(fin);
+
+    return satdata;
+}
+
+struct parameters assign_param_sly4(struct parameters satdata)
+{
+    FILE *fin;
+    float effm;
+
+    fin = fopen("../testing/satdata/sly4.in", "r");
+    fscanf(fin, "%f %f %f %f %f", &satdata.rhosat0, &satdata.lasat0, &satdata.ksat0, &satdata.qsat0, &satdata.zsat0);
+    fscanf(fin, "%f %f %f %f %f", &satdata.jsym0, &satdata.lsym0, &satdata.ksym0, &satdata.qsym0, &satdata.zsym0);
+    fscanf(fin, "%f %f", &effm, &satdata.bardel);
+    satdata.barm = 1./effm - 1.;
+    fclose(fin);
+
+    return satdata;
+}
+
+struct parameters assign_param_ski(struct parameters satdata)
+{
+    FILE *fin;
+    float effm;
+
+    fin = fopen("../testing/satdata/ski.in", "r");
     fscanf(fin, "%f %f %f %f %f", &satdata.rhosat0, &satdata.lasat0, &satdata.ksat0, &satdata.qsat0, &satdata.zsat0);
     fscanf(fin, "%f %f %f %f %f", &satdata.jsym0, &satdata.lsym0, &satdata.ksym0, &satdata.qsym0, &satdata.zsym0);
     fscanf(fin, "%f %f", &effm, &satdata.bardel);
