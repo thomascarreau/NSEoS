@@ -1,8 +1,6 @@
 #ifndef H_EMPIRICAL
 #define H_EMPIRICAL
 
-#include <stdio.h>
-
 struct parameters
 {
     float rhosat0;

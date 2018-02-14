@@ -1,3 +1,5 @@
+#include <stdio.h>
+
 #include "empirical.h"
 
 struct parameters assign_param_ref(struct parameters satdata)
