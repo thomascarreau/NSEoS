@@ -38,5 +38,13 @@ double calc_ls_meta_model_nuclear_en(struct parameters satdata, int max_order,
 double calc_ls_etf_meta_model_nuclear_en(struct parameters satdata, int max_order, 
         double aa_, double ii_, double n0_, double np_);
 
+//=============================
+//      DL(ETF)-ELFc(N)     
+//=============================
+// bulk: ELFc(N) meta-modeling
+// surface: DL surface energy w/ parameters 
+// ---------fitted out of ETF numerical calculation
+double calc_dl_etf_meta_model_nuclear_en(struct parameters satdata, int max_order, 
+        double aa_, double ii_, double n0_, double np_);
 
 #endif // H_NUCLEAR_EN
