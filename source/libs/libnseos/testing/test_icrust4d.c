@@ -5,12 +5,40 @@
 #include "../nseos/nuclear_en.h"
 #include "../nseos/observables.h"
 
+
+//====================================================================================
+//====================================================================================
+
+/* INSTRUCTIONS:
+ * =============
+ *
+ * LDM(SLy4)-ELFc(N):
+ * ------------------
+ * (calc_sly4_ldm_meta_model_nuclear_en) to use with (assign_param_sly4)
+ * 
+ * LS(SkI')-ELFc(N):
+ * -----------------
+ * (calc_ls_meta_model_nuclear_en) to use with (assign_param_ski)
+ *
+ * LS(ETF)-ELFc(N):
+ * -----------------
+ * (calc_ls_etf_meta_model_nuclear_en) to use with (assign_param_ref)
+ *
+ * DL(ETF)-ELFc(N):
+ * -----------------
+ * (calc_dl_etf_meta_model_nuclear_en) to use with (assign_param_ref)
+ */
+
 #define CALC_NUCLEAR_EN (calc_sly4_ldm_meta_model_nuclear_en)
 #define ASSIGN_PARAM (assign_param_sly4)
 
-// ==================== FUNCTIONS ====================
-
 static const int taylor_exp_order = 2;
+
+//====================================================================================
+//====================================================================================
+
+
+// ==================== FUNCTIONS ====================
 
 struct icrust_fun_4d
 {
@@ -19,120 +47,13 @@ struct icrust_fun_4d
     double f_muneq;
     double f_presseq;
 };
-
 struct icrust_fun_4d calc_icrust_fun_4d(double aa_, double del_, double rho0_, double rhop_, double rhog_);
-struct icrust_fun_4d calc_icrust_fun_4d(double aa_, double del_, double rho0_, double rhop_, double rhog_)
-{
-    struct icrust_fun_4d result;
-    struct parameters satdata;
-    double enuc;
-    double epsa;
-    double epsb;
-    double epsr;
-    double enuc_ap, enuc_am;
-    double enuc_bp, enuc_bm;
-    double enuc_rp, enuc_rm;
-    double denucdaa;
-    double denucddel;
-    double denucdrho0;
-    double muel;
-    double dmu;
-    struct hnm ngas;
-
-    satdata = ASSIGN_PARAM(satdata);
-
-    enuc = CALC_NUCLEAR_EN(satdata, taylor_exp_order, aa_, del_, rho0_, rhop_);
-    epsa = 0.001;
-    epsb = 0.0001;
-    epsr = 0.0001;
-    enuc_ap = CALC_NUCLEAR_EN(satdata, taylor_exp_order, aa_+epsa, del_, rho0_, rhop_);
-    enuc_am = CALC_NUCLEAR_EN(satdata, taylor_exp_order, aa_-epsa, del_, rho0_, rhop_);
-    enuc_bp = CALC_NUCLEAR_EN(satdata, taylor_exp_order, aa_, del_+epsb, rho0_, rhop_);
-    enuc_bm = CALC_NUCLEAR_EN(satdata, taylor_exp_order, aa_, del_-epsb, rho0_, rhop_);
-    enuc_rp = CALC_NUCLEAR_EN(satdata, taylor_exp_order, aa_, del_, rho0_+epsr, rhop_);
-    enuc_rm = CALC_NUCLEAR_EN(satdata, taylor_exp_order, aa_, del_, rho0_-epsr, rhop_);
-    denucdaa = (enuc_ap - enuc_am)/2./epsa; // 2 points derivatives
-    denucddel = (enuc_bp - enuc_bm)/2./epsb;
-    denucdrho0 = (enuc_rp - enuc_rm)/2./epsr;
-
-    muel = calc_egas_chemical_potential(rhop_);
-    dmu = calc_screening_derivative(satdata, aa_, del_, rho0_, rhop_);
-
-    ngas = calc_meta_model_nuclear_matter(satdata, taylor_exp_order, rhog_, 1.);
-
-    result.f_stability = denucdaa/aa_ - enuc/aa_/aa_;
-    result.f_beta = denucddel*2./aa_ - muel - dmu - RMP + RMN;
-    result.f_muneq = enuc/aa_ - (ngas.mun)*(1.-rhog_/rho0_) 
-        + (1.-del_)/2.*(muel + dmu + RMP - RMN) - rhog_*(ngas.enpernuc)/rho0_ ;
-    result.f_presseq = rho0_*rho0_*denucdrho0/aa_ - rhog_*ngas.mun + rhog_*ngas.enpernuc;
-
-    return result;
-}
-
 struct rparams
 {
     double rhop;
 };
-
 int assign_icrust_fun_4d(const gsl_vector * x, void *params, gsl_vector * f);
-int assign_icrust_fun_4d(const gsl_vector * x, void *params, gsl_vector * f)
-{
-    double rhop = ((struct rparams *) params)->rhop;
-
-    const double x0 = gsl_vector_get (x, 0);
-    const double x1 = gsl_vector_get (x, 1);
-    const double x2 = gsl_vector_get (x, 2);
-    const double x3 = gsl_vector_get (x, 3);
-
-    struct parameters satdata;
-    satdata = ASSIGN_PARAM(satdata);
-
-    rhop = (rhop-x3)*(1.-x1)/2./(1.-x3/x2);
-
-    struct icrust_fun_4d functs;
-    functs = calc_icrust_fun_4d(x0, x1, x2, rhop, x3);
-
-    const double y0 = functs.f_stability;
-    const double y1 = functs.f_beta;
-    const double y2 = functs.f_muneq;
-    const double y3 = functs.f_presseq;
-
-    gsl_vector_set(f, 0, y0);
-    gsl_vector_set(f, 1, y1);
-    gsl_vector_set(f, 2, y2);
-    gsl_vector_set(f, 3, y3);
-
-    return GSL_SUCCESS;
-}
-
 void print_state_icrust(gsl_multiroot_fsolver * s, double rhob_);
-void print_state_icrust(gsl_multiroot_fsolver * s, double rhob_)
-{
-    double aa_eq, del_eq, rho0_eq, rhog_eq;
-    double rhop_eq;
-    struct parameters satdata;
-    double enuc;
-    struct hnm ngas;
-    double epsg;
-    double epsws;
-    double pressws;
-
-    aa_eq = gsl_vector_get(s->x, 0);
-    del_eq = gsl_vector_get(s->x, 1);
-    rho0_eq = gsl_vector_get(s->x, 2);
-    rhog_eq = gsl_vector_get(s->x, 3);
-    rhop_eq = (rhob_-rhog_eq)*(1.-del_eq)/2./(1.-rhog_eq/rho0_eq);
-    satdata = ASSIGN_PARAM(satdata);
-
-    enuc = CALC_NUCLEAR_EN(satdata, taylor_exp_order, aa_eq, del_eq, rho0_eq, rhop_eq);
-    ngas = calc_meta_model_nuclear_matter(satdata, taylor_exp_order, rhog_eq, 1.);
-    epsg = rhog_eq*ngas.enpernuc;
-    epsws = calc_ws_cell_energy_density(aa_eq, rho0_eq, rhop_eq, rhog_eq, enuc, epsg, rhob_);
-    pressws = calc_ws_cell_pressure(satdata, aa_eq, del_eq, rho0_eq, rhop_eq, rhog_eq, epsg, ngas.mun);
-
-    printf ("%g %g %g %g %g %g %g\n", rhob_, aa_eq, del_eq, rho0_eq, rhog_eq,
-            epsws, pressws);
-}
 
 // ==================== MAIN ====================
 
@@ -151,7 +72,7 @@ int main(void)
     rho0_new_guess = 0.14;
     rhog_new_guess = 1.e-6;
 
-    for(irhob = 5; irhob <= 1000; irhob += 1)
+    for(irhob = 3; irhob <= 1000; irhob += 1)
     {
         const gsl_multiroot_fsolver_type *T;
         gsl_multiroot_fsolver *s;
@@ -266,4 +187,110 @@ int main(void)
     }
 
     return 0;
+}
+
+struct icrust_fun_4d calc_icrust_fun_4d(double aa_, double del_, double rho0_, double rhop_, double rhog_)
+{
+    struct icrust_fun_4d result;
+    struct parameters satdata;
+    double enuc;
+    double epsa;
+    double epsb;
+    double epsr;
+    double enuc_ap, enuc_am;
+    double enuc_bp, enuc_bm;
+    double enuc_rp, enuc_rm;
+    double denucdaa;
+    double denucddel;
+    double denucdrho0;
+    double muel;
+    double dmu;
+    struct hnm ngas;
+
+    satdata = ASSIGN_PARAM(satdata);
+
+    enuc = CALC_NUCLEAR_EN(satdata, taylor_exp_order, aa_, del_, rho0_, rhop_);
+    epsa = 0.001;
+    epsb = 0.0001;
+    epsr = 0.0001;
+    enuc_ap = CALC_NUCLEAR_EN(satdata, taylor_exp_order, aa_+epsa, del_, rho0_, rhop_);
+    enuc_am = CALC_NUCLEAR_EN(satdata, taylor_exp_order, aa_-epsa, del_, rho0_, rhop_);
+    enuc_bp = CALC_NUCLEAR_EN(satdata, taylor_exp_order, aa_, del_+epsb, rho0_, rhop_);
+    enuc_bm = CALC_NUCLEAR_EN(satdata, taylor_exp_order, aa_, del_-epsb, rho0_, rhop_);
+    enuc_rp = CALC_NUCLEAR_EN(satdata, taylor_exp_order, aa_, del_, rho0_+epsr, rhop_);
+    enuc_rm = CALC_NUCLEAR_EN(satdata, taylor_exp_order, aa_, del_, rho0_-epsr, rhop_);
+    denucdaa = (enuc_ap - enuc_am)/2./epsa; // 2 points derivatives
+    denucddel = (enuc_bp - enuc_bm)/2./epsb;
+    denucdrho0 = (enuc_rp - enuc_rm)/2./epsr;
+
+    muel = calc_egas_chemical_potential(rhop_);
+    dmu = calc_screening_derivative(satdata, aa_, del_, rho0_, rhop_);
+
+    ngas = calc_meta_model_nuclear_matter(satdata, taylor_exp_order, rhog_, 1.);
+
+    result.f_stability = denucdaa/aa_ - enuc/aa_/aa_;
+    result.f_beta = denucddel*2./aa_ - muel - dmu - RMP + RMN;
+    result.f_muneq = enuc/aa_ - (ngas.mun)*(1.-rhog_/rho0_) 
+        + (1.-del_)/2.*(muel + dmu + RMP - RMN) - rhog_*(ngas.enpernuc)/rho0_ ;
+    result.f_presseq = rho0_*rho0_*denucdrho0/aa_ - rhog_*ngas.mun + rhog_*ngas.enpernuc;
+
+    return result;
+}
+
+int assign_icrust_fun_4d(const gsl_vector * x, void *params, gsl_vector * f)
+{
+    double rhop = ((struct rparams *) params)->rhop;
+
+    const double x0 = gsl_vector_get (x, 0);
+    const double x1 = gsl_vector_get (x, 1);
+    const double x2 = gsl_vector_get (x, 2);
+    const double x3 = gsl_vector_get (x, 3);
+
+    struct parameters satdata;
+    satdata = ASSIGN_PARAM(satdata);
+
+    rhop = (rhop-x3)*(1.-x1)/2./(1.-x3/x2);
+
+    struct icrust_fun_4d functs;
+    functs = calc_icrust_fun_4d(x0, x1, x2, rhop, x3);
+
+    const double y0 = functs.f_stability;
+    const double y1 = functs.f_beta;
+    const double y2 = functs.f_muneq;
+    const double y3 = functs.f_presseq;
+
+    gsl_vector_set(f, 0, y0);
+    gsl_vector_set(f, 1, y1);
+    gsl_vector_set(f, 2, y2);
+    gsl_vector_set(f, 3, y3);
+
+    return GSL_SUCCESS;
+}
+
+void print_state_icrust(gsl_multiroot_fsolver * s, double rhob_)
+{
+    double aa_eq, del_eq, rho0_eq, rhog_eq;
+    double rhop_eq;
+    struct parameters satdata;
+    double enuc;
+    struct hnm ngas;
+    double epsg;
+    double epsws;
+    double pressws;
+
+    aa_eq = gsl_vector_get(s->x, 0);
+    del_eq = gsl_vector_get(s->x, 1);
+    rho0_eq = gsl_vector_get(s->x, 2);
+    rhog_eq = gsl_vector_get(s->x, 3);
+    rhop_eq = (rhob_-rhog_eq)*(1.-del_eq)/2./(1.-rhog_eq/rho0_eq);
+    satdata = ASSIGN_PARAM(satdata);
+
+    enuc = CALC_NUCLEAR_EN(satdata, taylor_exp_order, aa_eq, del_eq, rho0_eq, rhop_eq);
+    ngas = calc_meta_model_nuclear_matter(satdata, taylor_exp_order, rhog_eq, 1.);
+    epsg = rhog_eq*ngas.enpernuc;
+    epsws = calc_ws_cell_energy_density(aa_eq, rho0_eq, rhop_eq, rhog_eq, enuc, epsg, rhob_);
+    pressws = calc_ws_cell_pressure(satdata, aa_eq, del_eq, rho0_eq, rhop_eq, rhog_eq, epsg, ngas.mun);
+
+    printf ("%g %g %g %g %g %g %g\n", rhob_, aa_eq, del_eq, rho0_eq, rhog_eq,
+            epsws, pressws);
 }
