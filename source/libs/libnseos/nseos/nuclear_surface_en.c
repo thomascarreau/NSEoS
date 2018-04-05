@@ -4,13 +4,15 @@
 #include "nuclear_matter.h"
 #include "nuclear_surface_en.h"
 
-double calc_sly4_ldm_surface_en(double aa_)
+double calc_ldm_surface_en(double aa_)
 {
-    float as;
+    double rsat;
+    float sigmas;
 
-    as = 18.24; // in MeV
+    rsat = pow(3./4./PI/0.1540,1./3.); // SNM saturation density reference value
+    sigmas = 0.852537; // in MeV/fm^2; reference value
 
-    return as*pow(aa_,2./3.);
+    return 4.*PI*rsat*rsat*sigmas*pow(aa_,2./3.);
 }
 
 double my_integrand(double x, void *params_ptr)
@@ -46,7 +48,7 @@ double eta_function(int a, double b)
     return result;
 }
 
-double calc_etf_surface_en(struct parameters satdata, double aa_, double ii_, double n0_)
+double calc_etf_ana_surface_en(struct parameters satdata, double aa_, double ii_, double n0_)
 {
     double ckin;
     double alphanum, alphadenom, alpha;
@@ -181,65 +183,72 @@ double calc_etf_surface_en(struct parameters satdata, double aa_, double ii_, do
     return esurf;
 }
 
-double calc_ls_surface_en(struct parameters satdata, double aa_, double ii_)
+double calc_ls_surface_en(struct parameters satdata, double aa_, double ii_, double n0_)
 {
     double surf_energy;
     double r0;
     double sig;
-    double sigs, ss;
+    double sigs;
     double q;
     double ypnuc;
 
-    r0 = pow(4.*PI*satdata.rhosat0/3.,-1./3.);
+    n0_ = satdata.rhosat0;
+    r0 = pow(4.*PI*n0_/3.,-1./3.);
     ypnuc = (1. - ii_)/2.;
 
-    sigs = 1.15;                             // !!!!!!!!!!!!!!!!!!!!!
-    ss = 45.8;                               // !!!! SkI' values !!!!
-    q = 384.*PI*r0*r0*sigs/ss - 16.;         // !!!!!!!!!!!!!!!!!!!!!
-    sig = sigs*(16. + q)/(pow(ypnuc,-3.) 
-            + q + pow(1.-ypnuc,-3.));
+    /* double ss; */
+    /* sigs = 1.15;                             // !!!!!!!!!!!!!!!!!!!!! */
+    /* ss = 45.8;                               // !!!! SkI' values !!!! */
+    /* q = 384.*PI*r0*r0*sigs/ss - 16.;         // !!!!!!!!!!!!!!!!!!!!! */
+
+    // FOR n0
+    //=======================
+
+    /* double p = 2.; */
+    /* sigs = 1.08529; */
+    /* q = 1.26071; */
+
+    /* double p = 3.; */
+    /* sigs = 1.08329; */
+    /* q = 23.586; */
+
+    /* double p = 4.; */
+    /* sigs = 1.08086; */
+    /* q = 111.21; */
+
+    /* double p = 5.; */
+    /* sigs = 1.078; */
+    /* q = 409.947; */
+
+    //=======================
+
+    // FOR nsat
+    //=======================
+
+    /* double p = 2.; */
+    /* sigs = 1.08464; */
+    /* q = 3.2138; */
+
+    /* double p = 3.; */
+    /* sigs = 1.08289; */
+    /* q = 32.0129; */
+
+    /* double p = 4.; */
+    /* sigs = 1.08074; */
+    /* q = 142.077; */
+
+    double p = 5.;
+    sigs = 1.07822;
+    q = 513.793;
+
+    /* double p = 6.; */
+    /* sigs = 1.07533; */
+    /* q = 1694.52; */
+
+    sig = sigs*(pow(2.,p+1.) + q)/(pow(ypnuc,-p) 
+            + q + pow(1.-ypnuc,-p));
 
     surf_energy = 4.*PI*r0*r0*sig*pow(aa_,2./3.);
 
     return surf_energy;
-}
-
-double calc_bulk_asymmetry(struct parameters satdata, double aa_, double ii_)
-{
-    double rsat;
-    double ac;
-    double qq; // surface stiffness coefficient (see: 10.1103/PhysRevC.80.024316) 
-    double factor_num;
-    double factor_denom;
-    double zz;
-    double basym;
-
-    rsat = pow(3./4./PI/satdata.rhosat0,1./3.);
-    ac = 3./5.*ALPHAFS*HBARC/rsat;
-    qq = 144.5*satdata.jsym0/(satdata.lsym0+55.5);
-    factor_num = 3.*ac/8./qq;
-    factor_denom = 9.*satdata.jsym0/4./qq;
-
-    zz = aa_*(1.-ii_)/2.;
-
-    basym = (ii_ + factor_num*zz*zz/pow(aa_,5./3.))/(1.+factor_denom*pow(aa_,-1./3.));
-    
-    return basym;
-}
-
-double calc_ls_etf_surface_en(struct parameters satdata, double aa_, double ii_, double n0_)
-{
-    double sigmas, ss;
-    double r0;
-    double basym;
-    double ls_etf_surface_en;
-                                        // !!!!!!!!!!!!!!!!!!!!!!!!!!
-    sigmas = 1.06054; // in MeV/fm^2    // !!!! Reference values !!!! 
-    ss = 46.3042; // in MeV             // !!!!!!!!!!!!!!!!!!!!!!!!!!
-
-    r0 = pow(3./4./PI/n0_,1./3.);
-    basym = calc_bulk_asymmetry(satdata, aa_, ii_);
-    ls_etf_surface_en = (4.*PI*r0*r0*sigmas + ss*basym*basym)*pow(aa_,2./3.);
-
-    return ls_etf_surface_en;
 }

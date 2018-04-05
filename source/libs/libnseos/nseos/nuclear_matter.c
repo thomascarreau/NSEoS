@@ -196,6 +196,8 @@ struct hnm calc_meta_model_nuclear_matter(struct parameters satdata, int max_ord
     denpernucdx = dekinpernucdx + depotpernucdx;
     denpernucdi = dekinpernucdi + depotpernucdi;
 
+    result.p = 1./3.*satdata.rhosat0*pow(1.+3.*xx,2.)*denpernucdx;
+
     result.mun = result.enpernuc + nn_*(1./3./satdata.rhosat0*denpernucdx
             + (1.-ii_)/2.*denpernucdi);
 

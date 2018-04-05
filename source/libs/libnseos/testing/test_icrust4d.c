@@ -12,24 +12,16 @@
 /* INSTRUCTIONS:
  * =============
  *
- * LDM(SLy4)-ELFc(N):
+ * LDM-ELFc(N):
  * ------------------
- * (calc_sly4_ldm_meta_model_nuclear_en) to use with (assign_param_sly4)
- * 
- * LS(SkI')-ELFc(N):
- * -----------------
- * (calc_ls_meta_model_nuclear_en) to use with (assign_param_ski)
+ * (calc_ldm_meta_model_nuclear_en) to use with (assign_param_ref)
  *
  * LS(ETF)-ELFc(N):
  * -----------------
- * (calc_ls_etf_meta_model_nuclear_en) to use with (assign_param_ref)
- *
- * DL(ETF)-ELFc(N):
- * -----------------
- * (calc_dl_etf_meta_model_nuclear_en) to use with (assign_param_ref)
+ * (calc_ls_etf_meta_model_nuclear_en) to use with (assign_param_sly4)
  */
 
-#define CALC_NUCLEAR_EN (calc_sly4_ldm_meta_model_nuclear_en)
+#define CALC_NUCLEAR_EN (calc_ls_meta_model_nuclear_en)
 #define ASSIGN_PARAM (assign_param_sly4)
 
 static const int taylor_exp_order = 2;
@@ -67,10 +59,10 @@ int main(void)
     double rho0_new_guess;
     double rhog_new_guess;
 
-    aa_new_guess = 75.;
+    aa_new_guess = 100.;
     del_new_guess = 0.25;
-    rho0_new_guess = 0.14;
-    rhog_new_guess = 1.e-6;
+    rho0_new_guess = 0.15;
+    rhog_new_guess = 1.e-4;
 
     for(irhob = 3; irhob <= 1000; irhob += 1)
     {
@@ -129,7 +121,7 @@ int main(void)
                 break;
 
             // dirty backstepping
-            while (gsl_vector_get (s->x, 0) < 50.) {
+            while (gsl_vector_get (s->x, 0) < 0.) {
                 astep = astep/4.;
                 aa_new = aa_old + astep;
                 gsl_vector_set (x, 0, aa_new);
@@ -149,7 +141,7 @@ int main(void)
                 gsl_multiroot_fsolver_set (s, &f, x);
                 basym_new = gsl_vector_get (s->x, 1);
             }
-            while (gsl_vector_get (s->x, 2) < 0. || gsl_vector_get (s->x, 2) > 0.155) { // SkI' value
+            while (gsl_vector_get (s->x, 2) < 0.) {
                 rstep = rstep/4.;
                 rho0_new = rho0_old + rstep;
                 gsl_vector_set (x, 0, aa_new);
@@ -175,7 +167,11 @@ int main(void)
 
         while (status == GSL_CONTINUE && iter < 5000);
 
-        print_state_icrust(s, rhob);
+        if (gsl_vector_get(s->x, 0) != gsl_vector_get(s->x, 0))
+            break;
+
+        if (iter < 4995)
+            print_state_icrust(s, rhob);
 
         aa_new_guess = gsl_vector_get(s->x, 0);
         del_new_guess = gsl_vector_get(s->x, 1);
@@ -271,6 +267,7 @@ void print_state_icrust(gsl_multiroot_fsolver * s, double rhob_)
 {
     double aa_eq, del_eq, rho0_eq, rhog_eq;
     double rhop_eq;
+    double vws, rws;
     struct parameters satdata;
     double enuc;
     struct hnm ngas;
@@ -283,14 +280,17 @@ void print_state_icrust(gsl_multiroot_fsolver * s, double rhob_)
     rho0_eq = gsl_vector_get(s->x, 2);
     rhog_eq = gsl_vector_get(s->x, 3);
     rhop_eq = (rhob_-rhog_eq)*(1.-del_eq)/2./(1.-rhog_eq/rho0_eq);
-    satdata = ASSIGN_PARAM(satdata);
+    vws = aa_eq/(rhob_-rhog_eq)*(1.-rhog_eq/rho0_eq);
+    rws = pow(3.*vws/4./PI,1./3.);
 
+    satdata = ASSIGN_PARAM(satdata);
     enuc = CALC_NUCLEAR_EN(satdata, taylor_exp_order, aa_eq, del_eq, rho0_eq, rhop_eq);
     ngas = calc_meta_model_nuclear_matter(satdata, taylor_exp_order, rhog_eq, 1.);
     epsg = rhog_eq*ngas.enpernuc;
     epsws = calc_ws_cell_energy_density(aa_eq, rho0_eq, rhop_eq, rhog_eq, enuc, epsg, rhob_);
     pressws = calc_ws_cell_pressure(satdata, aa_eq, del_eq, rho0_eq, rhop_eq, rhog_eq, epsg, ngas.mun);
 
-    printf ("%g %g %g %g %g %g %g\n", rhob_, aa_eq, del_eq, rho0_eq, rhog_eq,
+    printf ("%g %g %g %g %g %g %g %g %g\n", rhob_, aa_eq, del_eq, aa_eq*(1.-del_eq)/2., rho0_eq, rhog_eq, rws,
             epsws, pressws);
+    /* printf("%g %g\n", rhob_, pressws); */
 }

@@ -8,6 +8,7 @@
 struct hnm
 {
     double enpernuc;
+    double p;
     double mun;
     double jsym;
     double lsym;

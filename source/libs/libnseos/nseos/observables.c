@@ -8,7 +8,6 @@
 double calc_ws_cell_energy_density(double aa_, double n0_, double np_, double ng_, double enuc, double epsg,
         double nb_)
 {
-
     double vws;
     double epseltot;
     double epsws; 
