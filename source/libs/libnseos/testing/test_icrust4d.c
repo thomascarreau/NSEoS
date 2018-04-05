@@ -24,6 +24,7 @@
 #define CALC_NUCLEAR_EN (calc_ls_meta_model_nuclear_en)
 #define ASSIGN_PARAM (assign_param_sly4)
 
+static const int p_surf_tension = 3;
 static const int taylor_exp_order = 2;
 
 //====================================================================================
@@ -205,16 +206,16 @@ struct icrust_fun_4d calc_icrust_fun_4d(double aa_, double del_, double rho0_, d
 
     satdata = ASSIGN_PARAM(satdata);
 
-    enuc = CALC_NUCLEAR_EN(satdata, taylor_exp_order, aa_, del_, rho0_, rhop_);
+    enuc = CALC_NUCLEAR_EN(satdata, p_surf_tension, taylor_exp_order, aa_, del_, rho0_, rhop_);
     epsa = 0.001;
     epsb = 0.0001;
     epsr = 0.0001;
-    enuc_ap = CALC_NUCLEAR_EN(satdata, taylor_exp_order, aa_+epsa, del_, rho0_, rhop_);
-    enuc_am = CALC_NUCLEAR_EN(satdata, taylor_exp_order, aa_-epsa, del_, rho0_, rhop_);
-    enuc_bp = CALC_NUCLEAR_EN(satdata, taylor_exp_order, aa_, del_+epsb, rho0_, rhop_);
-    enuc_bm = CALC_NUCLEAR_EN(satdata, taylor_exp_order, aa_, del_-epsb, rho0_, rhop_);
-    enuc_rp = CALC_NUCLEAR_EN(satdata, taylor_exp_order, aa_, del_, rho0_+epsr, rhop_);
-    enuc_rm = CALC_NUCLEAR_EN(satdata, taylor_exp_order, aa_, del_, rho0_-epsr, rhop_);
+    enuc_ap = CALC_NUCLEAR_EN(satdata, p_surf_tension, taylor_exp_order, aa_+epsa, del_, rho0_, rhop_);
+    enuc_am = CALC_NUCLEAR_EN(satdata, p_surf_tension, taylor_exp_order, aa_-epsa, del_, rho0_, rhop_);
+    enuc_bp = CALC_NUCLEAR_EN(satdata, p_surf_tension, taylor_exp_order, aa_, del_+epsb, rho0_, rhop_);
+    enuc_bm = CALC_NUCLEAR_EN(satdata, p_surf_tension, taylor_exp_order, aa_, del_-epsb, rho0_, rhop_);
+    enuc_rp = CALC_NUCLEAR_EN(satdata, p_surf_tension, taylor_exp_order, aa_, del_, rho0_+epsr, rhop_);
+    enuc_rm = CALC_NUCLEAR_EN(satdata, p_surf_tension, taylor_exp_order, aa_, del_, rho0_-epsr, rhop_);
     denucdaa = (enuc_ap - enuc_am)/2./epsa; // 2 points derivatives
     denucddel = (enuc_bp - enuc_bm)/2./epsb;
     denucdrho0 = (enuc_rp - enuc_rm)/2./epsr;
@@ -284,7 +285,7 @@ void print_state_icrust(gsl_multiroot_fsolver * s, double rhob_)
     rws = pow(3.*vws/4./PI,1./3.);
 
     satdata = ASSIGN_PARAM(satdata);
-    enuc = CALC_NUCLEAR_EN(satdata, taylor_exp_order, aa_eq, del_eq, rho0_eq, rhop_eq);
+    enuc = CALC_NUCLEAR_EN(satdata, p_surf_tension, taylor_exp_order, aa_eq, del_eq, rho0_eq, rhop_eq);
     ngas = calc_meta_model_nuclear_matter(satdata, taylor_exp_order, rhog_eq, 1.);
     epsg = rhog_eq*ngas.enpernuc;
     epsws = calc_ws_cell_energy_density(aa_eq, rho0_eq, rhop_eq, rhog_eq, enuc, epsg, rhob_);

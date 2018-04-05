@@ -26,7 +26,7 @@ double calc_etf_ana_meta_model_nuclear_en(struct parameters satdata, int max_ord
 //=============================
 // bulk: ELFc(N) meta-modeling
 // surface: LS corrected surface energy w/ SkI' values
-double calc_ls_meta_model_nuclear_en(struct parameters satdata, int max_order, 
+double calc_ls_meta_model_nuclear_en(struct parameters satdata, int p, int max_order, 
         double aa_, double ii_, double n0_, double np_);
 
 #endif // H_NUCLEAR_EN
