@@ -14,6 +14,6 @@ struct rparams_core
 };
 int assign_core_fun(const gsl_vector * x, void *params, gsl_vector * f);
 double calc_core_eq_asym(double rhob_, double *guess);
-void print_state_core(double del_eq_, double rhob_);
+void print_state_core(double del_eq_, double rhob_, FILE *eos);
 
 #endif // H_F_CORE

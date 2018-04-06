@@ -2,9 +2,8 @@
 
 #include "../nseos/nuclear_en.h"
 #include "../nseos/observables.h"
-#include "f_icrust4d.h"
-
 #include "choices.h"
+#include "f_icrust4d.h"
 
 struct icrust_fun_4d calc_icrust_fun_4d(double aa_, double del_, double rho0_, double rhop_, double rhog_)
 {
@@ -198,7 +197,7 @@ struct ic_compo calc_icrust4d_composition(double rhob_, double *guess)
     return eq;
 }
 
-void print_state_icrust(struct ic_compo eq, double rhob_)
+void print_state_icrust(struct ic_compo eq, double rhob_, FILE *compo, FILE *eos)
 {
     double rhop_eq;
     double vws, rws;
@@ -222,5 +221,7 @@ void print_state_icrust(struct ic_compo eq, double rhob_)
 
     /* printf ("%g %g %g %g %g %g %g %g %g\n", rhob_, eq.aa, eq.del, eq.aa*(1.-eq.del)/2., eq.rho0, eq.rhog, rws, */
     /*         epsws, pressws); */
-    printf("%g %g\n", rhob_, pressws);
+    /* printf("%g %g\n", rhob_, pressws); */
+    fprintf (compo, "%g %g %g %g %g %g %g %g\n", rhob_, eq.aa, eq.del, eq.aa*(1.-eq.del)/2., eq.rho0, eq.rhog, rws, epsws);
+    fprintf(eos, "%g %g\n", rhob_, pressws);
 }

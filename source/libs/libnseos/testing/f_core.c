@@ -110,18 +110,15 @@ double calc_core_eq_asym(double rhob_, double *guess)
     return del_eq;
 }
 
-void print_state_core(double del_eq_, double rhob_)
+void print_state_core(double del_eq_, double rhob_, FILE *eos)
 {
     struct parameters satdata;
     struct hnm meta;
-    double epsws;
     double pressws;
 
     satdata = ASSIGN_PARAM(satdata);
     meta = calc_meta_model_nuclear_matter(satdata, taylor_exp_order, rhob_, del_eq_);
-    epsws = calc_core_ws_cell_energy_density(del_eq_, meta, rhob_);
     pressws = calc_core_ws_cell_pressure(del_eq_, meta, rhob_);
 
-    /* printf("%g %g %g %g\n", rhob_, del_eq_, epsws, pressure); */
-    printf("%g %g\n", rhob_, pressws);
+    fprintf(eos, "%g %g\n", rhob_, pressws);
 }

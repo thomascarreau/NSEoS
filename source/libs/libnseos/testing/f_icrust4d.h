@@ -30,6 +30,6 @@ struct rparams_crust
 };
 int assign_icrust_fun_4d(const gsl_vector * x, void *params, gsl_vector * f);
 struct ic_compo calc_icrust4d_composition(double rhob_, double *guess);
-void print_state_icrust(struct ic_compo eq, double rhob_);
+void print_state_icrust(struct ic_compo eq, double rhob_, FILE *compo, FILE *eos);
 
 #endif // H_F_ICRUST4D

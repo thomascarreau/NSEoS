@@ -13,7 +13,7 @@ OBJS = f_core.o \
 APP = nseos
 
 $(APP) : $(OBJS) nseos.c
-	$(CC) -o $(APP) nseos.c $(OBJS) -Wall -lgsl -lgslcblas -lm
+	$(CC) -o $(APP) nseos.c $(OBJS) -lgsl -lgslcblas -lm
 
 $(BUILDDIR)/empirical.o : $(LIBDIR)/empirical.h \
 	$(LIBDIR)/empirical.c 

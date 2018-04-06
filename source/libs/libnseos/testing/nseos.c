@@ -2,12 +2,17 @@
 #include "../nseos/observables.h"
 
 #include "choices.h"
-
 #include "f_icrust4d.h"
 #include "f_core.h"
 
-int main(void)
+int main(int argc, char* argv[])
 {
+    FILE *mycompo;
+    FILE *myeos;
+
+    mycompo = fopen(argv[1],"w+");
+    myeos = fopen(argv[2],"w+");
+
     int irhob;
     double rhob;
 
@@ -52,13 +57,13 @@ int main(void)
             meta = calc_meta_model_nuclear_matter(satdata, taylor_exp_order, rhob, del_eq);
             epsws_core = calc_core_ws_cell_energy_density(del_eq, meta, rhob);
 
-            if (epsws_core < epsws_ic)
+            if (epsws_core < epsws_ic) // crust-core transition
             {
                 break;
             }
         }
 
-        print_state_icrust(comp, rhob);
+        print_state_icrust(comp, rhob, mycompo, myeos);
     }
 
     do
@@ -67,11 +72,16 @@ int main(void)
         if (guess_core != guess_core) // break if nan
             break;
 
-        print_state_core(del_eq, rhob);
+        print_state_core(del_eq, rhob, myeos);
 
         rhob += 0.001;
     }
     while (rhob < 0.5);
+
+    fclose(mycompo);
+    fclose(myeos);
+
+    printf("\\o/\n");
 
     return 0;
 }
