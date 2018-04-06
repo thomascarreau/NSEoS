@@ -4,11 +4,7 @@
 #include "../nseos/observables.h"
 #include "f_icrust4d.h"
 
-#define CALC_NUCLEAR_EN (calc_ls_meta_model_nuclear_en)
-#define ASSIGN_PARAM (assign_param_sly4)
-
-static const int p_surf_tension = 3;
-static const int taylor_exp_order = 2;
+#include "choices.h"
 
 struct icrust_fun_4d calc_icrust_fun_4d(double aa_, double del_, double rho0_, double rhop_, double rhog_)
 {
@@ -60,15 +56,12 @@ struct icrust_fun_4d calc_icrust_fun_4d(double aa_, double del_, double rho0_, d
 
 int assign_icrust_fun_4d(const gsl_vector * x, void *params, gsl_vector * f)
 {
-    double rhop = ((struct rparams *) params)->rhop;
+    double rhop = ((struct rparams_crust *) params)->rhop;
 
     const double x0 = gsl_vector_get (x, 0);
     const double x1 = gsl_vector_get (x, 1);
     const double x2 = gsl_vector_get (x, 2);
     const double x3 = gsl_vector_get (x, 3);
-
-    struct parameters satdata;
-    satdata = ASSIGN_PARAM(satdata);
 
     rhop = (rhop-x3)*(1.-x1)/2./(1.-x3/x2);
 
@@ -88,44 +81,9 @@ int assign_icrust_fun_4d(const gsl_vector * x, void *params, gsl_vector * f)
     return GSL_SUCCESS;
 }
 
-void print_state_icrust(gsl_multiroot_fsolver * s, double rhob_)
+struct ic_compo calc_icrust4d_composition(double rhob_, double *guess)
 {
-    double aa_eq, del_eq, rho0_eq, rhog_eq;
-    double rhop_eq;
-    double vws, rws;
-    struct parameters satdata;
-    double enuc;
-    struct hnm ngas;
-    double epsg;
-    double epsws;
-    double pressws;
-
-    aa_eq = gsl_vector_get(s->x, 0);
-    del_eq = gsl_vector_get(s->x, 1);
-    rho0_eq = gsl_vector_get(s->x, 2);
-    rhog_eq = gsl_vector_get(s->x, 3);
-    rhop_eq = (rhob_-rhog_eq)*(1.-del_eq)/2./(1.-rhog_eq/rho0_eq);
-    vws = aa_eq/(rhob_-rhog_eq)*(1.-rhog_eq/rho0_eq);
-    rws = pow(3.*vws/4./PI,1./3.);
-
-    satdata = ASSIGN_PARAM(satdata);
-    enuc = CALC_NUCLEAR_EN(satdata, p_surf_tension, taylor_exp_order, aa_eq, del_eq, rho0_eq, rhop_eq);
-    ngas = calc_meta_model_nuclear_matter(satdata, taylor_exp_order, rhog_eq, 1.);
-    epsg = rhog_eq*ngas.enpernuc;
-    epsws = calc_ws_cell_energy_density(aa_eq, rho0_eq, rhop_eq, rhog_eq, enuc, epsg, rhob_);
-    pressws = calc_ws_cell_pressure(satdata, aa_eq, del_eq, rho0_eq, rhop_eq, rhog_eq, epsg, ngas.mun);
-
-    printf ("%g %g %g %g %g %g %g %g %g\n", rhob_, aa_eq, del_eq, aa_eq*(1.-del_eq)/2., rho0_eq, rhog_eq, rws,
-            epsws, pressws);
-    /* printf("%g %g\n", rhob_, pressws); */
-}
-
-void calc_icrust4d(double rhob_, double *guess)
-{
-    double aa_new_guess;
-    double del_new_guess;
-    double rho0_new_guess;
-    double rhog_new_guess;
+    struct ic_compo eq;
 
     const gsl_multiroot_fsolver_type *T;
     gsl_multiroot_fsolver *s;
@@ -138,7 +96,7 @@ void calc_icrust4d(double rhob_, double *guess)
     double rho0_old, rho0_new, rstep;
     double rhog_old, rhog_new, gstep;
 
-    struct rparams p;
+    struct rparams_crust p;
     p.rhop = rhob_; // modification in assign_icrust_fun_4d (DIRTY!)
 
     const size_t n = 4;
@@ -156,8 +114,6 @@ void calc_icrust4d(double rhob_, double *guess)
 
     do
     {
-        /* print_state_icrust(s, rhob); */
-
         aa_old = gsl_vector_get (s->x, 0);
         basym_old = gsl_vector_get (s->x, 1);
         rho0_old = gsl_vector_get (s->x, 2);
@@ -226,19 +182,45 @@ void calc_icrust4d(double rhob_, double *guess)
 
     while (status == GSL_CONTINUE && iter < 5000);
 
-    if (iter < 4995)
-        print_state_icrust(s, rhob_);
+    eq.aa = gsl_vector_get(s->x, 0);
+    eq.del = gsl_vector_get(s->x, 1);
+    eq.rho0 = gsl_vector_get(s->x, 2);
+    eq.rhog = gsl_vector_get(s->x, 3);
 
-    aa_new_guess = gsl_vector_get(s->x, 0);
-    del_new_guess = gsl_vector_get(s->x, 1);
-    rho0_new_guess = gsl_vector_get(s->x, 2);
-    rhog_new_guess = gsl_vector_get(s->x, 3);
-
-    guess[0] = aa_new_guess;
-    guess[1] = del_new_guess;
-    guess[2] = rho0_new_guess;
-    guess[3] = rhog_new_guess;
+    guess[0] = eq.aa;
+    guess[1] = eq.del;
+    guess[2] = eq.rho0;
+    guess[3] = eq.rhog;
 
     gsl_multiroot_fsolver_free(s);
     gsl_vector_free(x);
+
+    return eq;
+}
+
+void print_state_icrust(struct ic_compo eq, double rhob_)
+{
+    double rhop_eq;
+    double vws, rws;
+    struct parameters satdata;
+    double enuc;
+    struct hnm ngas;
+    double epsg;
+    double epsws;
+    double pressws;
+
+    rhop_eq = (rhob_-eq.rhog)*(1.-eq.del)/2./(1.-eq.rhog/eq.rho0);
+    vws = eq.aa/(rhob_-eq.rhog)*(1.-eq.rhog/eq.rho0);
+    rws = pow(3.*vws/4./PI,1./3.);
+
+    satdata = ASSIGN_PARAM(satdata);
+    enuc = CALC_NUCLEAR_EN(satdata, p_surf_tension, taylor_exp_order, eq.aa, eq.del, eq.rho0, rhop_eq);
+    ngas = calc_meta_model_nuclear_matter(satdata, taylor_exp_order, eq.rhog, 1.);
+    epsg = eq.rhog*ngas.enpernuc;
+    epsws = calc_crust_ws_cell_energy_density(eq.aa, eq.rho0, rhop_eq, eq.rhog, enuc, epsg, rhob_);
+    pressws = calc_crust_ws_cell_pressure(satdata, eq.aa, eq.del, eq.rho0, rhop_eq, eq.rhog, epsg, ngas.mun);
+
+    /* printf ("%g %g %g %g %g %g %g %g %g\n", rhob_, eq.aa, eq.del, eq.aa*(1.-eq.del)/2., eq.rho0, eq.rhog, rws, */
+    /*         epsws, pressws); */
+    printf("%g %g\n", rhob_, pressws);
 }

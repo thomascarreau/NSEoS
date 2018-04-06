@@ -2,17 +2,18 @@ CC = gcc
 RM = rm
 LIBDIR = ../nseos
 BUILDDIR = ../nseos/build
-OBJS = f_icrust4d.o \
+OBJS = f_core.o \
+	   f_icrust4d.o \
 	   $(BUILDDIR)/observables.o \
 	   $(BUILDDIR)/nuclear_en.o \
 	   $(BUILDDIR)/coulomb_en.o \
 	   $(BUILDDIR)/nuclear_surface_en.o \
 	   $(BUILDDIR)/nuclear_matter.o \
 	   $(BUILDDIR)/empirical.o 
-APP = icrust4d
+APP = nseos
 
-$(APP) : $(OBJS) icrust4d.c
-	$(CC) -o $(APP) icrust4d.c $(OBJS) -Wall -lgsl -lgslcblas -lm
+$(APP) : $(OBJS) nseos.c
+	$(CC) -o $(APP) nseos.c $(OBJS) -Wall -lgsl -lgslcblas -lm
 
 $(BUILDDIR)/empirical.o : $(LIBDIR)/empirical.h \
 	$(LIBDIR)/empirical.c 
@@ -44,8 +45,14 @@ $(BUILDDIR)/observables.o : $(LIBDIR)/observables.h \
 	$(CC) -c $(LIBDIR)/observables.c -o $(BUILDDIR)/observables.o
 
 f_icrust4d.o : f_icrust4d.h \
-	f_icrust4d.c
+	f_icrust4d.c \
+	choices.h
 	$(CC) -c f_icrust4d.c -o f_icrust4d.o
+
+f_core.o : f_core.h \
+	f_core.c \
+	choices.h
+	$(CC) -c f_core.c -o f_core.o
 
 clean:
 	$(RM) $(OBJS) $(APP)
