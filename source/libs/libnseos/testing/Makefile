@@ -1,6 +1,7 @@
 CC = gcc
-RM = rm
+RM = rm -r
 LIBDIR = ../nseos
+MKDIR = mkdir
 BUILDDIR = ../nseos/build
 OBJS = f_core.o \
 	   f_icrust4d.o \
@@ -14,6 +15,9 @@ APP = nseos
 
 $(APP) : $(OBJS) nseos.c
 	$(CC) -o $(APP) nseos.c $(OBJS) -lgsl -lgslcblas -lm
+
+$(BUILDDIR):
+	$(MKDIR) $(BUILDDIR)
 
 $(BUILDDIR)/empirical.o : $(LIBDIR)/empirical.h \
 	$(LIBDIR)/empirical.c 
@@ -40,7 +44,8 @@ $(BUILDDIR)/nuclear_en.o : $(LIBDIR)/nuclear_en.h \
 	$(LIBDIR)/nuclear_en.c
 	$(CC) -c $(LIBDIR)/nuclear_en.c -o $(BUILDDIR)/nuclear_en.o
 
-$(BUILDDIR)/observables.o : $(LIBDIR)/observables.h \
+$(BUILDDIR)/observables.o : $(BUILDDIR) \
+	$(LIBDIR)/observables.h \
 	$(LIBDIR)/observables.c
 	$(CC) -c $(LIBDIR)/observables.c -o $(BUILDDIR)/observables.o
 
@@ -55,4 +60,4 @@ f_core.o : f_core.h \
 	$(CC) -c f_core.c -o f_core.o
 
 clean:
-	$(RM) $(OBJS) $(APP)
+	$(RM) $(BUILDDIR) $(APP)
