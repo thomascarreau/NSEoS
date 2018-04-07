@@ -1,7 +1,7 @@
 CC = gcc
 RM = rm -r
 LIBDIR = ../nseos
-MKDIR = mkdir
+MKDIR = mkdir -p
 BUILDDIR = ../nseos/build
 OBJS = f_core.o \
 	   f_icrust4d.o \
@@ -60,4 +60,4 @@ f_core.o : f_core.h \
 	$(CC) -c f_core.c -o f_core.o
 
 clean:
-	$(RM) $(BUILDDIR) $(APP)
+	$(RM) $(OBJS) $(APP)
