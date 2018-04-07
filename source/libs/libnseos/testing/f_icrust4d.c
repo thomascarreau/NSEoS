@@ -219,9 +219,6 @@ void print_state_icrust(struct ic_compo eq, double rhob_, FILE *compo, FILE *eos
     epsws = calc_crust_ws_cell_energy_density(eq.aa, eq.rho0, rhop_eq, eq.rhog, enuc, epsg, rhob_);
     pressws = calc_crust_ws_cell_pressure(satdata, eq.aa, eq.del, eq.rho0, rhop_eq, eq.rhog, epsg, ngas.mun);
 
-    /* printf ("%g %g %g %g %g %g %g %g %g\n", rhob_, eq.aa, eq.del, eq.aa*(1.-eq.del)/2., eq.rho0, eq.rhog, rws, */
-    /*         epsws, pressws); */
-    /* printf("%g %g\n", rhob_, pressws); */
     fprintf (compo, "%g %g %g %g %g %g %g %g\n", rhob_, eq.aa, eq.del, eq.aa*(1.-eq.del)/2., eq.rho0, eq.rhog, rws, epsws);
     fprintf(eos, "%g %g\n", rhob_, pressws);
 }
