@@ -31,6 +31,8 @@ You can change the parameter set to be use and the nuclear modeling in `choices.
 To do
 -----
 
+* Fit the surface energy parameters from AME2012
+
 * Work out the crust-core transition at constant pressure
 
 * Replace ELFc for ELFd modeling

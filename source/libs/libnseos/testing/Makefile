@@ -1,5 +1,5 @@
 CC = gcc
-RM = rm
+RM = rm -r
 LIBDIR = ../nseos
 MKDIR = mkdir -p
 BUILDDIR = ../nseos/build
