@@ -1,6 +1,7 @@
 CC = gcc
 RM = rm
 LIBDIR = ../nseos
+MKDIR = mkdir -p
 BUILDDIR = ../nseos/build
 OBJS = f_core.o \
 	   f_icrust4d.o \
@@ -15,6 +16,9 @@ APP = nseos
 $(APP) : $(OBJS) nseos.c
 	$(CC) -o $(APP) nseos.c $(OBJS) -lgsl -lgslcblas -lm
 
+$(BUILDDIR):
+	$(MKDIR) $(BUILDDIR)
+
 $(BUILDDIR)/empirical.o : $(LIBDIR)/empirical.h \
 	$(LIBDIR)/empirical.c 
 	$(CC) -c $(LIBDIR)/empirical.c -o $(BUILDDIR)/empirical.o
@@ -26,7 +30,8 @@ $(BUILDDIR)/nuclear_matter.o : $(LIBDIR)/nuclear_matter.h \
 	$(CC) -c $(LIBDIR)/nuclear_matter.c -o $(BUILDDIR)/nuclear_matter.o
 
 $(BUILDDIR)/nuclear_surface_en.o : $(LIBDIR)/nuclear_surface_en.h \
-	$(LIBDIR)/nuclear_surface_en.c
+	$(LIBDIR)/nuclear_surface_en.c \
+	choices.h
 	$(CC) -c $(LIBDIR)/nuclear_surface_en.c -o $(BUILDDIR)/nuclear_surface_en.o
 
 $(BUILDDIR)/coulomb_en.o : $(LIBDIR)/coulomb_en.h \
@@ -40,7 +45,8 @@ $(BUILDDIR)/nuclear_en.o : $(LIBDIR)/nuclear_en.h \
 	$(LIBDIR)/nuclear_en.c
 	$(CC) -c $(LIBDIR)/nuclear_en.c -o $(BUILDDIR)/nuclear_en.o
 
-$(BUILDDIR)/observables.o : $(LIBDIR)/observables.h \
+$(BUILDDIR)/observables.o : $(BUILDDIR) \
+	$(LIBDIR)/observables.h \
 	$(LIBDIR)/observables.c
 	$(CC) -c $(LIBDIR)/observables.c -o $(BUILDDIR)/observables.o
 

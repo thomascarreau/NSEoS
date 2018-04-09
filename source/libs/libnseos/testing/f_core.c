@@ -1,3 +1,5 @@
+#include <gsl/gsl_multiroots.h>
+
 #include "../nseos/nuclear_matter.h"
 #include "../nseos/coulomb_en.h"
 #include "../nseos/observables.h"

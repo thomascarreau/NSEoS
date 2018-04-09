@@ -24,6 +24,15 @@ int main(int argc, char* argv[])
 
     // parts of the energy density
     struct parameters satdata = ASSIGN_PARAM(satdata);
+    struct sf_params sparams;
+
+    fprintf(stderr, "%.2f %.2f %.2f\n", satdata.rhosat0, satdata.lasat0, satdata.ksat0);
+    fprintf(stderr, "%.2f %.2f %.2f\n", satdata.jsym0, satdata.lsym0, satdata.ksym0);
+    fprintf(stderr, "%.2f %.2f\n", satdata.barm, satdata.bardel);
+    fprintf(stderr, "p = %d\n\n", p_surf_tension);
+    fprintf (stderr, "==============================================\n\n");
+
+    sparams = fit_sf_params();
     double rhop;
     double enuc;
     struct hnm ngas;
@@ -36,7 +45,7 @@ int main(int argc, char* argv[])
     {
         rhob = irhob/10000.;
 
-        comp = calc_icrust4d_composition(rhob, guess_ic);
+        comp = calc_icrust4d_composition(rhob, guess_ic, sparams);
         if (guess_ic[0] != guess_ic[0]) // break if nan
             break;
 
@@ -44,7 +53,7 @@ int main(int argc, char* argv[])
         {
             // calculation of the energy density in the cell in the inner crust
             rhop = (rhob-comp.rhog)*(1.-comp.del)/2./(1.-comp.rhog/comp.rho0);
-            enuc = CALC_NUCLEAR_EN(satdata, p_surf_tension, taylor_exp_order, comp.aa, comp.del, comp.rho0, rhop);
+            enuc = CALC_NUCLEAR_EN(satdata, sparams, taylor_exp_order, comp.aa, comp.del, comp.rho0, rhop);
             ngas = calc_meta_model_nuclear_matter(satdata, taylor_exp_order, comp.rhog, 1.);
             epsg = comp.rhog*ngas.enpernuc;
             epsws_ic = calc_crust_ws_cell_energy_density(comp.aa, comp.rho0, rhop, comp.rhog, enuc, epsg, rhob);
@@ -57,14 +66,18 @@ int main(int argc, char* argv[])
             meta = calc_meta_model_nuclear_matter(satdata, taylor_exp_order, rhob, del_eq);
             epsws_core = calc_core_ws_cell_energy_density(del_eq, meta, rhob);
 
+            /* fprintf(stderr, "%g %g %g\n", rhob, epsws_ic, epsws_core); */
             if (epsws_core < epsws_ic) // crust-core transition
             {
                 break;
             }
         }
 
-        print_state_icrust(comp, rhob, mycompo, myeos);
+        print_state_icrust(comp, sparams, rhob, mycompo, myeos);
     }
+
+    fprintf(stderr, "nt = %g\n\n", rhob);
+    fprintf (stderr, "==============================================\n\n");
 
     do
     {
@@ -81,7 +94,7 @@ int main(int argc, char* argv[])
     fclose(mycompo);
     fclose(myeos);
 
-    printf("\\o/\n");
+    fprintf(stderr, "\\o/\n");
 
     return 0;
 }

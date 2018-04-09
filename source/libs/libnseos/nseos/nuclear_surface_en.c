@@ -1,8 +1,12 @@
 #include <math.h>
 #include <gsl/gsl_integration.h>
+#include <gsl/gsl_blas.h>
+#include <gsl/gsl_multifit_nlin.h>
 
 #include "nuclear_matter.h"
 #include "nuclear_surface_en.h"
+#include "coulomb_en.h"
+#include "../testing/choices.h"
 
 double calc_ldm_surface_en(struct parameters satdata, double aa_)
 {
@@ -183,53 +187,163 @@ double calc_etf_ana_surface_en(struct parameters satdata, double aa_, double ii_
     return esurf;
 }
 
-double calc_ls_surface_en(struct parameters satdata, int p, double aa_, double ii_, double n0_)
+int be_f (const gsl_vector * x, void *data, gsl_vector * f)
+{
+    int *zz = ((struct data *)data)->zz;
+    int *aa = ((struct data *)data)->aa;
+    double *be = ((struct data *)data)->be;
+
+    struct sf_params prms;
+    prms.sigma0 = gsl_vector_get (x, 0);
+    prms.b = gsl_vector_get (x, 1);
+
+    size_t i;
+
+    struct parameters satdata;
+    satdata = ASSIGN_PARAM(satdata);
+
+    for (i = 0; i < 2353; i++) // (wc -l AME2012.data)
+    {
+        double ii = 1.-2.*zz[i]/aa[i];
+        double n0 = satdata.rhosat0*(1.-3.*satdata.lsym0*ii*ii/(satdata.ksat0 + satdata.ksym0*ii*ii));
+        // bulk
+        struct hnm meta;
+        meta = calc_meta_model_nuclear_matter(satdata, taylor_exp_order, n0, ii);
+        double ebulk = meta.enpernuc;
+        // surface
+        double r0 = pow(4.*PI*n0/3.,-1./3.);
+        double ypnuc = (1.-ii)/2.;
+        double sigma = prms.sigma0*(pow(2.,p_surf_tension+1.) + prms.b)/(pow(ypnuc,-p_surf_tension) 
+                + prms.b + pow(1.-ypnuc,-p_surf_tension));
+        double esurf = 4.*PI*r0*r0*sigma*pow(aa[i],-1./3.);
+        // coulomb
+        double Ecoul = calc_coulomb_en(satdata, aa[i], ii, n0, 0.);
+        double ecoul = Ecoul/aa[i];
+        // total
+        double Be = ebulk + esurf + ecoul;
+        gsl_vector_set (f, i, Be - be[i]);
+    }
+
+    return GSL_SUCCESS;
+}
+
+struct sf_params fit_sf_params()
+{
+    struct sf_params prms;
+
+    const gsl_multifit_fdfsolver_type *T = gsl_multifit_fdfsolver_lmsder;
+    gsl_multifit_fdfsolver *s;
+    int status, info;
+    size_t i;
+    const size_t n = 2353;
+    const size_t nb_of_params = 2;
+
+    gsl_matrix *J = gsl_matrix_alloc(n, nb_of_params);
+    gsl_matrix *covar = gsl_matrix_alloc (nb_of_params, nb_of_params);
+    int zz[n], aa[n];
+    double be[n], weights[n];
+    struct data d = { zz, aa, be };
+    gsl_multifit_function_fdf f;
+    double x_init[2] = { 1.08, 23.0 };
+    gsl_vector_view x = gsl_vector_view_array (x_init, nb_of_params);
+    gsl_vector_view w = gsl_vector_view_array(weights, n);
+    gsl_vector *res_f;
+    double chi, chi0;
+
+    const double xtol = 1e-8;
+    const double gtol = 1e-8;
+    const double ftol = 0.0;
+
+    f.f = &be_f;
+    f.df = NULL; // finite differences
+    f.n = n;
+    f.p = nb_of_params;
+    f.params = &d;
+
+    /* This is the data to be fitted */
+    FILE *data = NULL;
+    data = fopen("AME2012.data", "r");
+    if (data != NULL)
+    {
+        for (i = 0; i < n; i++)
+        {
+            fscanf(data, "%d %d %lf", &zz[i], &aa[i], &be[i]);
+            weights[i] = 1.;
+        }
+        fclose(data);
+    } else {
+        fprintf(stderr,"ERROR: file issue\n");
+        exit(0);
+    }
+
+    s = gsl_multifit_fdfsolver_alloc (T, n, nb_of_params);
+
+    /* initialize solver with starting point and weights */
+    /* gsl_multifit_fdfsolver_wset (s, &f, &x.vector, &w.vector); */
+    gsl_multifit_fdfsolver_wset (s, &f, &x.vector, &w.vector);
+
+    /* compute initial residual norm */
+    res_f = gsl_multifit_fdfsolver_residual(s);
+    chi0 = gsl_blas_dnrm2(res_f);
+
+    /* solve the system with a maximum of 20 iterations */
+    status = gsl_multifit_fdfsolver_driver(s, 20, xtol, gtol, ftol, &info);
+
+    gsl_multifit_fdfsolver_jac(s, J);
+    gsl_multifit_covar (J, 0.0, covar);
+
+    /* compute final residual norm */
+    chi = gsl_blas_dnrm2(res_f);
+
+#define FIT(i) gsl_vector_get(s->x, i)
+#define ERR(i) sqrt(gsl_matrix_get(covar,i,i))
+
+    fprintf(stderr, "summary from method '%s'\n",
+            gsl_multifit_fdfsolver_name(s));
+    fprintf(stderr, "number of iterations: %zu\n",
+            gsl_multifit_fdfsolver_niter(s));
+    fprintf(stderr, "function evaluations: %zu\n", f.nevalf);
+    fprintf(stderr, "Jacobian evaluations: %zu\n", f.nevaldf);
+    fprintf(stderr, "reason for stopping: %s\n",
+            (info == 1) ? "small step size" : "small gradient");
+    fprintf(stderr, "initial |f(x)| = %g\n", chi0);
+    fprintf(stderr, "final   |f(x)| = %g\n", chi);
+
+    { 
+        double dof = n - nb_of_params;
+        double c = GSL_MAX_DBL(1, chi / sqrt(dof)); 
+
+        fprintf(stderr, "chisq/dof = %g\n",  pow(chi, 2.0) / dof);
+
+        fprintf (stderr, "sigma0 = %.5f +/- %.5f\n", FIT(0), c*ERR(0));
+        fprintf (stderr, "b      = %.5f +/- %.5f\n", FIT(1), c*ERR(1));
+    }
+
+    fprintf (stderr, "status = %s\n\n", gsl_strerror (status));
+    fprintf (stderr, "==============================================\n\n");
+
+    prms.sigma0 = gsl_vector_get(s->x, 0);
+    prms.b = gsl_vector_get(s->x, 1);
+
+    gsl_multifit_fdfsolver_free (s);
+    gsl_matrix_free (covar);
+    gsl_matrix_free (J);
+
+    return prms;
+}
+
+double calc_ls_surface_en(struct sf_params sparams, double aa_, double ii_, double n0_)
 {
     double surf_energy;
     double r0;
-    double sig;
-    double sigs;
-    double q;
+    double sigma;
     double ypnuc;
 
     r0 = pow(4.*PI*n0_/3.,-1./3.);
     ypnuc = (1. - ii_)/2.;
-
-    /* double ss; */
-    /* sigs = 1.15;                             // !!!!!!!!!!!!!!!!!!!!! */
-    /* ss = 45.8;                               // !!!! SkI' values !!!! */
-    /* q = 384.*PI*r0*r0*sigs/ss - 16.;         // !!!!!!!!!!!!!!!!!!!!! */
-
-    // FOR n0 (SLy4 values)
-    //=====================
-
-    switch(p)
-    {
-        case 2:
-            sigs = 1.08529;
-            q = 1.26071;
-            break;
-        case 3:
-            sigs = 1.08329;
-            q = 23.586;
-            break;
-        case 4:
-            sigs = 1.08086;
-            q = 111.21;
-            break;
-        case 5:
-            sigs = 1.078;
-            q = 409.947;
-            break;
-        default:
-            sigs = 1.08329;
-            q = 23.586;
-    }
-
-    sig = sigs*(pow(2.,p+1.) + q)/(pow(ypnuc,-p) 
-            + q + pow(1.-ypnuc,-p));
-
-    surf_energy = 4.*PI*r0*r0*sig*pow(aa_,2./3.);
+    sigma = sparams.sigma0*(pow(2.,p_surf_tension+1.) + sparams.b)/(pow(ypnuc,-p_surf_tension) 
+            + sparams.b + pow(1.-ypnuc,-p_surf_tension));
+    surf_energy = 4.*PI*r0*r0*sigma*pow(aa_,2./3.);
 
     return surf_energy;
 }
