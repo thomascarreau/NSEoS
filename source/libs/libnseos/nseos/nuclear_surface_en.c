@@ -208,13 +208,13 @@ int be_f (const gsl_vector * x, void *data, gsl_vector * f)
         double n0 = satdata.rhosat0*(1.-3.*satdata.lsym0*ii*ii/(satdata.ksat0 + satdata.ksym0*ii*ii));
         // bulk
         struct hnm meta;
-        meta = calc_meta_model_nuclear_matter(satdata, taylor_exp_order, n0, ii);
+        meta = calc_meta_model_nuclear_matter(satdata, TAYLOR_EXP_ORDER, n0, ii);
         double ebulk = meta.enpernuc;
         // surface
         double r0 = pow(4.*PI*n0/3.,-1./3.);
         double ypnuc = (1.-ii)/2.;
-        double sigma = prms.sigma0*(pow(2.,p_surf_tension+1.) + prms.b)/(pow(ypnuc,-p_surf_tension) 
-                + prms.b + pow(1.-ypnuc,-p_surf_tension));
+        double sigma = prms.sigma0*(pow(2.,P_SURF_TENSION+1.) + prms.b)/(pow(ypnuc,-P_SURF_TENSION) 
+                + prms.b + pow(1.-ypnuc,-P_SURF_TENSION));
         double esurf = 4.*PI*r0*r0*sigma*pow(aa[i],-1./3.);
         // coulomb
         double Ecoul = calc_coulomb_en(satdata, aa[i], ii, n0, 0.);
@@ -341,8 +341,8 @@ double calc_ls_surface_en(struct sf_params sparams, double aa_, double ii_, doub
 
     r0 = pow(4.*PI*n0_/3.,-1./3.);
     ypnuc = (1. - ii_)/2.;
-    sigma = sparams.sigma0*(pow(2.,p_surf_tension+1.) + sparams.b)/(pow(ypnuc,-p_surf_tension) 
-            + sparams.b + pow(1.-ypnuc,-p_surf_tension));
+    sigma = sparams.sigma0*(pow(2.,P_SURF_TENSION+1.) + sparams.b)/(pow(ypnuc,-P_SURF_TENSION) 
+            + sparams.b + pow(1.-ypnuc,-P_SURF_TENSION));
     surf_energy = 4.*PI*r0*r0*sigma*pow(aa_,2./3.);
 
     return surf_energy;

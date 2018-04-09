@@ -20,8 +20,8 @@ double calc_core_fun(double del_, double rhob_)
     // energy per particle of infinite matter
     satdata = ASSIGN_PARAM(satdata);
     epsd = del_/1000.;
-    meta_p = calc_meta_model_nuclear_matter(satdata, taylor_exp_order, rhob_, del_+epsd);
-    meta_m = calc_meta_model_nuclear_matter(satdata, taylor_exp_order, rhob_, del_-epsd);
+    meta_p = calc_meta_model_nuclear_matter(satdata, TAYLOR_EXP_ORDER, rhob_, del_+epsd);
+    meta_m = calc_meta_model_nuclear_matter(satdata, TAYLOR_EXP_ORDER, rhob_, del_-epsd);
     dehnmddel = (meta_p.enpernuc - meta_m.enpernuc)/2./epsd;
 
     // electron gas chemical potential (including rest mass)
@@ -119,7 +119,7 @@ void print_state_core(double del_eq_, double rhob_, FILE *eos)
     double pressws;
 
     satdata = ASSIGN_PARAM(satdata);
-    meta = calc_meta_model_nuclear_matter(satdata, taylor_exp_order, rhob_, del_eq_);
+    meta = calc_meta_model_nuclear_matter(satdata, TAYLOR_EXP_ORDER, rhob_, del_eq_);
     pressws = calc_core_ws_cell_pressure(del_eq_, meta, rhob_);
 
     fprintf(eos, "%g %g\n", rhob_, pressws);
