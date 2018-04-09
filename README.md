@@ -31,6 +31,10 @@ You can change the parameter set to be use and the nuclear modeling in `choices.
 To do
 -----
 
+* Study the influence of the Taylor expansion order on the crust-core transition
+
+* Relative uncertainty of b is large: why?
+
 * Work out the crust-core transition at constant pressure
 
 * Replace ELFc for ELFd modeling
