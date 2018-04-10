@@ -5,7 +5,7 @@
 
 #include "nuclear_matter.h"
 #include "nuclear_surface_en.h"
-#include "coulomb_en.h"
+#include "coulomb.h"
 #include "modeling.h"
 
 double calc_ldm_surface_en(struct parameters satdata, double aa_)

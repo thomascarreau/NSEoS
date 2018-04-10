@@ -33,6 +33,7 @@ struct skyrme_parameters
 struct parameters assign_param_ref(struct parameters satdata);
 struct parameters assign_param_sly4(struct parameters satdata);
 struct parameters assign_param_ski(struct parameters satdata);
+void print_parameters(struct parameters satdata);
 struct skyrme_parameters assign_skyrme_param(struct skyrme_parameters coeff);
 
 #endif // H_EMPIRICAL

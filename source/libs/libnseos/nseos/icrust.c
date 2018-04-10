@@ -2,7 +2,6 @@
 #include <gsl/gsl_multiroots.h>
 
 #include "nuclear_en.h"
-#include "observables.h"
 #include "modeling.h"
 #include "icrust.h"
 
@@ -208,27 +207,72 @@ struct ic_compo calc_icrust4d_composition(double rhob_, double *guess,
     return eq;
 }
 
-void print_state_icrust(struct ic_compo eq, struct sf_params sparams, double rhob_, FILE *compo, FILE *eos)
+double calc_crust_ws_cell_energy_density(struct parameters satdata, struct sf_params sparams, struct ic_compo eq,
+        double rhob_)
 {
-    double rhop_eq;
-    double vws, rws;
-    struct parameters satdata;
+    double rhop;
+    double vws;
+    double epseltot;
     double enuc;
     struct hnm ngas;
     double epsg;
+    double epsws; 
+
+    vws = eq.aa*(1. - eq.rhog/eq.rho0)/(rhob_ - eq.rhog);
+    rhop = eq.aa*(1.-eq.del)/2./vws;
+
+    epseltot = calc_egas_energy_density(rhop);
+
+    enuc = CALC_NUCLEAR_EN(satdata, sparams, TAYLOR_EXP_ORDER, eq.aa, eq.del, eq.rho0, rhop);
+
+    ngas = calc_meta_model_nuclear_matter(satdata, TAYLOR_EXP_ORDER, eq.rhog, 1.);
+    epsg = eq.rhog*ngas.enpernuc;
+
+    epsws = enuc/vws + epseltot + epsg*(1.-eq.aa/eq.rho0/vws)
+        + rhop*(RMP-RMN) + rhob_*(RMN-AMU);
+
+    return epsws;
+}
+
+double calc_ngas_pressure(struct parameters satdata, double rhog_)
+{
+    struct hnm ngas;
+    ngas = calc_meta_model_nuclear_matter(satdata, TAYLOR_EXP_ORDER, rhog_, 1.);
+    
+    return rhog_*ngas.mun - rhog_*ngas.enpernuc;
+}
+
+double calc_crust_ws_cell_pressure(struct parameters satdata, struct ic_compo eq, double rhob_)
+{
+    double rhop;
+    double egas_pressure;
+    double lattice_pressure;
+    double ngas_pressure;
+    double ws_cell_pressure;
+
+
+    rhop = (rhob_-eq.rhog)*(1.-eq.del)/2./(1.-eq.rhog/eq.rho0);
+    egas_pressure = calc_egas_pressure(rhop);
+    lattice_pressure = calc_lattice_pressure(satdata, eq.aa, eq.del, eq.rho0, rhop);
+    ngas_pressure = calc_ngas_pressure(satdata, eq.rhog);
+    ws_cell_pressure = egas_pressure + lattice_pressure + ngas_pressure;
+
+    return ws_cell_pressure;
+}
+
+void print_state_icrust(struct ic_compo eq, struct sf_params sparams, double rhob_, FILE *compo, FILE *eos)
+{
+    double vws, rws;
+    struct parameters satdata;
     double epsws;
     double pressws;
 
-    rhop_eq = (rhob_-eq.rhog)*(1.-eq.del)/2./(1.-eq.rhog/eq.rho0);
     vws = eq.aa/(rhob_-eq.rhog)*(1.-eq.rhog/eq.rho0);
     rws = pow(3.*vws/4./PI,1./3.);
 
     satdata = ASSIGN_PARAM(satdata);
-    enuc = CALC_NUCLEAR_EN(satdata, sparams, TAYLOR_EXP_ORDER, eq.aa, eq.del, eq.rho0, rhop_eq);
-    ngas = calc_meta_model_nuclear_matter(satdata, TAYLOR_EXP_ORDER, eq.rhog, 1.);
-    epsg = eq.rhog*ngas.enpernuc;
-    epsws = calc_crust_ws_cell_energy_density(eq.aa, eq.rho0, rhop_eq, eq.rhog, enuc, epsg, rhob_);
-    pressws = calc_crust_ws_cell_pressure(satdata, eq.aa, eq.del, eq.rho0, rhop_eq, eq.rhog, epsg, ngas.mun);
+    epsws = calc_crust_ws_cell_energy_density(satdata, sparams, eq, rhob_);
+    pressws = calc_crust_ws_cell_pressure(satdata, eq, rhob_);
 
     fprintf (compo, "%g %g %g %g %g %g %g %g\n", rhob_, eq.aa, eq.del, eq.aa*(1.-eq.del)/2., eq.rho0, eq.rhog, rws, epsws);
     fprintf(eos, "%g %g\n", rhob_, pressws);

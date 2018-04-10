@@ -7,5 +7,7 @@ double calc_coulomb_en(struct parameters satdata, double aa_, double ii_, double
 double calc_screening_derivative(struct parameters satdata, double aa_, double ii_, double n0_, double np_);
 double calc_egas_energy_density(double np_);
 double calc_egas_chemical_potential(double np_);
+double calc_egas_pressure(double np_); // in MeV/fm^3
+double calc_lattice_pressure(struct parameters satdata, double aa_, double ii_, double n0_, double np_);
 
 #endif // H_COULOMB_EN

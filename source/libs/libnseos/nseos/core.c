@@ -1,8 +1,7 @@
 #include <gsl/gsl_multiroots.h>
 
 #include "nuclear_matter.h"
-#include "coulomb_en.h"
-#include "observables.h"
+#include "coulomb.h"
 #include "modeling.h"
 #include "core.h"
 
@@ -112,15 +111,45 @@ double calc_core_eq_asym(double rhob_, double *guess)
     return del_eq;
 }
 
+double calc_core_ws_cell_energy_density(struct parameters satdata, double del_eq_, double rhob_)
+{
+    double rhop;
+    double epseltot;
+    struct hnm meta;
+    double epsws;
+
+    rhop = rhob_*(1.-del_eq_)/2.;
+    epseltot = calc_egas_energy_density(rhop);
+    meta = calc_meta_model_nuclear_matter(satdata, TAYLOR_EXP_ORDER, rhob_, del_eq_);
+    epsws = rhob_*meta.enpernuc + epseltot + rhop*(RMP-RMN) + rhob_*(RMN-AMU);
+
+
+    return epsws;
+}
+
+double calc_core_ws_cell_pressure(struct parameters satdata, double del_eq_, double rhob_)
+{
+    double rhop;
+    double egas_pressure;
+    struct hnm meta;
+    double ws_cell_pressure;
+
+    rhop = rhob_*(1.-del_eq_)/2.;
+    egas_pressure = calc_egas_pressure(rhop);
+    
+    meta = calc_meta_model_nuclear_matter(satdata, TAYLOR_EXP_ORDER, rhob_, del_eq_);
+    ws_cell_pressure = meta.p + egas_pressure; 
+
+    return ws_cell_pressure;
+}
+
 void print_state_core(double del_eq_, double rhob_, FILE *eos)
 {
     struct parameters satdata;
-    struct hnm meta;
     double pressws;
 
     satdata = ASSIGN_PARAM(satdata);
-    meta = calc_meta_model_nuclear_matter(satdata, TAYLOR_EXP_ORDER, rhob_, del_eq_);
-    pressws = calc_core_ws_cell_pressure(del_eq_, meta, rhob_);
+    pressws = calc_core_ws_cell_pressure(satdata, del_eq_, rhob_);
 
     fprintf(eos, "%g %g\n", rhob_, pressws);
 }

@@ -3,7 +3,7 @@
 
 #include "nuclear_matter.h"
 #include "nuclear_surface_en.h"
-#include "coulomb_en.h"
+#include "coulomb.h"
 
 //=============================
 //      LDM(ETF,ref)-ELFc(N)     
