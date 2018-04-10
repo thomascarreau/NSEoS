@@ -1,10 +1,10 @@
 #include <stdio.h>
 #include <gsl/gsl_multiroots.h>
 
-#include "../nseos/nuclear_en.h"
-#include "../nseos/observables.h"
-#include "choices.h"
-#include "f_icrust4d.h"
+#include "nuclear_en.h"
+#include "observables.h"
+#include "modeling.h"
+#include "icrust.h"
 
 struct icrust_fun_4d calc_icrust_fun_4d(double aa_, double del_, double rho0_, double rhop_, double rhog_,
         struct sf_params sparams)

@@ -3,8 +3,8 @@ RM = rm -r
 LIBDIR = ../nseos
 MKDIR = mkdir -p
 BUILDDIR = ../nseos/build
-OBJS = f_core.o \
-	   f_icrust4d.o \
+OBJS = $(BUILDDIR)/core.o \
+	   $(BUILDDIR)/icrust.o \
 	   $(BUILDDIR)/observables.o \
 	   $(BUILDDIR)/nuclear_en.o \
 	   $(BUILDDIR)/coulomb_en.o \
@@ -50,15 +50,15 @@ $(BUILDDIR)/observables.o : $(BUILDDIR) \
 	$(LIBDIR)/observables.c
 	$(CC) -c $(LIBDIR)/observables.c -o $(BUILDDIR)/observables.o
 
-f_icrust4d.o : f_icrust4d.h \
-	f_icrust4d.c \
+$(BUILDDIR)/icrust.o : $(LIBDIR)/icrust.h \
+	$(LIBDIR)/icrust.c \
 	$(LIBDIR)/modeling.h
-	$(CC) -c f_icrust4d.c -o f_icrust4d.o
+	$(CC) -c $(LIBDIR)/icrust.c -o $(BUILDDIR)/icrust.o
 
-f_core.o : f_core.h \
-	f_core.c \
+$(BUILDDIR)/core.o : $(LIBDIR)/core.h \
+	$(LIBDIR)/core.c \
 	$(LIBDIR)/modeling.h
-	$(CC) -c f_core.c -o f_core.o
+	$(CC) -c $(LIBDIR)/core.c -o $(BUILDDIR)/core.o
 
 clean:
 	$(RM) $(OBJS) $(APP)

@@ -1,10 +1,10 @@
 #include <gsl/gsl_multiroots.h>
 
-#include "../nseos/nuclear_matter.h"
-#include "../nseos/coulomb_en.h"
-#include "../nseos/observables.h"
-#include "choices.h"
-#include "f_core.h"
+#include "nuclear_matter.h"
+#include "coulomb_en.h"
+#include "observables.h"
+#include "modeling.h"
+#include "core.h"
 
 double calc_core_fun(double del_, double rhob_)
 {

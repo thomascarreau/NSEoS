@@ -1,9 +1,8 @@
 #include "../nseos/nuclear_en.h"
 #include "../nseos/observables.h"
-
-#include "choices.h"
-#include "f_icrust4d.h"
-#include "f_core.h"
+#include "../nseos/icrust.h"
+#include "../nseos/core.h"
+#include "../nseos/modeling.h"
 
 int main(int argc, char* argv[])
 {

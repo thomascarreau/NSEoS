@@ -1,5 +1,5 @@
-#ifndef H_F_ICRUST4D
-#define H_F_ICRUST4D
+#ifndef H_ICRUST
+#define H_ICRUST
 
 #include <gsl/gsl_vector.h>
 
@@ -23,7 +23,7 @@ struct rparams_crust
 {
     double rhop;
 
-    double sigma0;
+    double sigma0; // needed to avoid the fit at each iteration
     double b;
 };
 int assign_icrust_fun_4d(const gsl_vector * x, void *params, gsl_vector * f);
@@ -31,4 +31,4 @@ struct ic_compo calc_icrust4d_composition(double rhob_, double *guess,
         struct sf_params sparams);
 void print_state_icrust(struct ic_compo eq, struct sf_params sparams, double rhob_, FILE *compo, FILE *eos);
 
-#endif // H_F_ICRUST4D
+#endif // H_ICRUST
