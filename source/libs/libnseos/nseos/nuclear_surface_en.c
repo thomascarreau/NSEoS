@@ -262,7 +262,7 @@ struct sf_params fit_sf_params()
 
     /* This is the data to be fitted */
     FILE *data = NULL;
-    data = fopen("AME2012.data", "r");
+    data = fopen("input/AME2012.data", "r");
     if (data != NULL)
     {
         for (i = 0; i < n; i++)
