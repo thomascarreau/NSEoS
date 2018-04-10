@@ -187,6 +187,8 @@ double calc_etf_ana_surface_en(struct parameters satdata, double aa_, double ii_
     return esurf;
 }
 
+#define N (9)
+
 int be_f (const gsl_vector * x, void *data, gsl_vector * f)
 {
     int *zz = ((struct data *)data)->zz;
@@ -202,7 +204,7 @@ int be_f (const gsl_vector * x, void *data, gsl_vector * f)
     struct parameters satdata;
     satdata = ASSIGN_PARAM(satdata);
 
-    for (i = 0; i < 2353; i++) // (wc -l AME2012.data)
+    for (i = 0; i < N; i++) // (wc -l AME2012.data)
     {
         double ii = 1.-2.*zz[i]/aa[i];
         double n0 = satdata.rhosat0*(1.-3.*satdata.lsym0*ii*ii/(satdata.ksat0 + satdata.ksym0*ii*ii));
@@ -235,7 +237,7 @@ struct sf_params fit_sf_params()
     gsl_multifit_fdfsolver *s;
     int status, info;
     size_t i;
-    const size_t n = 2353;
+    const size_t n = N;
     const size_t nb_of_params = 2;
 
     gsl_matrix *J = gsl_matrix_alloc(n, nb_of_params);
@@ -262,7 +264,8 @@ struct sf_params fit_sf_params()
 
     /* This is the data to be fitted */
     FILE *data = NULL;
-    data = fopen("input/AME2012.data", "r");
+    /* data = fopen("input/masses/AME2012.data", "r"); */
+    data = fopen("input/masses/spherical_nuclei.data", "r");
     if (data != NULL)
     {
         for (i = 0; i < n; i++)
