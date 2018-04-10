@@ -7,6 +7,12 @@
 
 int main(int argc, char* argv[])
 {
+    if (argc != 3)
+    {
+        fprintf(stderr, "ERROR: syntax is './nseos compo.out eos.out'\n");
+        exit(0);
+    }
+
     FILE *mycompo;
     FILE *myeos;
 
@@ -30,7 +36,7 @@ int main(int argc, char* argv[])
     fprintf(stderr, "%.2f %.2f %.2f\n", satdata.jsym0, satdata.lsym0, satdata.ksym0);
     fprintf(stderr, "%.2f %.2f\n", satdata.barm, satdata.bardel);
     fprintf(stderr, "p = %d\n\n", P_SURF_TENSION);
-    fprintf (stderr, "==============================================\n\n");
+    fprintf(stderr, "==============================================\n\n");
 
     sparams = fit_sf_params();
     double rhop;
@@ -77,7 +83,7 @@ int main(int argc, char* argv[])
     }
 
     fprintf(stderr, "n_t = %g /fm^3\n\n", rhob);
-    fprintf (stderr, "==============================================\n\n");
+    fprintf(stderr, "==============================================\n\n");
 
     do
     {

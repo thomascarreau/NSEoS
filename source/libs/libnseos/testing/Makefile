@@ -31,7 +31,7 @@ $(BUILDDIR)/nuclear_matter.o : $(LIBDIR)/nuclear_matter.h \
 
 $(BUILDDIR)/nuclear_surface_en.o : $(LIBDIR)/nuclear_surface_en.h \
 	$(LIBDIR)/nuclear_surface_en.c \
-	choices.h
+	$(LIBDIR)/modeling.h
 	$(CC) -c $(LIBDIR)/nuclear_surface_en.c -o $(BUILDDIR)/nuclear_surface_en.o
 
 $(BUILDDIR)/coulomb_en.o : $(LIBDIR)/coulomb_en.h \
@@ -52,12 +52,12 @@ $(BUILDDIR)/observables.o : $(BUILDDIR) \
 
 f_icrust4d.o : f_icrust4d.h \
 	f_icrust4d.c \
-	choices.h
+	$(LIBDIR)/modeling.h
 	$(CC) -c f_icrust4d.c -o f_icrust4d.o
 
 f_core.o : f_core.h \
 	f_core.c \
-	choices.h
+	$(LIBDIR)/modeling.h
 	$(CC) -c f_core.c -o f_core.o
 
 clean:
