@@ -55,9 +55,9 @@ int main(int argc, char* argv[])
             // calculation of the energy density in the cell in the core
             epsws_core = calc_core_ws_cell_energy_density(satdata, del_eq, rhob);
 
-            /* fprintf(stderr, "%g %g %g\n", rhob, epsws_ic, epsws_core); */
             if (epsws_core < epsws_ic) // crust-core transition
             {
+                fprintf(stderr, "e_core < e_crust\n");
                 break;
             }
         }
