@@ -78,7 +78,7 @@ int main(int argc, char* argv[])
 
         rhob += 0.001;
     }
-    while (rhob < 0.5);
+    while (rhob < 6.*satdata.rhosat0);
 
     fclose(mycompo);
     fclose(myeos);

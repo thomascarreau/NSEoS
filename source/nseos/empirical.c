@@ -49,9 +49,9 @@ struct parameters assign_param_ski(struct parameters satdata)
 
 void print_parameters(struct parameters satdata)
 {
-    fprintf(stderr, "%.2f %.2f %.2f\n", satdata.rhosat0, satdata.lasat0, satdata.ksat0);
-    fprintf(stderr, "%.2f %.2f %.2f\n", satdata.jsym0, satdata.lsym0, satdata.ksym0);
-    fprintf(stderr, "%.2f %.2f\n", satdata.barm, satdata.bardel);
+    fprintf(stderr, "%g %g %g\n", satdata.rhosat0, satdata.lasat0, satdata.ksat0);
+    fprintf(stderr, "%g %g %g\n", satdata.jsym0, satdata.lsym0, satdata.ksym0);
+    fprintf(stderr, "%g %g\n", satdata.barm, satdata.bardel);
 }
 
 struct skyrme_parameters assign_skyrme_param(struct skyrme_parameters coeff)
