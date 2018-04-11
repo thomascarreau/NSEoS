@@ -12,7 +12,9 @@ OBJS = $(BUILDDIR)/core.o \
 	   $(BUILDDIR)/empirical.o 
 APP = nseos
 
-$(APP) : $(OBJS) nseos.c
+$(APP) : $(BUILDDIR) \
+	$(OBJS) \
+	nseos.c
 	$(CC) -o $(APP) nseos.c $(OBJS) -lgsl -lgslcblas -lm
 
 $(BUILDDIR):
@@ -49,8 +51,7 @@ $(BUILDDIR)/icrust.o : $(LIBDIR)/icrust.h \
 	$(LIBDIR)/modeling.h
 	$(CC) -c $(LIBDIR)/icrust.c -o $(BUILDDIR)/icrust.o
 
-$(BUILDDIR)/core.o : $(BUILDDIR) \
-	$(LIBDIR)/core.h \
+$(BUILDDIR)/core.o : $(LIBDIR)/core.h \
 	$(LIBDIR)/core.c \
 	$(LIBDIR)/modeling.h
 	$(CC) -c $(LIBDIR)/core.c -o $(BUILDDIR)/core.o
