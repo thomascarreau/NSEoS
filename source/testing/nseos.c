@@ -65,7 +65,8 @@ int main(int argc, char* argv[])
         print_state_icrust(comp, sparams, rhob, mycompo, myeos);
     }
 
-    fprintf(stderr, "n_t = %g /fm^3\n\n", rhob);
+    fprintf(stderr, "n_t = %g /fm^3\n", rhob);
+    fprintf(stderr, "P_t = %g MeV/fm^3\n\n", calc_crust_ws_cell_pressure(satdata, comp, rhob));
     fprintf(stderr, "==============================================\n\n");
 
     do
