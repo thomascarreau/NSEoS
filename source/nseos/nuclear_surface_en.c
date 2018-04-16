@@ -202,7 +202,7 @@ int be_f (const gsl_vector * x, void *data, gsl_vector * f)
     size_t i;
 
     struct parameters satdata;
-    satdata = ASSIGN_PARAM(satdata);
+    satdata = assign_param();
 
     for (i = 0; i < N; i++) // (wc -l AME2012.data)
     {

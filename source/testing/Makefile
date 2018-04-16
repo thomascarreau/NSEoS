@@ -21,7 +21,8 @@ $(BUILDDIR):
 	$(MKDIR) $(BUILDDIR)
 
 $(BUILDDIR)/empirical.o : $(LIBDIR)/empirical.h \
-	$(LIBDIR)/empirical.c 
+	$(LIBDIR)/empirical.c \
+	$(LIBDIR)/modeling.h
 	$(CC) -c $(LIBDIR)/empirical.c -o $(BUILDDIR)/empirical.o
 
 $(BUILDDIR)/nuclear_matter.o : $(LIBDIR)/nuclear_matter.h \

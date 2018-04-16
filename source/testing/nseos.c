@@ -8,7 +8,7 @@ int main(int argc, char* argv[])
     if (argc != 3)
     {
         fprintf(stderr, "ERROR: syntax is './nseos compo.out eos.out'\n");
-        exit(0);
+        return 1;
     }
 
     FILE *mycompo;
@@ -24,7 +24,7 @@ int main(int argc, char* argv[])
     double del_eq;
     double guess_core = 0.7; // initial guess for the core
 
-    struct parameters satdata = ASSIGN_PARAM(satdata);
+    struct parameters satdata = assign_param();
     print_parameters(satdata);
     fprintf(stderr, "p = %d\n\n", P_SURF_TENSION);
     fprintf(stderr, "==============================================\n\n");
@@ -67,7 +67,7 @@ int main(int argc, char* argv[])
     }
 
     fprintf(stderr, "n_t = %g /fm^3\n", rhob);
-    fprintf(stderr, "P_t = %g MeV/fm^3\n\n", calc_crust_ws_cell_pressure(satdata, comp, rhob));
+    fprintf(stderr, "P_t = %g MeV/fm^3\n\n", calc_core_ws_cell_pressure(satdata, del_eq, rhob));
     fprintf(stderr, "==============================================\n\n");
 
     do

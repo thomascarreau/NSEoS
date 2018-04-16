@@ -24,7 +24,7 @@ struct icrust_fun_4d calc_icrust_fun_4d(double aa_, double del_, double rho0_, d
     double dmu;
     struct hnm ngas;
 
-    satdata = ASSIGN_PARAM(satdata);
+    satdata = assign_param();
 
     enuc = CALC_NUCLEAR_EN(satdata, sparams, TAYLOR_EXP_ORDER, aa_, del_, rho0_, rhop_);
     epsa = 0.001;
@@ -270,7 +270,7 @@ void print_state_icrust(struct ic_compo eq, struct sf_params sparams, double rho
     vws = eq.aa/(rhob_-eq.rhog)*(1.-eq.rhog/eq.rho0);
     rws = pow(3.*vws/4./PI,1./3.);
 
-    satdata = ASSIGN_PARAM(satdata);
+    satdata = assign_param();
     epsws = calc_crust_ws_cell_energy_density(satdata, sparams, eq, rhob_);
     pressws = calc_crust_ws_cell_pressure(satdata, eq, rhob_);
 

@@ -17,7 +17,7 @@ double calc_core_fun(double del_, double rhob_)
     double beta_eq_fun;
 
     // energy per particle of infinite matter
-    satdata = ASSIGN_PARAM(satdata);
+    satdata = assign_param();
     epsd = del_/1000.;
     meta_p = calc_meta_model_nuclear_matter(satdata, TAYLOR_EXP_ORDER, rhob_, del_+epsd);
     meta_m = calc_meta_model_nuclear_matter(satdata, TAYLOR_EXP_ORDER, rhob_, del_-epsd);
@@ -148,7 +148,7 @@ void print_state_core(double del_eq_, double rhob_, FILE *eos)
     struct parameters satdata;
     double pressws;
 
-    satdata = ASSIGN_PARAM(satdata);
+    satdata = assign_param();
     pressws = calc_core_ws_cell_pressure(satdata, del_eq_, rhob_);
 
     fprintf(eos, "%g %g\n", rhob_, pressws);

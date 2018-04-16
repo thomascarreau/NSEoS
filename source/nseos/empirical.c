@@ -1,43 +1,16 @@
 #include <stdio.h>
+#include <string.h>
 
+#include "modeling.h"
 #include "empirical.h"
 
-struct parameters assign_param_ref(struct parameters satdata)
+struct parameters assign_param()
 {
+    struct parameters satdata;
     FILE *fin;
     float effm;
 
-    fin = fopen("../testing/input/satdata/ref.in", "r");
-    fscanf(fin, "%f %f %f %f %f", &satdata.rhosat0, &satdata.lasat0, &satdata.ksat0, &satdata.qsat0, &satdata.zsat0);
-    fscanf(fin, "%f %f %f %f %f", &satdata.jsym0, &satdata.lsym0, &satdata.ksym0, &satdata.qsym0, &satdata.zsym0);
-    fscanf(fin, "%f %f", &effm, &satdata.bardel);
-    satdata.barm = 1./effm - 1.;
-    fclose(fin);
-
-    return satdata;
-}
-
-struct parameters assign_param_sly4(struct parameters satdata)
-{
-    FILE *fin;
-    float effm;
-
-    fin = fopen("../testing/input/satdata/sly4.in", "r");
-    fscanf(fin, "%f %f %f %f %f", &satdata.rhosat0, &satdata.lasat0, &satdata.ksat0, &satdata.qsat0, &satdata.zsat0);
-    fscanf(fin, "%f %f %f %f %f", &satdata.jsym0, &satdata.lsym0, &satdata.ksym0, &satdata.qsym0, &satdata.zsym0);
-    fscanf(fin, "%f %f", &effm, &satdata.bardel);
-    satdata.barm = 1./effm - 1.;
-    fclose(fin);
-
-    return satdata;
-}
-
-struct parameters assign_param_ski(struct parameters satdata)
-{
-    FILE *fin;
-    float effm;
-
-    fin = fopen("../testing/input/satdata/ski.in", "r");
+    fin = fopen(EMP_SET, "r");
     fscanf(fin, "%f %f %f %f %f", &satdata.rhosat0, &satdata.lasat0, &satdata.ksat0, &satdata.qsat0, &satdata.zsat0);
     fscanf(fin, "%f %f %f %f %f", &satdata.jsym0, &satdata.lsym0, &satdata.ksym0, &satdata.qsym0, &satdata.zsym0);
     fscanf(fin, "%f %f", &effm, &satdata.bardel);
@@ -49,8 +22,10 @@ struct parameters assign_param_ski(struct parameters satdata)
 
 void print_parameters(struct parameters satdata)
 {
-    fprintf(stderr, "%g %g %g\n", satdata.rhosat0, satdata.lasat0, satdata.ksat0);
-    fprintf(stderr, "%g %g %g\n", satdata.jsym0, satdata.lsym0, satdata.ksym0);
+    fprintf(stderr, EMP_SET);
+    fprintf(stderr, ":\n");
+    fprintf(stderr, "%g %g %g %g %g\n", satdata.rhosat0, satdata.lasat0, satdata.ksat0, satdata.qsat0, satdata.zsat0);
+    fprintf(stderr, "%g %g %g %g %g\n", satdata.jsym0, satdata.lsym0, satdata.ksym0, satdata.qsym0, satdata.zsym0);
     fprintf(stderr, "%g %g\n", satdata.barm, satdata.bardel);
 }
 
