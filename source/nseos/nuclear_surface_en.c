@@ -14,7 +14,7 @@ double calc_ldm_surface_en(struct parameters satdata, double aa_)
     float sigmas;
 
     rsat = pow(3./4./PI/satdata.rhosat0,1./3.); // SNM saturation density reference value
-    sigmas = 0.852537; // in MeV/fm^2; reference value
+    sigmas = 1.02999; // in MeV/fm^2; SLy4 value
 
     return 4.*PI*rsat*rsat*sigmas*pow(aa_,2./3.);
 }

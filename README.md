@@ -31,11 +31,13 @@ You can change the parameter set to be use and the nuclear modeling options in `
 To do
 -----
 
-* Study the influence of the Taylor expansion order on the crust-core transition
+* Study the influence of the Taylor expansion order on the crust-core transition: the higher the expansion order, 
+    the higher the transition density probably because of the low density neutron gas description.
 
-* Why does the crust-core transition density depend on the initial baryonic density?
+* Why does the crust-core transition density depend on the initial baryonic density?: the density step must be 
+    small enough.
 
-* Relative uncertainty of b is large: why?
+* Relative uncertainty of b is large: why?: lack of data.
 
 * Work out the crust-core transition at constant pressure
 

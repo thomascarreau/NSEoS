@@ -17,7 +17,6 @@ int main(int argc, char* argv[])
     mycompo = fopen(argv[1],"w+");
     myeos = fopen(argv[2],"w+");
 
-    int irhob;
     double rhob;
 
     struct ic_compo comp;
@@ -35,15 +34,15 @@ int main(int argc, char* argv[])
     double epsws_ic;
     double epsws_core;
 
-    for(irhob = 3; irhob < 1001; irhob ++)
-    {
-        rhob = irhob/10000.;
+    rhob = 0.0003;
 
+    while(1)
+    {
         comp = calc_icrust4d_composition(rhob, guess_ic, sparams);
         if (guess_ic[0] != guess_ic[0]) // break if nan
             break;
 
-        if (irhob > 399)
+        if (rhob > 0.04)
         {
             // calculation of the energy density in the cell in the inner crust
             epsws_ic = calc_crust_ws_cell_energy_density(satdata, sparams, comp, rhob);
@@ -63,6 +62,8 @@ int main(int argc, char* argv[])
         }
 
         print_state_icrust(comp, sparams, rhob, mycompo, myeos);
+
+        rhob += 0.0002;
     }
 
     fprintf(stderr, "n_t = %g /fm^3\n", rhob);
@@ -77,7 +78,7 @@ int main(int argc, char* argv[])
 
         print_state_core(del_eq, rhob, myeos);
 
-        rhob += 0.001;
+        rhob += 0.005;
     }
     while (rhob < 6.*satdata.rhosat0);
 
