@@ -28,6 +28,20 @@ cluster density, gas density, radius of the cell, and energy density in the cell
 The second file gives you the EoS that is the pressure in the cell as a function of the baryonic density. 
 You can change the parameter set to be use and the nuclear modeling options in `source/nseos/modeling.h`.
 
+### Available sets of empirical parameters
+
+* BSk14
+
+* BSk16
+
+* BSk17
+
+* SLy4
+
+* SLy230a
+
+* NL3
+
 To do
 -----
 
@@ -39,9 +53,10 @@ To do
 
 * Relative uncertainty of b is large: why?: lack of data.
 
-* Work out the crust-core transition at constant pressure
+* Replace ELFc for ELFd modeling: not pertinent to take a high density point as it is done is the paper, ELFc 
+    modeling give better results.
 
-* Replace ELFc for ELFd modeling
+* Work out the crust-core transition at constant pressure
 
 * Write outer-crust EoS calculation code
 

@@ -9,12 +9,15 @@ struct parameters assign_param()
     struct parameters satdata;
     FILE *fin;
     float effm;
+    float isosplit;
 
     fin = fopen(EMP_SET, "r");
     fscanf(fin, "%f %f %f %f %f", &satdata.rhosat0, &satdata.lasat0, &satdata.ksat0, &satdata.qsat0, &satdata.zsat0);
     fscanf(fin, "%f %f %f %f %f", &satdata.jsym0, &satdata.lsym0, &satdata.ksym0, &satdata.qsym0, &satdata.zsym0);
-    fscanf(fin, "%f %f", &effm, &satdata.bardel);
+    fscanf(fin, "%f %f", &effm, &isosplit);
     satdata.barm = 1./effm - 1.;
+    satdata.bardel = satdata.barm - isosplit;
+
     fclose(fin);
 
     return satdata;

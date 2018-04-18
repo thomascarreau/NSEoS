@@ -33,6 +33,7 @@ int main(int argc, char* argv[])
 
     double epsws_ic;
     double epsws_core;
+    int transition = 0;
 
     rhob = 0.0003;
 
@@ -57,14 +58,18 @@ int main(int argc, char* argv[])
             if (epsws_core < epsws_ic) // crust-core transition
             {
                 fprintf(stderr, "e_core < e_crust\n");
+                transition = 1; // transition occurs
                 break;
             }
         }
 
         print_state_icrust(comp, sparams, rhob, mycompo, myeos);
 
-        rhob += 0.0002;
+        rhob += 0.0001;
     }
+
+    if (transition == 0)
+        fprintf(stderr, "e_core - e_crust = %g MeV/fm^3\n", epsws_core - epsws_ic);
 
     fprintf(stderr, "n_t = %g /fm^3\n", rhob);
     fprintf(stderr, "P_t = %g MeV/fm^3\n\n", calc_core_ws_cell_pressure(satdata, del_eq, rhob));
