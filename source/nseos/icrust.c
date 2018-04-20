@@ -5,11 +5,10 @@
 #include "modeling.h"
 #include "icrust.h"
 
-struct icrust_fun_4d calc_icrust_fun_4d(double aa_, double del_, double rho0_, double rhop_, double rhog_,
-        struct sf_params sparams)
+struct icrust_fun_4d calc_icrust_fun_4d(struct parameters satdata, struct sf_params sparams, 
+        double aa_, double del_, double rho0_, double rhop_, double rhog_)
 {
     struct icrust_fun_4d result;
-    struct parameters satdata;
     double enuc;
     double epsa;
     double epsb;
@@ -23,8 +22,6 @@ struct icrust_fun_4d calc_icrust_fun_4d(double aa_, double del_, double rho0_, d
     double muel;
     double dmu;
     struct hnm ngas;
-
-    satdata = assign_param();
 
     enuc = CALC_NUCLEAR_EN(satdata, sparams, TAYLOR_EXP_ORDER, aa_, del_, rho0_, rhop_);
     epsa = 0.001;
@@ -57,12 +54,8 @@ struct icrust_fun_4d calc_icrust_fun_4d(double aa_, double del_, double rho0_, d
 int assign_icrust_fun_4d(const gsl_vector * x, void *params, gsl_vector * f)
 {
     double rhop = ((struct rparams_crust *) params)->rhop;
-    double sigma0 = ((struct rparams_crust *) params)->sigma0;
-    double b = ((struct rparams_crust *) params)->b;
-
-    struct sf_params sparams;
-    sparams.sigma0 = sigma0;
-    sparams.b = b;
+    struct parameters satdata = ((struct rparams_crust *) params)->satdata;
+    struct sf_params sparams = ((struct rparams_crust *) params)->sparams;
 
     const double x0 = gsl_vector_get (x, 0);
     const double x1 = gsl_vector_get (x, 1);
@@ -72,7 +65,7 @@ int assign_icrust_fun_4d(const gsl_vector * x, void *params, gsl_vector * f)
     rhop = (rhop-x3)*(1.-x1)/2./(1.-x3/x2);
 
     struct icrust_fun_4d functs;
-    functs = calc_icrust_fun_4d(x0, x1, x2, rhop, x3, sparams);
+    functs = calc_icrust_fun_4d(satdata, sparams, x0, x1, x2, rhop, x3);
 
     const double y0 = functs.f_stability;
     const double y1 = functs.f_beta;
@@ -88,7 +81,7 @@ int assign_icrust_fun_4d(const gsl_vector * x, void *params, gsl_vector * f)
 }
 
 struct ic_compo calc_icrust4d_composition(double rhob_, double *guess,
-        struct sf_params sparams)
+        struct parameters satdata, struct sf_params sparams)
 {
     struct ic_compo eq;
 
@@ -105,8 +98,8 @@ struct ic_compo calc_icrust4d_composition(double rhob_, double *guess,
 
     struct rparams_crust p;
     p.rhop = rhob_; // modification in assign_icrust_fun_4d (DIRTY!)
-    p.sigma0 = sparams.sigma0;
-    p.b = sparams.b;
+    p.satdata = satdata;
+    p.sparams = sparams;
 
     const size_t n = 4;
     gsl_vector *x = gsl_vector_alloc(n);
@@ -260,17 +253,16 @@ double calc_crust_ws_cell_pressure(struct parameters satdata, struct ic_compo eq
     return ws_cell_pressure;
 }
 
-void print_state_icrust(struct ic_compo eq, struct sf_params sparams, double rhob_, FILE *compo, FILE *eos)
+void print_state_icrust(struct ic_compo eq, struct parameters satdata, struct sf_params sparams, 
+        double rhob_, FILE *compo, FILE *eos)
 {
     double vws, rws;
-    struct parameters satdata;
     double epsws;
     double pressws;
 
     vws = eq.aa/(rhob_-eq.rhog)*(1.-eq.rhog/eq.rho0);
     rws = pow(3.*vws/4./PI,1./3.);
 
-    satdata = assign_param();
     epsws = calc_crust_ws_cell_energy_density(satdata, sparams, eq, rhob_);
     pressws = calc_crust_ws_cell_pressure(satdata, eq, rhob_);
 

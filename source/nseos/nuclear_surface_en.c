@@ -194,6 +194,7 @@ int be_f (const gsl_vector * x, void *data, gsl_vector * f)
     int *zz = ((struct data *)data)->zz;
     int *aa = ((struct data *)data)->aa;
     double *be = ((struct data *)data)->be;
+    struct parameters satdata = ((struct data *)data)->satdata;
 
     struct sf_params prms;
     prms.sigma0 = gsl_vector_get (x, 0);
@@ -201,10 +202,7 @@ int be_f (const gsl_vector * x, void *data, gsl_vector * f)
 
     size_t i;
 
-    struct parameters satdata;
-    satdata = assign_param();
-
-    for (i = 0; i < N; i++) // (wc -l AME2012.data)
+    for (i = 0; i < N; i++) // (wc -l spherical_nuclei.data)
     {
         double ii = 1.-2.*zz[i]/aa[i];
         double n0 = satdata.rhosat0*(1.-3.*satdata.lsym0*ii*ii/(satdata.ksat0 + satdata.ksym0*ii*ii));
@@ -229,7 +227,7 @@ int be_f (const gsl_vector * x, void *data, gsl_vector * f)
     return GSL_SUCCESS;
 }
 
-struct sf_params fit_sf_params()
+struct sf_params fit_sf_params(struct parameters satdata)
 {
     struct sf_params prms;
 
@@ -244,7 +242,7 @@ struct sf_params fit_sf_params()
     gsl_matrix *covar = gsl_matrix_alloc (nb_of_params, nb_of_params);
     int zz[n], aa[n];
     double be[n], weights[n];
-    struct data d = { zz, aa, be };
+    struct data d = { zz, aa, be, satdata };
     gsl_multifit_function_fdf f;
     double x_init[2] = { 1.08, 23.0 };
     gsl_vector_view x = gsl_vector_view_array (x_init, nb_of_params);

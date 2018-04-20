@@ -4,14 +4,18 @@
 #include "modeling.h"
 #include "empirical.h"
 
-struct parameters assign_param()
+struct parameters assign_param(char set[])
 {
     struct parameters satdata;
     FILE *fin;
     float effm;
     float isosplit;
 
-    fin = fopen(EMP_SET, "r");
+    char path_of_set[50] = "input/satdata/";
+    strcat(path_of_set, set);
+
+    fin = fopen(path_of_set, "r");
+
     fscanf(fin, "%f %f %f %f %f", &satdata.rhosat0, &satdata.lasat0, &satdata.ksat0, &satdata.qsat0, &satdata.zsat0);
     fscanf(fin, "%f %f %f %f %f", &satdata.jsym0, &satdata.lsym0, &satdata.ksym0, &satdata.qsym0, &satdata.zsym0);
     fscanf(fin, "%f %f", &effm, &isosplit);
@@ -23,10 +27,9 @@ struct parameters assign_param()
     return satdata;
 }
 
-void print_parameters(struct parameters satdata)
+void print_parameters(char set[], struct parameters satdata)
 {
-    fprintf(stderr, EMP_SET);
-    fprintf(stderr, ":\n");
+    fprintf(stderr, "%s:\n", set);
     fprintf(stderr, "%g %g %g %g %g\n", satdata.rhosat0, satdata.lasat0, satdata.ksat0, satdata.qsat0, satdata.zsat0);
     fprintf(stderr, "%g %g %g %g %g\n", satdata.jsym0, satdata.lsym0, satdata.ksym0, satdata.qsym0, satdata.zsym0);
     fprintf(stderr, "%g %g\n", satdata.barm, satdata.bardel);

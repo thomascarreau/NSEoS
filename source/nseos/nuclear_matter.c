@@ -249,6 +249,8 @@ struct hnm calc_skyrme_nuclear_matter(struct skyrme_parameters coeff, double nn_
 
     result.mun = result.enpernuc + nn_*(denpernucdn + (1.-ii_)/nn_*denpernucdi);
 
+    result.p = nn_*nn_*denpernucdn;
+
     result.jsym = HBARC*HBARC/2./RMN/3.*pow(1.5*PI2,2./3.)*pow(nn_,2./3.) + 1./8.*coeff.t0*nn_*(1.-coeff.x0)
         + 1./48.*coeff.t3*pow(nn_,coeff.sigma+1.)*(1.-coeff.x3) + 1./24.*pow(1.5*PI2,2./3.)*pow(nn_,5./3.)
         *(coeff.t2*(5.*coeff.x2 + 4.) - 3.*coeff.t1*coeff.x1);

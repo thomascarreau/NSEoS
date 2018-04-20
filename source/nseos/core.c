@@ -5,9 +5,8 @@
 #include "modeling.h"
 #include "core.h"
 
-double calc_core_fun(double del_, double rhob_)
+double calc_core_fun(struct parameters satdata, double del_, double rhob_)
 {
-    struct parameters satdata;
     double epsd;
     struct hnm meta_p;
     struct hnm meta_m;
@@ -17,7 +16,6 @@ double calc_core_fun(double del_, double rhob_)
     double beta_eq_fun;
 
     // energy per particle of infinite matter
-    satdata = assign_param();
     epsd = del_/1000.;
     meta_p = calc_meta_model_nuclear_matter(satdata, TAYLOR_EXP_ORDER, rhob_, del_+epsd);
     meta_m = calc_meta_model_nuclear_matter(satdata, TAYLOR_EXP_ORDER, rhob_, del_-epsd);
@@ -35,10 +33,11 @@ double calc_core_fun(double del_, double rhob_)
 int assign_core_fun(const gsl_vector * x, void *params, gsl_vector * f)
 {
     double rhob = ((struct rparams_core *) params)->rhob;
+    struct parameters satdata = ((struct rparams_core *) params)->satdata;
 
     const double x0 = gsl_vector_get (x, 0);
 
-    double func = calc_core_fun(x0, rhob);
+    double func = calc_core_fun(satdata, x0, rhob);
 
     const double y0 = func;
 
@@ -47,7 +46,7 @@ int assign_core_fun(const gsl_vector * x, void *params, gsl_vector * f)
     return GSL_SUCCESS;
 }
 
-double calc_core_eq_asym(double rhob_, double *guess)
+double calc_core_eq_asym(double rhob_, double *guess, struct parameters satdata)
 {
     double del_eq;
 
@@ -61,6 +60,7 @@ double calc_core_eq_asym(double rhob_, double *guess)
 
     struct rparams_core p;
     p.rhob = rhob_;
+    p.satdata = satdata;
 
     double del_init = *guess;
     const size_t n = 1;
@@ -143,12 +143,10 @@ double calc_core_ws_cell_pressure(struct parameters satdata, double del_eq_, dou
     return ws_cell_pressure;
 }
 
-void print_state_core(double del_eq_, double rhob_, FILE *eos)
+void print_state_core(struct parameters satdata, double del_eq_, double rhob_, FILE *eos)
 {
-    struct parameters satdata;
     double pressws;
 
-    satdata = assign_param();
     pressws = calc_core_ws_cell_pressure(satdata, del_eq_, rhob_);
 
     fprintf(eos, "%g %g\n", rhob_, pressws);

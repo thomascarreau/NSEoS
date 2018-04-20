@@ -3,6 +3,8 @@
 
 #include <gsl/gsl_vector.h>
 
+#include "empirical.h"
+
 // LDM
 //====
 double calc_ldm_surface_en(struct parameters satdata, double aa_);
@@ -25,9 +27,10 @@ struct data
     int *zz;
     int *aa;
     double *be;
+    struct parameters satdata;
 };
 int be_f (const gsl_vector * x, void *data, gsl_vector * f);
-struct sf_params fit_sf_params();
+struct sf_params fit_sf_params(struct parameters satdata);
 struct sf_params
 {
     double sigma0;

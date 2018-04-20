@@ -30,8 +30,8 @@ struct skyrme_parameters
     float x3;
 };
 
-struct parameters assign_param();
-void print_parameters(struct parameters satdata);
+struct parameters assign_param(char set[]);
+void print_parameters(char set[], struct parameters satdata);
 struct skyrme_parameters assign_skyrme_param(struct skyrme_parameters coeff);
 
 #endif // H_EMPIRICAL

@@ -21,44 +21,43 @@ Usage
 
 In the testing directory:
 
-    ./nseos compo.out eos.out
+    ./nseos set.in compo.out eos.out
 
 The first file gives you the crust composition (mass of the cluster, global asymmetry in the cluster, number of charges, 
 cluster density, gas density, radius of the cell, and energy density in the cell) as a function of the baryonic density. 
-The second file gives you the EoS that is the pressure in the cell as a function of the baryonic density. 
-You can change the parameter set to be use and the nuclear modeling options in `source/nseos/modeling.h`.
+The second file gives you the EoS that is the pressure in the cell as a function of the baryonic density.
 
 ### Available sets of empirical parameters
 
 #### Skyrme
 
-* BSk14
+* BSk14: `bsk14.in`
 
-* BSk16
+* BSk16: `bsk16.in`
 
-* BSk17
+* BSk17: `bsk17.in`
 
-* NRAPR
+* NRAPR: `nrapr.in`
 
-* RATP
+* RATP: `ratp.in`
 
-* SkO
+* SkO: `sko.in`
 
-* SLy230a
+* SLy230a: `sly230a.in`
 
-* SLy230b
+* SLy230b: `sly230b.in`
 
-* SLy4
+* SLy4: `sly4.in`
 
 #### Relativistic
 
-* NL3
+* NL3: `nl3.in`
 
-* TM1
+* TM1: `tm1.in`
 
-* DD-ME1
+* DD-ME1: `ddme1.in`
 
-* DD-ME2
+* DD-ME2: `ddme2.in`
 
 To do
 -----
