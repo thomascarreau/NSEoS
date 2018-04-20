@@ -30,17 +30,35 @@ You can change the parameter set to be use and the nuclear modeling options in `
 
 ### Available sets of empirical parameters
 
+#### Skyrme
+
 * BSk14
 
 * BSk16
 
 * BSk17
 
-* SLy4
+* NRAPR
+
+* RATP
+
+* SkO
 
 * SLy230a
 
+* SLy230b
+
+* SLy4
+
+#### Relativistic
+
 * NL3
+
+* TM1
+
+* DD-ME1
+
+* DD-ME2
 
 To do
 -----
