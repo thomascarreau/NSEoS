@@ -4,7 +4,7 @@ LIBDIR = ../nseos
 MKDIR = mkdir -p
 BUILDDIR = ../nseos/build
 OBJS = $(BUILDDIR)/core.o \
-	   $(BUILDDIR)/icrust.o \
+	   $(BUILDDIR)/crust.o \
 	   $(BUILDDIR)/nuclear_en.o \
 	   $(BUILDDIR)/coulomb.o \
 	   $(BUILDDIR)/nuclear_surface_en.o \
@@ -47,10 +47,10 @@ $(BUILDDIR)/nuclear_en.o : $(LIBDIR)/nuclear_en.h \
 	$(LIBDIR)/nuclear_en.c
 	$(CC) -c $(LIBDIR)/nuclear_en.c -o $(BUILDDIR)/nuclear_en.o
 
-$(BUILDDIR)/icrust.o : $(LIBDIR)/icrust.h \
-	$(LIBDIR)/icrust.c \
+$(BUILDDIR)/crust.o : $(LIBDIR)/crust.h \
+	$(LIBDIR)/crust.c \
 	$(LIBDIR)/modeling.h
-	$(CC) -c $(LIBDIR)/icrust.c -o $(BUILDDIR)/icrust.o
+	$(CC) -c $(LIBDIR)/crust.c -o $(BUILDDIR)/crust.o
 
 $(BUILDDIR)/core.o : $(LIBDIR)/core.h \
 	$(LIBDIR)/core.c \

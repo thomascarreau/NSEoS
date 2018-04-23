@@ -1,5 +1,5 @@
 #include "../nseos/nuclear_en.h"
-#include "../nseos/icrust.h"
+#include "../nseos/crust.h"
 #include "../nseos/core.h"
 #include "../nseos/modeling.h"
 
@@ -19,8 +19,9 @@ int main(int argc, char* argv[])
 
     double rhob;
 
-    struct ic_compo comp;
-    double guess_ic[4] = {100.,0.25,0.15,1.e-4}; // initial guess for the inner crust
+    struct compo comp;
+    double muncl = -1.; // sign of muncl is negative is the outer crust
+    double guess_oc[3] = {60., 0.15, 0.1595}; // initial guess for the outer crust
     double del_eq;
     double guess_core = 0.7; // initial guess for the core
 
@@ -28,14 +29,34 @@ int main(int argc, char* argv[])
     print_parameters(argv[1], satdata);
     fprintf(stderr, "p = %d\n\n", P_SURF_TENSION);
     fprintf(stderr, "==============================================\n\n");
-
     struct sf_params sparams = fit_sf_params(satdata);
 
     double epsws_ic;
     double epsws_core;
     int transition = 0;
 
-    rhob = 0.0003;
+    rhob = 1e-10;
+
+    while(muncl < 0.)
+    {
+        comp = calc_ocrust3d_composition(rhob, guess_oc, satdata, sparams);
+        if (guess_oc[0] != guess_oc[0]) // break if nan
+        {
+            fprintf(stderr, "%g\n", rhob); // debug
+            break;
+        }
+
+        muncl = calc_muncl(satdata, sparams, comp, rhob);
+
+        print_state_crust(comp, satdata, sparams, rhob, mycompo, myeos);
+
+        rhob += rhob/50.;
+    }
+
+    fprintf(stderr, "n_d = %g /fm^3\n\n", rhob);
+    fprintf(stderr, "==============================================\n\n");
+
+    double guess_ic[4] = {guess_oc[0], guess_oc[1], guess_oc[2], 1.e-4}; // initial guess for the inner crust
 
     while(1)
     {
@@ -63,7 +84,7 @@ int main(int argc, char* argv[])
             }
         }
 
-        print_state_icrust(comp, satdata, sparams, rhob, mycompo, myeos);
+        print_state_crust(comp, satdata, sparams, rhob, mycompo, myeos);
 
         rhob += 0.0001;
     }

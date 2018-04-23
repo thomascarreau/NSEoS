@@ -74,7 +74,3 @@ To do
     modeling give better results.
 
 * Work out the crust-core transition at constant pressure
-
-* Write outer-crust EoS calculation code
-
-* Write a single code for the crust and core calculation (current situation: inner crust + core)

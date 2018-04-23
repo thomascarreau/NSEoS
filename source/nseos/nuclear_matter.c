@@ -176,7 +176,7 @@ struct hnm calc_meta_model_nuclear_matter(struct parameters satdata, int max_ord
             +  ii_*ii_*(a02*u0p + a12*u1 + a12*xx*u1p
                     + a22*xx*u2 + 0.5*a22*xx*xx*u2p);
         depotpernucdi = 2.*ii_*(a02*u0 + a12*xx*u1 + 0.5*a22*xx*xx*u2);
-         
+
         result.jsym = 5./9.*t0fg*pow(1.+3.*xx,2./3.)*(1.+satdata.barm*(1.+3.*xx))
             + a02*u0 + a12*xx*u1 + 0.5*a22*xx*xx*u2;
 
@@ -198,8 +198,11 @@ struct hnm calc_meta_model_nuclear_matter(struct parameters satdata, int max_ord
 
     result.p = 1./3.*satdata.rhosat0*pow(1.+3.*xx,2.)*denpernucdx;
 
-    result.mun = result.enpernuc + nn_*(1./3./satdata.rhosat0*denpernucdx
-            + (1.-ii_)/2.*denpernucdi);
+    if (nn_ == 0.)
+        result.mun = 0.;
+    else
+        result.mun = result.enpernuc + nn_*(1./3./satdata.rhosat0*denpernucdx
+                + (1.-ii_)/2.*denpernucdi);
 
     return result;
 }
