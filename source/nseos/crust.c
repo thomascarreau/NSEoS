@@ -399,7 +399,7 @@ double calc_crust_ws_cell_pressure(struct parameters satdata, struct compo eq, d
     return ws_cell_pressure;
 }
 
-void print_state_crust(struct compo eq, struct parameters satdata, struct sf_params sparams, 
+void print_state_crust(struct parameters satdata, struct sf_params sparams, struct compo eq, 
         double rhob_, FILE *compo, FILE *eos)
 {
     double vws, rws;

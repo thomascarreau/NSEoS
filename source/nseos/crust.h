@@ -45,7 +45,7 @@ double calc_crust_ws_cell_energy_density(struct parameters satdata, struct sf_pa
 double calc_ngas_pressure(struct parameters satdata, double rhog_); // in MeV/fm^3
 double calc_crust_ws_cell_pressure(struct parameters satdata, struct compo eq,
         double rhob_); // pressure in the inner-crust WS cell in MeV/fm^3
-void print_state_crust(struct compo eq, struct parameters satdata, struct sf_params sparams, 
+void print_state_crust(struct parameters satdata, struct sf_params sparams, struct compo eq,
         double rhob_, FILE *compo, FILE *eos);
 
 #endif // H_ICRUST

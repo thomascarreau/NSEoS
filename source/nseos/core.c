@@ -25,7 +25,7 @@ struct core_fun calc_core_fun(struct parameters satdata, double del_, double rho
     // electron(muon) chemical potential (including rest mass)
     rhop = rhob_*(1.-del_)/2.;
     mueltot = calc_egas_chemical_potential(rhop - rhou_); 
-    muutot = calc_egas_chemical_potential(rhou_); 
+    muutot = calc_ugas_chemical_potential(rhou_); 
 
     result.f_beta = 2.*dehnmddel + RMN - RMP - mueltot;
     result.f_mueq = mueltot - muutot;
@@ -231,7 +231,6 @@ double calc_core_ws_cell_energy_density(struct parameters satdata, struct core_c
     meta = calc_meta_model_nuclear_matter(satdata, TAYLOR_EXP_ORDER, rhob_, eq.del);
     epsws = rhob_*meta.enpernuc + epseltot + epsutot + rhop*(RMP-RMN) + rhob_*(RMN-AMU);
 
-
     return epsws;
 }
 
@@ -255,11 +254,18 @@ double calc_core_ws_cell_pressure(struct parameters satdata, struct core_compo e
 }
 
 void print_state_core(struct parameters satdata, struct core_compo eq,
-        double rhob_, FILE *eos)
+        double rhob_, FILE *core, FILE *eos)
 {
+    double rhop;
+    double xp, xe, xu;
     double pressws;
 
+    rhop = rhob_*(1.-eq.del)/2.;
+    xp = rhop/rhob_;
+    xe = (rhop - eq.rhou)/rhob_;
+    xu = eq.rhou/rhob_;
     pressws = calc_core_ws_cell_pressure(satdata, eq, rhob_);
 
+    fprintf(core, "%g %g %g %g\n", rhob_, xp, xe, xu);
     fprintf(eos, "%g %g\n", rhob_, pressws);
 }

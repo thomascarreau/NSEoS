@@ -21,11 +21,12 @@ Usage
 
 In the testing directory:
 
-    ./nseos set.in compo.out eos.out
+    ./nseos set.in crust.out core.out eos.out
 
-The first file gives you the crust composition (mass of the cluster, global asymmetry in the cluster, number of charges, 
+The first output file gives you the crust composition (mass of the cluster, global asymmetry in the cluster, number of charges, 
 cluster density, gas density, radius of the cell, and energy density in the cell) as a function of the baryonic density. 
-The second file gives you the EoS that is the pressure in the cell as a function of the baryonic density.
+The second output file gives you the core composition (fraction of protons, of electrons, and of muons). 
+Finally, the third output file gives you the EoS that is the pressure in the cell as a function of the baryonic density.
 
 ### Available sets of empirical parameters
 
@@ -69,8 +70,5 @@ To do
     small enough.
 
 * Relative uncertainty of b is large: why?: lack of data.
-
-* Replace ELFc for ELFd modeling: not pertinent to take a high density point as it is done is the paper, ELFc 
-    modeling give better results.
 
 * Work out the crust-core transition at constant pressure

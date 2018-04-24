@@ -33,6 +33,6 @@ double calc_core_ws_cell_energy_density(struct parameters satdata, struct core_c
 double calc_core_ws_cell_pressure(struct parameters satdata, struct core_compo eq,
         double nb_); // pressure in the inner-crust WS cell in MeV/fm^3
 void print_state_core(struct parameters satdata, struct core_compo eq, 
-        double rhob_, FILE *eos);
+        double rhob_, FILE *core, FILE *eos);
 
 #endif // H_CORE

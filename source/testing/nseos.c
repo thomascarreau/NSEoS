@@ -5,17 +5,19 @@
 
 int main(int argc, char* argv[])
 {
-    if (argc != 4)
+    if (argc != 5)
     {
-        fprintf(stderr, "ERROR: syntax is './nseos set.in compo.out eos.out'\n");
+        fprintf(stderr, "ERROR: syntax is './nseos set.in crust.out core.out eos.out'\n");
         return 1;
     }
 
-    FILE *mycompo;
+    FILE *mycrust;
+    FILE *mycore;
     FILE *myeos;
 
-    mycompo = fopen(argv[2],"w+");
-    myeos = fopen(argv[3],"w+");
+    mycrust = fopen(argv[2],"w+");
+    mycore = fopen(argv[3],"w+");
+    myeos = fopen(argv[4],"w+");
 
     double rhob;
 
@@ -50,7 +52,7 @@ int main(int argc, char* argv[])
         if (muncl > 0.)
             break;
 
-        print_state_crust(comp, satdata, sparams, rhob, mycompo, myeos);
+        print_state_crust(satdata, sparams, comp, rhob, mycrust, myeos);
 
         rhob += rhob/50.;
     }
@@ -86,7 +88,7 @@ int main(int argc, char* argv[])
             }
         }
 
-        print_state_crust(comp, satdata, sparams, rhob, mycompo, myeos);
+        print_state_crust(satdata, sparams, comp, rhob, mycrust, myeos);
 
         rhob += 0.0001;
     }
@@ -110,7 +112,7 @@ int main(int argc, char* argv[])
         if (mueltot - MMU > 0.)
             break;
 
-        print_state_core(satdata, ccomp, rhob, myeos);
+        print_state_core(satdata, ccomp, rhob, mycore, myeos);
 
         rhob += 0.001;
     }
@@ -120,18 +122,19 @@ int main(int argc, char* argv[])
 
     double guess_npeucore[2] = {guess_npecore, 1.e-4};
 
-    while(rhob < 6.*satdata.rhosat0)
+    while (rhob < 3.*satdata.rhosat0)
     {
         ccomp = calc_npeucore_composition(rhob, guess_npeucore, satdata);
-        if (guess_npeucore != guess_npeucore) // break if nan
+        if (guess_npeucore[0] != guess_npeucore[0]) // break if nan
             break;
 
-        print_state_core(satdata, ccomp, rhob, myeos);
+        print_state_core(satdata, ccomp, rhob, mycore, myeos);
 
         rhob += 0.005;
     }
 
-    fclose(mycompo);
+    fclose(mycrust);
+    fclose(mycore);
     fclose(myeos);
 
     fprintf(stderr, "\\o/\n");
