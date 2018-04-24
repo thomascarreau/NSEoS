@@ -19,25 +19,17 @@ int main(int argc, char* argv[])
     mycore = fopen(argv[3],"w+");
     myeos = fopen(argv[4],"w+");
 
-    double rhob;
-
-    struct compo comp;
-    double muncl = -1.; // sign of muncl is negative is the outer crust
-    double guess_oc[3] = {60., 0.15, 0.1595}; // initial guess for the outer crust
-    struct core_compo ccomp;
-    double guess_npecore = 0.7; // initial guess for the core
-
     struct parameters satdata = assign_param(argv[1]);
     print_parameters(argv[1], satdata);
     fprintf(stderr, "p = %d\n\n", P_SURF_TENSION);
     fprintf(stderr, "==============================================\n\n");
     struct sf_params sparams = fit_sf_params(satdata);
 
-    double epsws_ic;
-    double epsws_core;
-    int transition = 0;
+    struct compo comp;
+    double muncl = -1.; // sign of muncl is negative is the outer crust
+    double guess_oc[3] = {60., 0.15, 0.1595}; // initial guess for the outer crust
 
-    rhob = 1e-10;
+    double rhob = 1e-10;
 
     while(1)
     {
@@ -60,7 +52,12 @@ int main(int argc, char* argv[])
     fprintf(stderr, "n_d = %g /fm^3\n\n", rhob);
     fprintf(stderr, "==============================================\n\n");
 
+    double epsws_ic;
+    double epsws_core;
+    int transition = 0;
     double guess_ic[4] = {guess_oc[0], guess_oc[1], guess_oc[2], 1.e-4}; // initial guess for the inner crust
+    struct core_compo ccomp;
+    double guess_npecore = 0.7; // initial guess for the core
 
     while(1)
     {
