@@ -22,8 +22,8 @@ int main(int argc, char* argv[])
     struct compo comp;
     double muncl = -1.; // sign of muncl is negative is the outer crust
     double guess_oc[3] = {60., 0.15, 0.1595}; // initial guess for the outer crust
-    double del_eq;
-    double guess_core = 0.7; // initial guess for the core
+    struct core_compo ccomp;
+    double guess_npecore = 0.7; // initial guess for the core
 
     struct parameters satdata = assign_param(argv[1]);
     print_parameters(argv[1], satdata);
@@ -37,7 +37,7 @@ int main(int argc, char* argv[])
 
     rhob = 1e-10;
 
-    while(muncl < 0.)
+    while(1)
     {
         comp = calc_ocrust3d_composition(rhob, guess_oc, satdata, sparams);
         if (guess_oc[0] != guess_oc[0]) // break if nan
@@ -47,6 +47,8 @@ int main(int argc, char* argv[])
         }
 
         muncl = calc_muncl(satdata, sparams, comp, rhob);
+        if (muncl > 0.)
+            break;
 
         print_state_crust(comp, satdata, sparams, rhob, mycompo, myeos);
 
@@ -69,12 +71,12 @@ int main(int argc, char* argv[])
             // calculation of the energy density in the cell in the inner crust
             epsws_ic = calc_crust_ws_cell_energy_density(satdata, sparams, comp, rhob);
 
-            del_eq = calc_core_eq_asym(rhob, &guess_core, satdata);
-            if (guess_core != guess_core) // break if nan
+            ccomp = calc_npecore_composition(rhob, &guess_npecore, satdata);
+            if (guess_npecore != guess_npecore) // break if nan
                 break;
 
             // calculation of the energy density in the cell in the core
-            epsws_core = calc_core_ws_cell_energy_density(satdata, del_eq, rhob);
+            epsws_core = calc_core_ws_cell_energy_density(satdata, ccomp, rhob);
 
             if (epsws_core < epsws_ic) // crust-core transition
             {
@@ -93,20 +95,41 @@ int main(int argc, char* argv[])
         fprintf(stderr, "e_core - e_crust = %g MeV/fm^3\n", epsws_core - epsws_ic);
 
     fprintf(stderr, "n_t = %g /fm^3\n", rhob);
-    fprintf(stderr, "P_t = %g MeV/fm^3\n\n", calc_core_ws_cell_pressure(satdata, del_eq, rhob));
+    fprintf(stderr, "P_t = %g MeV/fm^3\n\n", calc_core_ws_cell_pressure(satdata, ccomp, rhob));
     fprintf(stderr, "==============================================\n\n");
 
-    do
+    double mueltot = 0.; // initializing
+
+    while(1)
     {
-        del_eq = calc_core_eq_asym(rhob, &guess_core, satdata);
-        if (guess_core != guess_core) // break if nan
+        ccomp = calc_npecore_composition(rhob, &guess_npecore, satdata);
+        if (guess_npecore != guess_npecore) // break if nan
             break;
 
-        print_state_core(satdata, del_eq, rhob, myeos);
+        mueltot = calc_egas_chemical_potential(rhob*(1.-ccomp.del)/2.);
+        if (mueltot - MMU > 0.)
+            break;
+
+        print_state_core(satdata, ccomp, rhob, myeos);
+
+        rhob += 0.001;
+    }
+
+    fprintf(stderr, "muons appear at %g /fm^3\n\n", rhob);
+    fprintf(stderr, "==============================================\n\n");
+
+    double guess_npeucore[2] = {guess_npecore, 1.e-4};
+
+    while(rhob < 6.*satdata.rhosat0)
+    {
+        ccomp = calc_npeucore_composition(rhob, guess_npeucore, satdata);
+        if (guess_npeucore != guess_npeucore) // break if nan
+            break;
+
+        print_state_core(satdata, ccomp, rhob, myeos);
 
         rhob += 0.005;
     }
-    while (rhob < 6.*satdata.rhosat0);
 
     fclose(mycompo);
     fclose(myeos);
