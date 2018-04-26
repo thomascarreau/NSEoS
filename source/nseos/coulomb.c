@@ -89,7 +89,6 @@ double calc_ugas_chemical_potential(double nu_)
     double ugas_chemical_potential;
 
     t = HBARC*cpow(3.0*PI2*nu_,1./3.)/MMU;
-
     ugas_chemical_potential = cpow(MMU,3.)/8./cpow(3.*nu_*PI2,2./3.)/cpow(HBARC,2.)
         *(cpow(t*t+1.,1./2.)*(1.+6.*t*t) + t*t*(2.*t*t+1.)/cpow(t*t+1.,1./2.)
                 - 1./cpow(t*t+1.,1./2.));

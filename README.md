@@ -23,10 +23,10 @@ In the testing directory:
 
     ./nseos set.in crust.out core.out eos.out
 
-The first output file gives you the crust composition (mass of the cluster, global asymmetry in the cluster, number of charges, 
-cluster density, gas density, radius of the cell, and energy density in the cell) as a function of the baryonic density. 
-The second output file gives you the core composition (fraction of protons, of electrons, and of muons). 
-Finally, the third output file gives you the EoS that is the pressure in the cell as a function of the baryonic density.
+The first output file gives you the crust composition (number density, mass of the cluster, global asymmetry in the cluster, 
+number of charges, cluster density, gas density, and radius of the cell). 
+The second output file gives you the core composition (number density, fraction of protons, electrons, and muons). 
+Finally, the third output file gives you the EoS (number density, mass density, and pressure).
 
 ### Available sets of empirical parameters
 

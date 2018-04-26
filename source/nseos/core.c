@@ -5,27 +5,27 @@
 #include "modeling.h"
 #include "core.h"
 
-struct core_fun calc_core_fun(struct parameters satdata, double del_, double rhou_, double rhob_)
+struct core_fun calc_core_fun(struct parameters satdata, double del_, double nu_, double nb_)
 {
     struct core_fun result;
     double epsd;
     struct hnm meta_p;
     struct hnm meta_m;
     double dehnmddel;
-    double rhop;
+    double np;
     double mueltot;
     double muutot;
 
     // energy per particle of infinite matter
     epsd = del_/1000.;
-    meta_p = calc_meta_model_nuclear_matter(satdata, TAYLOR_EXP_ORDER, rhob_, del_+epsd);
-    meta_m = calc_meta_model_nuclear_matter(satdata, TAYLOR_EXP_ORDER, rhob_, del_-epsd);
+    meta_p = calc_meta_model_nuclear_matter(satdata, TAYLOR_EXP_ORDER, nb_, del_+epsd);
+    meta_m = calc_meta_model_nuclear_matter(satdata, TAYLOR_EXP_ORDER, nb_, del_-epsd);
     dehnmddel = (meta_p.enpernuc - meta_m.enpernuc)/2./epsd;
 
     // electron(muon) chemical potential (including rest mass)
-    rhop = rhob_*(1.-del_)/2.;
-    mueltot = calc_egas_chemical_potential(rhop - rhou_); 
-    muutot = calc_ugas_chemical_potential(rhou_); 
+    np = nb_*(1.-del_)/2.;
+    mueltot = calc_egas_chemical_potential(np - nu_); 
+    muutot = calc_ugas_chemical_potential(nu_); 
 
     result.f_beta = 2.*dehnmddel + RMN - RMP - mueltot;
     result.f_mueq = mueltot - muutot;
@@ -35,13 +35,13 @@ struct core_fun calc_core_fun(struct parameters satdata, double del_, double rho
 
 int assign_npecore_fun(const gsl_vector * x, void *params, gsl_vector * f)
 {
-    double rhob = ((struct rparams_core *) params)->rhob;
+    double nb = ((struct rparams_core *) params)->nb;
     struct parameters satdata = ((struct rparams_core *) params)->satdata;
 
     const double x0 = gsl_vector_get (x, 0);
 
     struct core_fun functs;
-    functs = calc_core_fun(satdata, x0, 0., rhob);
+    functs = calc_core_fun(satdata, x0, 0., nb);
 
     const double y0 = functs.f_beta;
 
@@ -50,7 +50,7 @@ int assign_npecore_fun(const gsl_vector * x, void *params, gsl_vector * f)
     return GSL_SUCCESS;
 }
 
-struct core_compo calc_npecore_composition(double rhob_, double *guess, struct parameters satdata)
+struct core_compo calc_npecore_composition(double nb_, double *guess, struct parameters satdata)
 {
     struct core_compo eq;
 
@@ -63,7 +63,7 @@ struct core_compo calc_npecore_composition(double rhob_, double *guess, struct p
     double del_old, del_new, dstep;
 
     struct rparams_core p;
-    p.rhob = rhob_;
+    p.nb = nb_;
     p.satdata = satdata;
 
     double del_init = *guess;
@@ -106,7 +106,7 @@ struct core_compo calc_npecore_composition(double rhob_, double *guess, struct p
     while (status == GSL_CONTINUE && iter < 1000);
 
     eq.del = gsl_vector_get(s->x, 0);
-    eq.rhou = 0.;
+    eq.nu = 0.;
 
     *guess = eq.del;
 
@@ -118,14 +118,14 @@ struct core_compo calc_npecore_composition(double rhob_, double *guess, struct p
 
 int assign_npeucore_fun(const gsl_vector * x, void *params, gsl_vector * f)
 {
-    double rhob = ((struct rparams_core *) params)->rhob;
+    double nb = ((struct rparams_core *) params)->nb;
     struct parameters satdata = ((struct rparams_core *) params)->satdata;
 
     const double x0 = gsl_vector_get (x, 0);
     const double x1 = gsl_vector_get (x, 1);
 
     struct core_fun functs;
-    functs = calc_core_fun(satdata, x0, x1, rhob);
+    functs = calc_core_fun(satdata, x0, x1, nb);
 
     const double y0 = functs.f_beta;
     const double y1 = functs.f_mueq;
@@ -136,7 +136,7 @@ int assign_npeucore_fun(const gsl_vector * x, void *params, gsl_vector * f)
     return GSL_SUCCESS;
 }
 
-struct core_compo calc_npeucore_composition(double rhob_, double *guess, struct parameters satdata)
+struct core_compo calc_npeucore_composition(double nb_, double *guess, struct parameters satdata)
 {
     struct core_compo eq;
 
@@ -147,10 +147,10 @@ struct core_compo calc_npeucore_composition(double rhob_, double *guess, struct 
     size_t iter = 0;
 
     double del_old, del_new, dstep;
-    double rhou_old, rhou_new, ustep;
+    double nu_old, nu_new, ustep;
 
     struct rparams_core p;
-    p.rhob = rhob_;
+    p.nb = nb_;
     p.satdata = satdata;
 
     const size_t n = 2;
@@ -167,16 +167,16 @@ struct core_compo calc_npeucore_composition(double rhob_, double *guess, struct 
     do
     {
         del_old = gsl_vector_get (s->x, 0);
-        rhou_old = gsl_vector_get (s->x, 1);
+        nu_old = gsl_vector_get (s->x, 1);
 
         iter++;
 
         status = gsl_multiroot_fsolver_iterate(s);
 
         del_new = gsl_vector_get (s->x, 0);
-        rhou_new = gsl_vector_get (s->x, 1);
+        nu_new = gsl_vector_get (s->x, 1);
         dstep = del_new - del_old;
-        ustep = rhou_new - rhou_old;
+        ustep = nu_new - nu_old;
 
         if (status)
             break;
@@ -186,17 +186,17 @@ struct core_compo calc_npeucore_composition(double rhob_, double *guess, struct 
             dstep = dstep/4.;
             del_new = del_old + dstep;
             gsl_vector_set (x, 0, del_new);
-            gsl_vector_set (x, 1, rhou_new);
+            gsl_vector_set (x, 1, nu_new);
             gsl_multiroot_fsolver_set (s, &f, x);
             del_new = gsl_vector_get (s->x, 0);
         }
-        while (gsl_vector_get (s->x, 1) < 0. || gsl_vector_get (s->x, 1) > rhob_*(1.-gsl_vector_get(s->x, 0))/2.) {
+        while (gsl_vector_get (s->x, 1) < 0. || gsl_vector_get (s->x, 1) > nb_*(1.-gsl_vector_get(s->x, 0))/2.) {
             ustep = ustep/4.;
-            rhou_new = rhou_old + ustep;
+            nu_new = nu_old + ustep;
             gsl_vector_set (x, 0, del_new);
-            gsl_vector_set (x, 1, rhou_new);
+            gsl_vector_set (x, 1, nu_new);
             gsl_multiroot_fsolver_set (s, &f, x);
-            rhou_new = gsl_vector_get (s->x, 1);
+            nu_new = gsl_vector_get (s->x, 1);
         }
 
         status = gsl_multiroot_test_residual (s->f, 9e-9);
@@ -205,10 +205,10 @@ struct core_compo calc_npeucore_composition(double rhob_, double *guess, struct 
     while (status == GSL_CONTINUE && iter < 1000);
 
     eq.del = gsl_vector_get(s->x, 0);
-    eq.rhou = gsl_vector_get(s->x, 1);
+    eq.nu = gsl_vector_get(s->x, 1);
 
     guess[0] = eq.del;
-    guess[1] = eq.rhou;
+    guess[1] = eq.nu;
 
     gsl_multiroot_fsolver_free(s);
     gsl_vector_free(x);
@@ -217,55 +217,58 @@ struct core_compo calc_npeucore_composition(double rhob_, double *guess, struct 
 }
 
 double calc_core_ws_cell_energy_density(struct parameters satdata, struct core_compo eq,
-        double rhob_)
+        double nb_)
 {
-    double rhop;
+    double np;
     double epseltot;
     double epsutot;
     struct hnm meta;
     double epsws;
 
-    rhop = rhob_*(1.-eq.del)/2.;
-    epseltot = calc_egas_energy_density(rhop-eq.rhou);
-    epsutot = calc_ugas_energy_density(eq.rhou);
-    meta = calc_meta_model_nuclear_matter(satdata, TAYLOR_EXP_ORDER, rhob_, eq.del);
-    epsws = rhob_*meta.enpernuc + epseltot + epsutot + rhop*(RMP-RMN) + rhob_*(RMN-AMU);
+    np = nb_*(1.-eq.del)/2.;
+    epseltot = calc_egas_energy_density(np-eq.nu);
+    epsutot = calc_ugas_energy_density(eq.nu);
+    meta = calc_meta_model_nuclear_matter(satdata, TAYLOR_EXP_ORDER, nb_, eq.del);
+    epsws = nb_*meta.enpernuc + epseltot + epsutot + np*(RMP-RMN) + nb_*RMN;
 
     return epsws;
 }
 
 double calc_core_ws_cell_pressure(struct parameters satdata, struct core_compo eq, 
-        double rhob_)
+        double nb_)
 {
-    double rhop;
+    double np;
     double egas_pressure;
     double ugas_pressure;
     struct hnm meta;
     double ws_cell_pressure;
 
-    rhop = rhob_*(1.-eq.del)/2.;
-    egas_pressure = calc_egas_pressure(rhop-eq.rhou);
-    ugas_pressure = calc_ugas_pressure(eq.rhou);
+    np = nb_*(1.-eq.del)/2.;
+    egas_pressure = calc_egas_pressure(np-eq.nu);
+    ugas_pressure = calc_ugas_pressure(eq.nu);
 
-    meta = calc_meta_model_nuclear_matter(satdata, TAYLOR_EXP_ORDER, rhob_, eq.del);
+    meta = calc_meta_model_nuclear_matter(satdata, TAYLOR_EXP_ORDER, nb_, eq.del);
     ws_cell_pressure = meta.p + egas_pressure + ugas_pressure; 
 
     return ws_cell_pressure;
 }
 
 void print_state_core(struct parameters satdata, struct core_compo eq,
-        double rhob_, FILE *core, FILE *eos)
+        double nb_, FILE *core, FILE *eos)
 {
-    double rhop;
+    double rhob;
+    double np;
     double xp, xe, xu;
     double pressws;
 
-    rhop = rhob_*(1.-eq.del)/2.;
-    xp = rhop/rhob_;
-    xe = (rhop - eq.rhou)/rhob_;
-    xu = eq.rhou/rhob_;
-    pressws = calc_core_ws_cell_pressure(satdata, eq, rhob_);
+    np = nb_*(1.-eq.del)/2.;
+    xp = np/nb_;
+    xe = (np - eq.nu)/nb_;
+    xu = eq.nu/nb_;
 
-    fprintf(core, "%g %g %g %g\n", rhob_, xp, xe, xu);
-    fprintf(eos, "%g %g\n", rhob_, pressws);
+    rhob = calc_core_ws_cell_energy_density(satdata, eq, nb_)*(ELEMC/1.e-19)/pow(SPEEDOFL/1.e8,2.)*1.e13;
+    pressws = calc_core_ws_cell_pressure(satdata, eq, nb_);
+
+    fprintf(core, "%g %g %g %g\n", nb_, xp, xe, xu);
+    fprintf(eos, "%g %g %g\n", nb_, rhob, pressws);
 }
