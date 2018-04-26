@@ -201,7 +201,6 @@ struct core_compo calc_npeucore_composition(double nb_, double *guess, struct pa
 
         status = gsl_multiroot_test_residual (s->f, 9e-9);
     }
-
     while (status == GSL_CONTINUE && iter < 1000);
 
     eq.del = gsl_vector_get(s->x, 0);
