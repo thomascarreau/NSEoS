@@ -119,7 +119,7 @@ int main(int argc, char* argv[])
 
     double guess_npeucore[2] = {guess_npecore, 1.e-5};
 
-    while (nb < 7.*satdata.rhosat0)
+    while (nb < 4.*satdata.rhosat0)
     {
         ccomp = calc_npeucore_composition(nb, guess_npeucore, satdata);
         if (guess_npeucore[0] != guess_npeucore[0]) // break if nan
