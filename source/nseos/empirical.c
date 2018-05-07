@@ -11,7 +11,7 @@ struct parameters assign_param(char set[])
     float effm;
     float isosplit;
 
-    char path_of_set[50] = "input/satdata/";
+    char path_of_set[50] = "../../input/satdata/";
     strcat(path_of_set, set);
 
     fin = fopen(path_of_set, "r");
@@ -40,7 +40,7 @@ struct skyrme_parameters assign_skyrme_param(struct skyrme_parameters coeff)
     FILE *fin;
     float sigmadenom;
 
-    fin = fopen("../testing/input/coeff.in", "r");
+    fin = fopen("../../input/coeff.in", "r");
     fscanf(fin, "%f %f %f %f", &coeff.t0, &coeff.t1, &coeff.t2, &coeff.t3);
     fscanf(fin, "%f", &sigmadenom);
     fscanf(fin, "%f %f %f %f", &coeff.x0, &coeff.x1, &coeff.x2, &coeff.x3);

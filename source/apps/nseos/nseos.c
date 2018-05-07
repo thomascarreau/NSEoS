@@ -1,7 +1,7 @@
-#include "../nseos/nuclear_en.h"
-#include "../nseos/crust.h"
-#include "../nseos/core.h"
-#include "../nseos/modeling.h"
+#include "../../nseos/nuclear_en.h"
+#include "../../nseos/crust.h"
+#include "../../nseos/core.h"
+#include "../../nseos/modeling.h"
 
 int main(int argc, char* argv[])
 {

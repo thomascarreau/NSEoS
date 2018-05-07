@@ -1,8 +1,8 @@
 CC = gcc
 RM = rm -r
-LIBDIR = ../nseos
+LIBDIR = ../../nseos
 MKDIR = mkdir -p
-BUILDDIR = ../nseos/build
+BUILDDIR = ../../nseos/build
 OBJS = $(BUILDDIR)/core.o \
 	   $(BUILDDIR)/crust.o \
 	   $(BUILDDIR)/nuclear_en.o \

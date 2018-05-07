@@ -13,13 +13,13 @@ Installation
 ------------
 
     git clone https://github.com/thomascarreau/NSEoS
-    cd NSEoS/source/testing
+    cd NSEoS/source/apps/nseos
     make
 
 Usage
 -----
 
-In the testing directory:
+In `NSEoS/source/apps/nseos`:
 
     ./nseos set.in crust.out core.out eos.out
 
