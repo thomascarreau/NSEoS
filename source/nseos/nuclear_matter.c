@@ -3,37 +3,27 @@
 
 #include "nuclear_matter.h"
 
-double calc_meta_model_low_density_correction(int max_order, int order, double xx_)
+double calc_meta_model_low_density_correction(struct parameters satdata, int max_order, int order, double xx_)
 {
-    double bb;
     double bexp;
-    double corr;
-    bb = 10.*log(2);
-    bexp = exp(-bb*(3.*xx_+1.));
-    corr = 1. - pow(-3.*xx_,max_order+1-order)*bexp;
-    return corr;
+    bexp = exp(-satdata.b*(3.*xx_+1.));
+    return 1. - pow(-3.*xx_,max_order+1-order)*bexp;
 }
 
-double calc_meta_model_low_density_correction_derivative(int max_order, int order, double xx_)
+double calc_meta_model_low_density_correction_derivative(struct parameters satdata, int max_order, int order, double xx_)
 {
-    double bb;
     double bexp;
-    bb = 10.*log(2);
-    bexp = exp(-bb*(3.*xx_+1.));
-
+    bexp = exp(-satdata.b*(3.*xx_+1.));
     return bexp*pow(3.,-order+max_order+1)*pow(-xx_,max_order-order)
-        *(-order - 3.*bb*xx_ + max_order + 1.);
+        *(-order - 3.*satdata.b*xx_ + max_order + 1.);
 }
 
-double calc_meta_model_low_density_correction_second_derivative(int max_order, int order, double xx_)
+double calc_meta_model_low_density_correction_second_derivative(struct parameters satdata, int max_order, int order, double xx_)
 {
-    double bb;
     double bexp;
-    bb = 10.*log(2);
-    bexp = exp(-bb*(3.*xx_+1.));
-
+    bexp = exp(-satdata.b*(3.*xx_+1.));
     return bexp*(-pow(-3.,-order+max_order+1))*pow(-xx_,-order+max_order-1)
-        *(9.*bb*bb*xx_*xx_ + (-order + max_order + 1)*(-order - 6.*bb*xx_ + max_order));
+        *(9.*satdata.b*satdata.b*xx_*xx_ + (-order + max_order + 1)*(-order - 6.*satdata.b*xx_ + max_order));
 }
 
 struct hnm calc_meta_model_nuclear_matter(struct parameters satdata, int max_order, double nn_, double ii_)
@@ -74,15 +64,15 @@ struct hnm calc_meta_model_nuclear_matter(struct parameters satdata, int max_ord
     xx = exp(tmp) - 1./3.;
 
     // correction at nn=0
-    u0 = calc_meta_model_low_density_correction(max_order, 0, xx);
-    u1 = calc_meta_model_low_density_correction(max_order, 1, xx);
-    u2 = calc_meta_model_low_density_correction(max_order, 2, xx);
-    u0p = calc_meta_model_low_density_correction_derivative(max_order, 0, xx);
-    u1p = calc_meta_model_low_density_correction_derivative(max_order, 1, xx);
-    u2p = calc_meta_model_low_density_correction_derivative(max_order, 2, xx);
-    u0pp = calc_meta_model_low_density_correction_second_derivative(max_order, 0, xx);
-    u1pp = calc_meta_model_low_density_correction_second_derivative(max_order, 1, xx);
-    u2pp = calc_meta_model_low_density_correction_second_derivative(max_order, 2, xx);
+    u0 = calc_meta_model_low_density_correction(satdata, max_order, 0, xx);
+    u1 = calc_meta_model_low_density_correction(satdata, max_order, 1, xx);
+    u2 = calc_meta_model_low_density_correction(satdata, max_order, 2, xx);
+    u0p = calc_meta_model_low_density_correction_derivative(satdata, max_order, 0, xx);
+    u1p = calc_meta_model_low_density_correction_derivative(satdata, max_order, 1, xx);
+    u2p = calc_meta_model_low_density_correction_derivative(satdata, max_order, 2, xx);
+    u0pp = calc_meta_model_low_density_correction_second_derivative(satdata, max_order, 0, xx);
+    u1pp = calc_meta_model_low_density_correction_second_derivative(satdata, max_order, 1, xx);
+    u2pp = calc_meta_model_low_density_correction_second_derivative(satdata, max_order, 2, xx);
 
     rmns = RMN/(1.+ (satdata.barm + ii_*satdata.bardel)*(1.+3.*xx));
     rmps = RMN/(1.+ (satdata.barm - ii_*satdata.bardel)*(1.+3.*xx));
@@ -101,9 +91,9 @@ struct hnm calc_meta_model_nuclear_matter(struct parameters satdata, int max_ord
     {
         a30 = satdata.qsat0 - 2.*t0fg*(4.-5.*satdata.barm);
         a32 = satdata.qsym0 - 10./9.*t0fg*(4.-5.*barfac);
-        u3 = calc_meta_model_low_density_correction(max_order, 3, xx);
-        u3p = calc_meta_model_low_density_correction_derivative(max_order, 3, xx);
-        u3pp = calc_meta_model_low_density_correction_second_derivative(max_order, 3, xx);
+        u3 = calc_meta_model_low_density_correction(satdata, max_order, 3, xx);
+        u3p = calc_meta_model_low_density_correction_derivative(satdata, max_order, 3, xx);
+        u3pp = calc_meta_model_low_density_correction_second_derivative(satdata, max_order, 3, xx);
 
         epotpernuc = a00*u0 + a10*xx*u1 + 0.5*a20*xx*xx*u2 + 1./6.*a30*xx*xx*xx*u3
             + (a02*u0 + a12*xx*u1 + 0.5*a22*xx*xx*u2 + 1./6.*a32*xx*xx*xx*u3)*ii_*ii_;
@@ -134,12 +124,12 @@ struct hnm calc_meta_model_nuclear_matter(struct parameters satdata, int max_ord
         a40 = satdata.zsat0 - 8.*t0fg*(-7.+5.*satdata.barm);
         a32 = satdata.qsym0 - 10./9.*t0fg*(4.-5.*barfac);
         a42 = satdata.zsym0 - 40./9.*t0fg*(-7.+5.*barfac);
-        u3 = calc_meta_model_low_density_correction(max_order, 3, xx);
-        u4 = calc_meta_model_low_density_correction(max_order, 4, xx);
-        u3p = calc_meta_model_low_density_correction_derivative(max_order, 3, xx);
-        u4p = calc_meta_model_low_density_correction_derivative(max_order, 4, xx);
-        u3pp = calc_meta_model_low_density_correction_second_derivative(max_order, 3, xx);
-        u4pp = calc_meta_model_low_density_correction_second_derivative(max_order, 4, xx);
+        u3 = calc_meta_model_low_density_correction(satdata, max_order, 3, xx);
+        u4 = calc_meta_model_low_density_correction(satdata, max_order, 4, xx);
+        u3p = calc_meta_model_low_density_correction_derivative(satdata, max_order, 3, xx);
+        u4p = calc_meta_model_low_density_correction_derivative(satdata, max_order, 4, xx);
+        u3pp = calc_meta_model_low_density_correction_second_derivative(satdata, max_order, 3, xx);
+        u4pp = calc_meta_model_low_density_correction_second_derivative(satdata, max_order, 4, xx);
 
         epotpernuc = a00*u0 + a10*xx*u1 + 0.5*a20*xx*xx*u2 + 1./6.*a30*xx*xx*xx*u3 + 1./24.*a40*xx*xx*xx*xx*u4
             + (a02*u0 + a12*xx*u1 + 0.5*a22*xx*xx*u2 + 1./6.*a32*xx*xx*xx*u3 + 1./24.*a42*xx*xx*xx*xx*u4)*ii_*ii_;

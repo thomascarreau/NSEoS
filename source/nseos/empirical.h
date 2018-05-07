@@ -15,6 +15,7 @@ struct parameters
     float zsym0;
     float barm;
     float bardel;
+    float b;
 };
 
 struct skyrme_parameters
@@ -31,7 +32,7 @@ struct skyrme_parameters
 };
 
 struct parameters assign_param(char set[]);
-void print_parameters(char set[], struct parameters satdata);
+void print_parameters(struct parameters satdata);
 struct skyrme_parameters assign_skyrme_param(struct skyrme_parameters coeff);
 
 #endif // H_EMPIRICAL

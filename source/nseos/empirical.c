@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include <math.h>
 
 #include "modeling.h"
 #include "empirical.h"
@@ -21,18 +22,19 @@ struct parameters assign_param(char set[])
     fscanf(fin, "%f %f", &effm, &isosplit);
     satdata.barm = 1./effm - 1.;
     satdata.bardel = satdata.barm - isosplit;
+    satdata.b = 10.*log(2.);
 
     fclose(fin);
 
     return satdata;
 }
 
-void print_parameters(char set[], struct parameters satdata)
+void print_parameters(struct parameters satdata)
 {
-    fprintf(stderr, "%s:\n", set);
     fprintf(stderr, "%g %g %g %g %g\n", satdata.rhosat0, satdata.lasat0, satdata.ksat0, satdata.qsat0, satdata.zsat0);
     fprintf(stderr, "%g %g %g %g %g\n", satdata.jsym0, satdata.lsym0, satdata.ksym0, satdata.qsym0, satdata.zsym0);
     fprintf(stderr, "%g %g\n", satdata.barm, satdata.bardel);
+    fprintf(stderr, "%g\n", satdata.b);
 }
 
 struct skyrme_parameters assign_skyrme_param(struct skyrme_parameters coeff)

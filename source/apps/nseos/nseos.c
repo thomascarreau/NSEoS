@@ -1,3 +1,5 @@
+#include <math.h>
+
 #include "../../nseos/nuclear_en.h"
 #include "../../nseos/crust.h"
 #include "../../nseos/core.h"
@@ -20,7 +22,7 @@ int main(int argc, char* argv[])
     myeos = fopen(argv[4],"w+");
 
     struct parameters satdata = assign_param(argv[1]);
-    print_parameters(argv[1], satdata);
+    print_parameters(satdata);
     fprintf(stderr, "p = %d\n\n", P_SURF_TENSION);
     fprintf(stderr, "==============================================\n\n");
     struct sf_params sparams = fit_sf_params(satdata);
