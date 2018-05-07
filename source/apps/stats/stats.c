@@ -7,7 +7,7 @@
 
 #define N (325) // wc -l list_of_good_sets.data
 
-struct parameters read_table_of_good_sets(FILE *);
+struct parameters read_table_of_good_sets(FILE *, float *, float *);
 
 struct transtion_qtt
 {
@@ -40,6 +40,7 @@ int main(void)
     FILE *statistics = NULL;
     FILE *matrix = NULL;
     struct parameters satdata;
+    float m, dm;
     struct transtion_qtt tqtt;
     double p[15][N];
     struct stats st;
@@ -48,7 +49,7 @@ int main(void)
 
     for(int i = 0; i < N; i++)
     {
-        satdata = read_table_of_good_sets(good_sets);
+        satdata = read_table_of_good_sets(good_sets, &m, &dm);
 
         print_parameters(satdata); // test
         fprintf(stderr, "\n==============================================\n\n");
@@ -68,8 +69,8 @@ int main(void)
         p[9][i] = satdata.ksym0;
         p[10][i] = satdata.qsym0;
         p[11][i] = satdata.zsym0;
-        p[12][i] = satdata.barm;
-        p[13][i] = satdata.bardel;
+        p[12][i] = m;
+        p[13][i] = dm;
         p[14][i] = satdata.b;
     }
 
@@ -96,7 +97,7 @@ int main(void)
     return 0;
 }
 
-struct parameters read_table_of_good_sets(FILE *good_sets)
+struct parameters read_table_of_good_sets(FILE *good_sets, float *m, float *dm)
 {
     struct parameters satdata;
     float effm, isosplit;
@@ -119,6 +120,9 @@ struct parameters read_table_of_good_sets(FILE *good_sets)
     satdata.barm = 1./effm - 1.;
     satdata.bardel = (sqrt((satdata.barm + 1.)*(satdata.barm + 1.)*isosplit*isosplit + 1.)
             + satdata.barm * isosplit - 1.)/isosplit;
+
+    *m = effm;
+    *dm = isosplit;
 
     return satdata;
 }
