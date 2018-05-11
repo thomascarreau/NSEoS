@@ -43,7 +43,7 @@ int main(int argc, char* argv[])
         }
 
         muncl = calc_muncl(satdata, sparams, comp, nb);
-        if (muncl > 0.)
+        if (muncl > 0.) // neutron drip -> transtion to inner crust
             break;
 
         print_state_crust(satdata, sparams, comp, nb, mycrust, myeos);
@@ -108,7 +108,7 @@ int main(int argc, char* argv[])
             break;
 
         mueltot = calc_egas_chemical_potential(nb*(1.-ccomp.del)/2.);
-        if (mueltot - MMU > 0.)
+        if (mueltot - MMU > 0.) // transition to npeu matter
             break;
 
         print_state_core(satdata, ccomp, nb, mycore, myeos);
@@ -121,7 +121,7 @@ int main(int argc, char* argv[])
 
     double guess_npeucore[2] = {guess_npecore, 1.e-5};
 
-    while (nb < 4.*satdata.rhosat0)
+    while (nb < 10.*satdata.rhosat0)
     {
         ccomp = calc_npeucore_composition(nb, guess_npeucore, satdata);
         if (guess_npeucore[0] != guess_npeucore[0]) // break if nan
