@@ -181,7 +181,8 @@ struct core_compo calc_npeucore_composition(double nb_, double *guess, struct pa
         if (status)
             break;
 
-        // dirty backstepping
+        // (VERY) dirty backstepping
+        int count = 0;
         while (gsl_vector_get (s->x, 0) < 0.1 || gsl_vector_get (s->x, 0) > 1.0) {
             dstep = dstep/4.;
             del_new = del_old + dstep;
@@ -189,6 +190,15 @@ struct core_compo calc_npeucore_composition(double nb_, double *guess, struct pa
             gsl_vector_set (x, 1, nu_new);
             gsl_multiroot_fsolver_set (s, &f, x);
             del_new = gsl_vector_get (s->x, 0);
+            count += 1;
+            if (count > 1000)
+            {
+                eq.del = NAN;
+                eq.nu = NAN;
+                guess[0] = eq.del;
+                guess[1] = eq.nu;
+                return eq;
+            }
         }
         while (gsl_vector_get (s->x, 1) < 0. || gsl_vector_get (s->x, 1) > nb_*(1.-gsl_vector_get(s->x, 0))/2.) {
             ustep = ustep/4.;
@@ -197,6 +207,15 @@ struct core_compo calc_npeucore_composition(double nb_, double *guess, struct pa
             gsl_vector_set (x, 1, nu_new);
             gsl_multiroot_fsolver_set (s, &f, x);
             nu_new = gsl_vector_get (s->x, 1);
+            count += 1;
+            if (count > 1000)
+            {
+                eq.del = NAN;
+                eq.nu = NAN;
+                guess[0] = eq.del;
+                guess[1] = eq.nu;
+                return eq;
+            }
         }
 
         status = gsl_multiroot_test_residual (s->f, 9e-9);

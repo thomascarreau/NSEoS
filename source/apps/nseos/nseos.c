@@ -124,7 +124,7 @@ int main(int argc, char* argv[])
     while (nb < 10.*satdata.rhosat0)
     {
         ccomp = calc_npeucore_composition(nb, guess_npeucore, satdata);
-        if (guess_npeucore[0] != guess_npeucore[0]) // break if nan
+        if (guess_npeucore[0] != guess_npeucore[0]) // break if nan; see q&d part in core.c
             break;
 
         print_state_core(satdata, ccomp, nb, mycore, myeos);
