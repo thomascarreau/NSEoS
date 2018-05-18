@@ -5,10 +5,10 @@
 #include "../../nseos/core.h"
 #include "../../nseos/modeling.h"
 
-#define N (325) // wc -l list_of_good_sets.data
+#define N (325) // wc -l jm_sets.data
 #define N_PARAMS (17) // number of parameters in the matrix
 
-struct parameters read_table_of_good_sets(FILE *, float *, float *);
+struct parameters read_table_of_sets(FILE *, float *, float *);
 
 struct transtion_qtt
 {
@@ -30,10 +30,10 @@ struct stats calc_stats(double data[N_PARAMS][N], double w[N]);
 
 int main(void)
 {
-    FILE *good_sets = NULL;
+    FILE *sets = NULL;
 
-    good_sets = fopen("../../input/list_of_good_sets.data", "r");
-    if(good_sets == NULL)
+    sets = fopen("../../input/jm_sets.data", "r");
+    if(sets == NULL)
     {
         fprintf(stderr, "ERROR: file issue\n");
         return 1;
@@ -54,7 +54,9 @@ int main(void)
 
     for(int i = 0; i < N; i++)
     {
-        satdata = read_table_of_good_sets(good_sets, &m, &dm);
+        fprintf(stderr, "Set %d:\n", i+1);
+
+        satdata = read_table_of_sets(sets, &m, &dm);
 
         print_parameters(satdata); // test
         fprintf(stderr, "\n==============================================\n\n");
@@ -109,21 +111,23 @@ int main(void)
                 st.correlation[i][9], st.correlation[i][10], st.correlation[i][11], st.correlation[i][12], 
                 st.correlation[i][13], st.correlation[i][14], st.correlation[i][15], st.correlation[i][16]);
 
-    fclose(good_sets);
+    fclose(sets);
     fclose(posterior);
     fclose(statistics);
     fclose(matrix);
 
+    fprintf(stderr, "\\o/\n");
+
     return 0;
 }
 
-struct parameters read_table_of_good_sets(FILE *good_sets, float *m, float *dm)
+struct parameters read_table_of_sets(FILE *sets, float *m, float *dm)
 {
     struct parameters satdata;
     float effm, isosplit, kv;
 
     // reading the parameters
-    fscanf(good_sets, "%f %f %f %f %f %f %f %f %f %f %f %f %f", 
+    fscanf(sets, "%f %f %f %f %f %f %f %f %f %f %f %f %f", 
             &satdata.lasat0, &satdata.rhosat0, &satdata.ksat0,
             &satdata.qsat0, &satdata.zsat0, &satdata.jsym0, 
             &satdata.lsym0, &satdata.ksym0, &satdata.qsym0, 

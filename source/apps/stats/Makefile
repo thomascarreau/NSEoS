@@ -10,12 +10,13 @@ OBJS = $(BUILDDIR)/core.o \
 	   $(BUILDDIR)/nuclear_surface_en.o \
 	   $(BUILDDIR)/nuclear_matter.o \
 	   $(BUILDDIR)/empirical.o 
-APP = stats
 
-$(APP) : $(BUILDDIR) \
+all : $(BUILDDIR) \
 	$(OBJS) \
-	stats.c
-	$(CC) -o $(APP) stats.c $(OBJS) -lgsl -lgslcblas -lm
+	stats.c \
+	stats_tov.c
+	$(CC) -o stats stats.c $(OBJS) -lgsl -lgslcblas -lm
+	$(CC) -o stats_tov stats_tov.c $(OBJS) -lgsl -lgslcblas -lm
 
 $(BUILDDIR):
 	$(MKDIR) $(BUILDDIR)
@@ -58,4 +59,4 @@ $(BUILDDIR)/core.o : $(LIBDIR)/core.h \
 	$(CC) -c $(LIBDIR)/core.c -o $(BUILDDIR)/core.o
 
 clean:
-	$(RM) $(OBJS) $(APP)
+	$(RM) $(OBJS) stats stats_tov
