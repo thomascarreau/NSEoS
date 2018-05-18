@@ -325,6 +325,7 @@ struct sf_params fit_sf_params(struct parameters satdata)
 
     prms.sigma0 = gsl_vector_get(s->x, 0);
     prms.b = gsl_vector_get(s->x, 1);
+    prms.chi2 = pow(chi, 2.0);
 
     gsl_multifit_fdfsolver_free (s);
     gsl_matrix_free (covar);

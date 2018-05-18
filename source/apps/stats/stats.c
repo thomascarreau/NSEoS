@@ -6,6 +6,7 @@
 #include "../../nseos/modeling.h"
 
 #define N (325) // wc -l list_of_good_sets.data
+#define N_PARAMS (17) // number of parameters in the matrix
 
 struct parameters read_table_of_good_sets(FILE *, float *, float *);
 
@@ -16,14 +17,16 @@ struct transtion_qtt
 };
 struct transtion_qtt eval_transition_qtt(struct parameters);
 
+void calc_weights_for_masses_filter(double chi2[N], double w[N]);
+
 struct stats
 {
-    double average[15];
-    double variance[15];
-    double deviation[15];
-    double correlation[15][15];
+    double average[N_PARAMS];
+    double variance[N_PARAMS];
+    double deviation[N_PARAMS];
+    double correlation[N_PARAMS][N_PARAMS];
 };
-struct stats calc_stats(double data[15][N]);
+struct stats calc_stats(double data[N_PARAMS][N], double w[N]);
 
 int main(void)
 {
@@ -36,16 +39,18 @@ int main(void)
         return 1;
     }
 
-    FILE *transition = NULL;
+    FILE *posterior = NULL;
     FILE *statistics = NULL;
     FILE *matrix = NULL;
     struct parameters satdata;
     float m, dm;
+    struct sf_params sparams;
     struct transtion_qtt tqtt;
-    double p[15][N];
+    double p[N_PARAMS][N];
+    double chi2[N];
     struct stats st;
 
-    transition = fopen("transition.out", "w+"); 
+    posterior = fopen("posterior.out", "w+"); 
 
     for(int i = 0; i < N; i++)
     {
@@ -54,8 +59,10 @@ int main(void)
         print_parameters(satdata); // test
         fprintf(stderr, "\n==============================================\n\n");
 
+        sparams = fit_sf_params(satdata);
+
         tqtt = eval_transition_qtt(satdata);
-        fprintf(transition, "%g %g\n", tqtt.nt, tqtt.pt);
+        fprintf(posterior, "%g %g %g %g\n", tqtt.nt, tqtt.pt, sparams.sigma0, sparams.b);
 
         p[0][i] = tqtt.nt;
         p[1][i] = tqtt.pt;
@@ -72,25 +79,38 @@ int main(void)
         p[12][i] = m;
         p[13][i] = dm;
         p[14][i] = satdata.b;
+        p[15][i] = sparams.sigma0;
+        p[16][i] = sparams.b;
+
+        chi2[i] = sparams.chi2;
     }
 
-    st = calc_stats(p);
+    double w[N];
+
+    /* // w/o any filter */
+    /* for(int i = 0; i < N; i++) */
+    /*     w[i] = 1.0; */
+
+    // w/ masses filter
+    calc_weights_for_masses_filter(chi2, w);
+
+    st = calc_stats(p, w);
 
     statistics = fopen("statistics.out", "w+"); 
     matrix = fopen("matrix.out", "w+"); 
 
-    for(int i = 0; i < 15; i++)
+    for(int i = 0; i < N_PARAMS; i++)
         fprintf(statistics, "%g %g %g\n", st.average[i], st.variance[i], st.deviation[i]);
 
-    for(int i = 0; i < 15; i++)
-        fprintf(matrix, "%g %g %g %g %g %g %g %g %g %g %g %g %g %g %g\n", st.correlation[i][0],
+    for(int i = 0; i < N_PARAMS; i++)
+        fprintf(matrix, "%g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g\n", st.correlation[i][0],
                 st.correlation[i][1], st.correlation[i][2], st.correlation[i][3], st.correlation[i][4], 
                 st.correlation[i][5], st.correlation[i][6], st.correlation[i][7], st.correlation[i][8], 
                 st.correlation[i][9], st.correlation[i][10], st.correlation[i][11], st.correlation[i][12], 
-                st.correlation[i][13], st.correlation[i][14]);
+                st.correlation[i][13], st.correlation[i][14], st.correlation[i][15], st.correlation[i][16]);
 
     fclose(good_sets);
-    fclose(transition);
+    fclose(posterior);
     fclose(statistics);
     fclose(matrix);
 
@@ -100,7 +120,7 @@ int main(void)
 struct parameters read_table_of_good_sets(FILE *good_sets, float *m, float *dm)
 {
     struct parameters satdata;
-    float effm, isosplit;
+    float effm, isosplit, kv;
 
     // reading the parameters
     fscanf(good_sets, "%f %f %f %f %f %f %f %f %f %f %f %f %f", 
@@ -118,8 +138,14 @@ struct parameters read_table_of_good_sets(FILE *good_sets, float *m, float *dm)
 
     // (effm,isosplit) <-> (barm,bardel)
     satdata.barm = 1./effm - 1.;
-    satdata.bardel = (sqrt((satdata.barm + 1.)*(satdata.barm + 1.)*isosplit*isosplit + 1.)
-            + satdata.barm * isosplit - 1.)/isosplit;
+
+    if (isosplit == 0.0)
+        kv = satdata.barm - 0.5*isosplit*(1.+satdata.barm)*(1.+satdata.barm); // eq (8) of arXiv:1708:06894
+    else
+        kv = (sqrt((satdata.barm + 1.)*(satdata.barm + 1.)*isosplit*isosplit + 1.)
+                + satdata.barm * isosplit - 1.)/isosplit; // see: ref [103] of arXiv:1708:06894
+
+    satdata.bardel = satdata.barm - kv;
 
     *m = effm;
     *dm = isosplit;
@@ -181,50 +207,62 @@ struct transtion_qtt eval_transition_qtt(struct parameters satdata)
     return tqtt;
 }
 
-struct stats calc_stats(double data[15][N])
+void calc_weights_for_masses_filter(double chi2[N], double w[N]) // where chi2 is associated to the masses filter
+{
+    for(int i = 0; i < N; i++)
+        w[i] = exp(-chi2[i]/2.);
+}
+
+struct stats calc_stats(double data[N_PARAMS][N], double w[N])
 {
     struct stats result;
 
     // initializing the sum
-    double sumi[15] = {0., 0., 0., 0., 0., 0., 0.,
-        0., 0., 0., 0., 0., 0., 0.};
+    double sumi[N_PARAMS];
+    for(int i = 0; i < N_PARAMS; i++)
+        sumi[i] = 0.;
+
+    // normalizing constant (=N if w[i]=1 for each set)
+    double norm_const = 0.;
+    for(int i = 0; i < N; i++)
+        norm_const += w[i];
 
     // average
-    for(int i = 0; i < 15; i++)
+    for(int i = 0; i < N_PARAMS; i++)
         for(int j = 0; j < N; j++)
-            sumi[i] += data[i][j];
-    for(int i = 0; i < 15; i++)
-        result.average[i] = sumi[i] / N;
+            sumi[i] += data[i][j]*w[j];
+    for(int i = 0; i < N_PARAMS; i++)
+        result.average[i] = sumi[i] / norm_const;
 
     // initializing the sum
-    for(int i = 0; i < 15; i++)
+    for(int i = 0; i < N_PARAMS; i++)
         sumi[i] = 0.;
 
     // variance and deviation
-    for(int i = 0; i < 15; i++)
+    for(int i = 0; i < N_PARAMS; i++)
         for(int j = 0; j < N; j++)
-            sumi[i] += pow(data[i][j] - result.average[i], 2.); 
-    for(int i = 0; i < 15; i++)
+            sumi[i] += pow(data[i][j] - result.average[i], 2.)*w[j];
+    for(int i = 0; i < N_PARAMS; i++)
     {
-        result.variance[i] = sumi[i] / N;
+        result.variance[i] = sumi[i] / norm_const;
         result.deviation[i] = sqrt(result.variance[i]);
     }
 
-    double sumij[15][15];
     // initializing the sum
-    for(int i = 0; i < 15; i++)
-        for(int j = 0; j < 15; j++)
+    double sumij[N_PARAMS][N_PARAMS];
+    for(int i = 0; i < N_PARAMS; i++)
+        for(int j = 0; j < N_PARAMS; j++)
             sumij[i][j] = 0.;
 
     // correlation matrix: cor(x,y) = cov(x,y)/(sigx*sigy)
-    for(int i = 0; i < 15; i++)
-        for(int j = 0; j < 15; j++)
+    for(int i = 0; i < N_PARAMS; i++)
+        for(int j = 0; j < N_PARAMS; j++)
             for(int k = 0; k < N; k++)
                 sumij[i][j] += (data[i][k] - result.average[i])
-                    *(data[j][k] - result.average[j]);
-    for(int i = 0; i < 15; i++)
-        for(int j = 0; j < 15; j++)
-            result.correlation[i][j] = fabs(sumij[i][j] / N)
+                    *(data[j][k] - result.average[j])*w[k];
+    for(int i = 0; i < N_PARAMS; i++)
+        for(int j = 0; j < N_PARAMS; j++)
+            result.correlation[i][j] = fabs(sumij[i][j] / norm_const)
                 /(result.deviation[i]*result.deviation[j]);
 
     return result;

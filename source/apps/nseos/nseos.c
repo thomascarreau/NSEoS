@@ -67,7 +67,7 @@ int main(int argc, char* argv[])
         if (guess_ic[0] != guess_ic[0]) // break if nan
             break;
 
-        if (nb > 0.04)
+        if (nb > 0.01)
         {
             // calculation of the energy density in the cell in the inner crust
             epsws_ic = calc_crust_ws_cell_energy_density(satdata, sparams, comp, nb);
