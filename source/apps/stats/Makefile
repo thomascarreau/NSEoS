@@ -3,19 +3,25 @@ RM = rm -r
 LIBDIR = ../../nseos
 MKDIR = mkdir -p
 BUILDDIR = ../../nseos/build
-OBJS = $(BUILDDIR)/core.o \
+STATSBUILDDIR = build
+OBJS = $(STATSBUILDDIR)/functions.o \
+	   $(BUILDDIR)/core.o \
 	   $(BUILDDIR)/crust.o \
 	   $(BUILDDIR)/nuclear_en.o \
 	   $(BUILDDIR)/coulomb.o \
 	   $(BUILDDIR)/nuclear_surface_en.o \
 	   $(BUILDDIR)/nuclear_matter.o \
-	   $(BUILDDIR)/empirical.o 
+	   $(BUILDDIR)/empirical.o
 APP = stats
 
-$(APP) : $(BUILDDIR) \
+$(APP) : $(STATSBUILDDIR) \
+	$(BUILDDIR) \
 	$(OBJS) \
-	stats.c \
+	stats.c
 	$(CC) -o $(APP) stats.c $(OBJS) -lgsl -lgslcblas -lm
+
+$(STATSBUILDDIR):
+	$(MKDIR) $(STATSBUILDDIR)
 
 $(BUILDDIR):
 	$(MKDIR) $(BUILDDIR)
@@ -56,6 +62,10 @@ $(BUILDDIR)/core.o : $(LIBDIR)/core.h \
 	$(LIBDIR)/core.c \
 	$(LIBDIR)/modeling.h
 	$(CC) -c $(LIBDIR)/core.c -o $(BUILDDIR)/core.o
+
+$(STATSBUILDDIR)/functions.o : functions.h \
+	functions.c
+	$(CC) -c functions.c -o $(STATSBUILDDIR)/functions.o
 
 clean:
 	$(RM) $(OBJS) $(APP)
