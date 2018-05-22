@@ -200,7 +200,8 @@ struct core_compo calc_npeucore_composition(double nb_, double *guess, struct pa
                 return eq;
             }
         }
-        while (gsl_vector_get (s->x, 1) < 0. || gsl_vector_get (s->x, 1) > nb_*(1.-gsl_vector_get(s->x, 0))/2.) {
+        while (gsl_vector_get (s->x, 1) < 1.e-10 // to avoid the "matrix is singular" error 
+                || gsl_vector_get (s->x, 1) > nb_*(1.-gsl_vector_get(s->x, 0))/2.) {
             ustep = ustep/4.;
             nu_new = nu_old + ustep;
             gsl_vector_set (x, 0, del_new);
