@@ -4,73 +4,64 @@
 
 #include "functions.h"
 
+#define MASSES (1) // 0 -> w/o masses filter
+
 int main(void)
 {
-    FILE *sets = NULL;
+    FILE *posterior = NULL;
 
-    sets = fopen("../../input/jm_sets.data", "r");
-    if(sets == NULL)
+    posterior = fopen("posterior.out", "r");
+    if(posterior == NULL)
     {
         fprintf(stderr, "ERROR: file issue\n");
         return 1;
     }
 
-    FILE *posterior = NULL;
     FILE *statistics = NULL;
     FILE *matrix = NULL;
-    struct parameters satdata;
-    float m, dm;
-    struct sf_params sparams;
-    struct transtion_qtt tqtt;
-    double p[N_PARAMS][N];
-    double chi2[N];
+    float p[N_PARAMS][N];
+    float chi2[N];
+    float w[N];
     struct stats st;
 
-    posterior = fopen("posterior.out", "w+"); 
+    /*
+        ___________________
+       /
+       | 0  -> nt
+       | 1  -> pt
+       | 2  -> rhosat0
+       | 3  -> lasat0
+       | 4  -> ksat0
+       | 5  -> qsat0
+       | 6  -> zsat0
+       | 7  -> jsym0
+       | 8  -> lsym0
+       | 9  -> ksym0
+       | 10 -> qsym0
+       | 11 -> zsym0
+       | 12 -> m
+       | 13 -> dm
+       | 14 -> b
+       | 15 -> sigma0
+       | 16 -> bs
+       \___________________
+
+       */
+
 
     for(int i = 0; i < N; i++)
     {
-        fprintf(stderr, "Set %d:\n", i+1);
-
-        satdata = read_table_of_sets(sets, &m, &dm);
-
-        print_parameters(satdata); // test
-        fprintf(stderr, "\n==============================================\n\n");
-
-        sparams = fit_sf_params(satdata);
-
-        tqtt = eval_transition_qtt(satdata);
-        fprintf(posterior, "%g %g %g %g\n", tqtt.nt, tqtt.pt, sparams.sigma0, sparams.b);
-
-        p[0][i] = tqtt.nt;
-        p[1][i] = tqtt.pt;
-        p[2][i] = satdata.rhosat0;
-        p[3][i] = satdata.lasat0;
-        p[4][i] = satdata.ksat0;
-        p[5][i] = satdata.qsat0;
-        p[6][i] = satdata.zsat0;
-        p[7][i] = satdata.jsym0;
-        p[8][i] = satdata.lsym0;
-        p[9][i] = satdata.ksym0;
-        p[10][i] = satdata.qsym0;
-        p[11][i] = satdata.zsym0;
-        p[12][i] = m;
-        p[13][i] = dm;
-        p[14][i] = satdata.b;
-        p[15][i] = sparams.sigma0;
-        p[16][i] = sparams.b;
-
-        chi2[i] = sparams.chi2;
+        fscanf(posterior, "%f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f",
+                &p[0][i], &p[1][i], &p[2][i], &p[3][i], &p[4][i], &p[5][i], &p[6][i],
+                &p[7][i], &p[8][i], &p[9][i], &p[10][i], &p[11][i], &p[12][i], &p[13][i],
+                &p[14][i], &p[15][i], &p[16][i], &chi2[i]);
     }
 
-    double w[N];
-
-    /* // w/o any filter */
-    /* for(int i = 0; i < N; i++) */
-    /*     w[i] = 1.0; */
-
-    // w/ masses filter
-    calc_weights_for_masses_filter(chi2, w);
+    if (MASSES == 1)
+        calc_weights_for_masses_filter(chi2, w);
+    else
+        for(int i = 0; i < N; i++)
+            w[i] = 1.0;
 
     st = calc_stats(p, w);
 
@@ -87,7 +78,6 @@ int main(void)
                 st.correlation[i][9], st.correlation[i][10], st.correlation[i][11], st.correlation[i][12], 
                 st.correlation[i][13], st.correlation[i][14], st.correlation[i][15], st.correlation[i][16]);
 
-    fclose(sets);
     fclose(posterior);
     fclose(statistics);
     fclose(matrix);

@@ -96,23 +96,23 @@ struct transtion_qtt eval_transition_qtt(struct parameters satdata)
     return tqtt;
 }
 
-void calc_weights_for_masses_filter(double chi2[N], double w[N]) // where chi2 is associated to the masses filter
+void calc_weights_for_masses_filter(float chi2[N], float w[N]) // where chi2 is associated to the masses filter
 {
     for(int i = 0; i < N; i++)
         w[i] = exp(-chi2[i]/2.);
 }
 
-struct stats calc_stats(double data[N_PARAMS][N], double w[N])
+struct stats calc_stats(float data[N_PARAMS][N], float w[N])
 {
     struct stats result;
 
     // initializing the sum
-    double sumi[N_PARAMS];
+    float sumi[N_PARAMS];
     for(int i = 0; i < N_PARAMS; i++)
         sumi[i] = 0.;
 
     // normalizing constant (=N if w[i]=1 for each set)
-    double norm_const = 0.;
+    float norm_const = 0.;
     for(int i = 0; i < N; i++)
         norm_const += w[i];
 
@@ -138,7 +138,7 @@ struct stats calc_stats(double data[N_PARAMS][N], double w[N])
     }
 
     // initializing the sum
-    double sumij[N_PARAMS][N_PARAMS];
+    float sumij[N_PARAMS][N_PARAMS];
     for(int i = 0; i < N_PARAMS; i++)
         for(int j = 0; j < N_PARAMS; j++)
             sumij[i][j] = 0.;

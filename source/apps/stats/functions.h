@@ -17,15 +17,15 @@ struct transtion_qtt
 };
 struct transtion_qtt eval_transition_qtt(struct parameters);
 
-void calc_weights_for_masses_filter(double chi2[N], double w[N]);
+void calc_weights_for_masses_filter(float chi2[N], float w[N]);
 
 struct stats
 {
-    double average[N_PARAMS];
-    double variance[N_PARAMS];
-    double deviation[N_PARAMS];
-    double correlation[N_PARAMS][N_PARAMS];
+    float average[N_PARAMS];
+    float variance[N_PARAMS];
+    float deviation[N_PARAMS];
+    float correlation[N_PARAMS][N_PARAMS];
 };
-struct stats calc_stats(double data[N_PARAMS][N], double w[N]);
+struct stats calc_stats(float data[N_PARAMS][N], float w[N]);
 
 #endif // H_FUNCTIONS
