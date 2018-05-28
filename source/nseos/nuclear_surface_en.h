@@ -28,11 +28,13 @@ struct data
     int *aa;
     double *be;
     struct parameters satdata;
+    double p;
 };
 int be_f (const gsl_vector * x, void *data, gsl_vector * f);
-struct sf_params fit_sf_params(struct parameters satdata);
+struct sf_params fit_sf_params(struct parameters satdata, double p);
 struct sf_params
 {
+    double p;
     double sigma0;
     double b;
     double chi2;

@@ -22,10 +22,11 @@ int main(int argc, char* argv[])
     myeos = fopen(argv[4],"w+");
 
     struct parameters satdata = assign_param(argv[1]);
+    double p = 3.;
     print_parameters(satdata);
-    fprintf(stderr, "p = %d\n\n", P_SURF_TENSION);
+    fprintf(stderr, "p = %g\n\n", p);
     fprintf(stderr, "==============================================\n\n");
-    struct sf_params sparams = fit_sf_params(satdata);
+    struct sf_params sparams = fit_sf_params(satdata, p);
 
     struct compo comp;
     double muncl = -1.; // sign of muncl is negative is the outer crust

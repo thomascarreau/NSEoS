@@ -195,8 +195,10 @@ int be_f (const gsl_vector * x, void *data, gsl_vector * f)
     int *aa = ((struct data *)data)->aa;
     double *be = ((struct data *)data)->be;
     struct parameters satdata = ((struct data *)data)->satdata;
+    double p = ((struct data *)data)->p;
 
     struct sf_params prms;
+    prms.p = p;
     prms.sigma0 = gsl_vector_get (x, 0);
     prms.b = gsl_vector_get (x, 1);
 
@@ -213,8 +215,8 @@ int be_f (const gsl_vector * x, void *data, gsl_vector * f)
         // surface
         double r0 = pow(4.*PI*n0/3.,-1./3.);
         double ypnuc = (1.-ii)/2.;
-        double sigma = prms.sigma0*(pow(2.,P_SURF_TENSION+1.) + prms.b)/(pow(ypnuc,-P_SURF_TENSION) 
-                + prms.b + pow(1.-ypnuc,-P_SURF_TENSION));
+        double sigma = prms.sigma0*(pow(2.,prms.p+1.) + prms.b)/(pow(ypnuc,-prms.p) 
+                + prms.b + pow(1.-ypnuc,-prms.p));
         double esurf = 4.*PI*r0*r0*sigma*pow(aa[i],-1./3.);
         // coulomb
         double Ecoul = calc_coulomb_en(satdata, aa[i], ii, n0, 0.);
@@ -227,7 +229,7 @@ int be_f (const gsl_vector * x, void *data, gsl_vector * f)
     return GSL_SUCCESS;
 }
 
-struct sf_params fit_sf_params(struct parameters satdata)
+struct sf_params fit_sf_params(struct parameters satdata, double p)
 {
     struct sf_params prms;
 
@@ -242,7 +244,7 @@ struct sf_params fit_sf_params(struct parameters satdata)
     gsl_matrix *covar = gsl_matrix_alloc (nb_of_params, nb_of_params);
     int zz[n], aa[n];
     double be[n], weights[n];
-    struct data d = { zz, aa, be, satdata };
+    struct data d = { zz, aa, be, satdata, p };
     gsl_multifit_function_fdf f;
     double x_init[2] = { 1.08, 23.0 };
     gsl_vector_view x = gsl_vector_view_array (x_init, nb_of_params);
@@ -323,6 +325,7 @@ struct sf_params fit_sf_params(struct parameters satdata)
     fprintf (stderr, "status = %s\n\n", gsl_strerror (status));
     fprintf (stderr, "==============================================\n\n");
 
+    prms.p = p;
     prms.sigma0 = gsl_vector_get(s->x, 0);
     prms.b = gsl_vector_get(s->x, 1);
     prms.chi2 = pow(chi, 2.0);
@@ -343,8 +346,8 @@ double calc_ls_surface_en(struct sf_params sparams, double aa_, double ii_, doub
 
     r0 = pow(4.*PI*n0_/3.,-1./3.);
     ypnuc = (1. - ii_)/2.;
-    sigma = sparams.sigma0*(pow(2.,P_SURF_TENSION+1.) + sparams.b)/(pow(ypnuc,-P_SURF_TENSION) 
-            + sparams.b + pow(1.-ypnuc,-P_SURF_TENSION));
+    sigma = sparams.sigma0*(pow(2.,sparams.p+1.) + sparams.b)/(pow(ypnuc,-sparams.p) 
+            + sparams.b + pow(1.-ypnuc,-sparams.p));
     surf_energy = 4.*PI*r0*r0*sigma*pow(aa_,2./3.);
 
     return surf_energy;
