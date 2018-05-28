@@ -7,7 +7,7 @@ from random import randint
 
 def main():
     p = [2, 3, 4]
-    for i in range(1000):
+    for i in range(500):
         lasat0 = float(randint(150,170))/(-10.0)
         nsat0 = float(randint(150,170))/1000.0
         ksat0 = float(randint(190,270))

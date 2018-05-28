@@ -1,8 +1,8 @@
 #ifndef H_FUNCTIONS
 #define H_FUNCTIONS
 
-#define N (325) // wc -l jm_sets.data
-#define N_PARAMS (17) // number of parameters in the matrix
+#define N (325) // using wc -l
+#define N_PARAMS (18) // number of parameters in the matrix
 
 #include <stdio.h>
 
@@ -15,7 +15,7 @@ struct transtion_qtt
     double nt;
     double pt;
 };
-struct transtion_qtt eval_transition_qtt(struct parameters);
+struct transtion_qtt eval_transition_qtt(struct parameters, double p);
 
 void calc_weights_for_masses_filter(float chi2[N], float w[N]);
 

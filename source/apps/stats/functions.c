@@ -42,10 +42,10 @@ struct parameters read_table_of_sets(FILE *sets, float *m, float *dm)
     return satdata;
 }
 
-struct transtion_qtt eval_transition_qtt(struct parameters satdata)
+struct transtion_qtt eval_transition_qtt(struct parameters satdata, double p)
 {
     struct transtion_qtt tqtt;
-    struct sf_params sparams = fit_sf_params(satdata);
+    struct sf_params sparams = fit_sf_params(satdata, p);
     struct compo comp;
     double epsws_ic;
     double epsws_core;
