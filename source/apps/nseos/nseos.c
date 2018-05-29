@@ -37,11 +37,8 @@ int main(int argc, char* argv[])
     while(1)
     {
         comp = calc_ocrust3d_composition(nb, guess_oc, satdata, sparams);
-        if (guess_oc[0] != guess_oc[0]) // break if nan
-        {
-            fprintf(stderr, "%g\n", nb); // debug
-            break;
-        }
+        if (guess_oc[0] != guess_oc[0]) // exit if nan
+            return 1;
 
         muncl = calc_muncl(satdata, sparams, comp, nb);
         if (muncl > 0.) // neutron drip -> transtion to inner crust
@@ -65,17 +62,17 @@ int main(int argc, char* argv[])
     while(1)
     {
         comp = calc_icrust4d_composition(nb, guess_ic, satdata, sparams);
-        if (guess_ic[0] != guess_ic[0]) // break if nan
-            break;
+        if (guess_ic[0] != guess_ic[0]) // exit if nan
+            return 1;
 
-        if (nb > 0.01)
+        if (nb > 0.001)
         {
             // calculation of the energy density in the cell in the inner crust
             epsws_ic = calc_crust_ws_cell_energy_density(satdata, sparams, comp, nb);
 
             ccomp = calc_npecore_composition(nb, &guess_npecore, satdata);
-            if (guess_npecore != guess_npecore) // break if nan
-                break;
+            if (guess_npecore != guess_npecore) // exit if nan
+                return 1;
 
             // calculation of the energy density in the cell in the core
             epsws_core = calc_core_ws_cell_energy_density(satdata, ccomp, nb);
@@ -105,8 +102,8 @@ int main(int argc, char* argv[])
     while(1)
     {
         ccomp = calc_npecore_composition(nb, &guess_npecore, satdata);
-        if (guess_npecore != guess_npecore) // break if nan
-            break;
+        if (guess_npecore != guess_npecore) // exit if nan
+            return 1;
 
         mueltot = calc_egas_chemical_potential(nb*(1.-ccomp.del)/2.);
         if (mueltot - MMU > 0.) // transition to npeu matter
