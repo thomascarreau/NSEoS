@@ -39,7 +39,7 @@ int main(void)
 
             tqtt = eval_transition_qtt(satdata, p[j]);
 
-            if (tqtt.nt > 0.001)
+            if (tqtt.nt > 0.001) // =if transition occurs
                 fprintf(posterior, "%g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g\n",
                         tqtt.nt, tqtt.pt, satdata.rhosat0, satdata.lasat0, satdata.ksat0,
                         satdata.qsat0, satdata.zsat0, satdata.jsym0, satdata.lsym0, 

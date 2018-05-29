@@ -18,13 +18,6 @@ struct parameters read_table_of_sets(FILE *sets, float *m, float *dm)
             &satdata.lsym0, &satdata.ksym0, &satdata.qsym0, 
             &satdata.zsym0, &effm, &isosplit, &satdata.b);
 
-    // deleting factors
-    satdata.lasat0 = -satdata.lasat0/10.;
-    satdata.rhosat0 /= 1000.;
-    effm /= 100.;
-    isosplit /= 100.;
-    satdata.b /= 10.;
-
     // (effm,isosplit) <-> (barm,bardel)
     satdata.barm = 1./effm - 1.;
 

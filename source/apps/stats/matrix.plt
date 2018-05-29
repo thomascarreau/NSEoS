@@ -13,6 +13,6 @@ set ytics ("n_t" 0, "P_t" 1, "n_{sat}" 2, "{/Symbol l}_{sat}" 3, \
 "K_{sym}" 9, "Q_{sym}" 10, "Z_{sym}" 11, "m*/m" 12, "{/Symbol D}m*/m" 13, \
 "b" 14, "{/Symbol s}_0" 15, "b_s" 16) font 'Helvetica,35'
 
-set palette defined (0 'white', 1 'dark-blue')
+set palette defined (0 'white', 1 'green')
 
 p 'matrix.out' matrix w image
