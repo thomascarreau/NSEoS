@@ -54,24 +54,21 @@ struct transtion_qtt eval_transition_qtt(struct parameters satdata, double p)
         if (guess_ic[0] != guess_ic[0]) // break if nan
             break;
 
-        if (nb > 0.01)
+        // calculation of the energy density in the cell in the inner crust
+        epsws_ic = calc_crust_ws_cell_energy_density(satdata, sparams, comp, nb);
+
+        ccomp = calc_npecore_composition(nb, &guess_npecore, satdata);
+        if (guess_npecore != guess_npecore) // break if nan
+            break;
+
+        // calculation of the energy density in the cell in the core
+        epsws_core = calc_core_ws_cell_energy_density(satdata, ccomp, nb);
+
+        if (epsws_core < epsws_ic) // crust-core transition
         {
-            // calculation of the energy density in the cell in the inner crust
-            epsws_ic = calc_crust_ws_cell_energy_density(satdata, sparams, comp, nb);
-
-            ccomp = calc_npecore_composition(nb, &guess_npecore, satdata);
-            if (guess_npecore != guess_npecore) // break if nan
-                break;
-
-            // calculation of the energy density in the cell in the core
-            epsws_core = calc_core_ws_cell_energy_density(satdata, ccomp, nb);
-
-            if (epsws_core < epsws_ic) // crust-core transition
-            {
-                fprintf(stderr, "e_core < e_crust\n");
-                transition = 1; // transition occurs
-                break;
-            }
+            fprintf(stderr, "e_core < e_crust\n");
+            transition = 1; // transition occurs
+            break;
         }
 
         nb += 0.0001;
