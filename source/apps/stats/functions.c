@@ -46,7 +46,7 @@ struct transtion_qtt eval_transition_qtt(struct parameters satdata, double p)
     double guess_ic[4] = {100., 0.4, 0.14, 1.e-4}; // initial guess for the inner crust
     struct core_compo ccomp;
     double guess_npecore = 0.7; // initial guess for the core
-    double nb = 0.001;
+    double nb = 0.0005;
 
     while(1)
     {

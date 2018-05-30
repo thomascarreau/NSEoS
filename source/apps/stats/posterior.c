@@ -8,7 +8,7 @@ int main(void)
 {
     FILE *sets = NULL;
 
-    sets = fopen("../../input/jm_sets.data", "r");
+    sets = fopen("../../input/mw_sets.data", "r");
     if(sets == NULL)
     {
         fprintf(stderr, "ERROR: file issue\n");
@@ -17,7 +17,7 @@ int main(void)
 
     FILE *posterior = NULL;
     struct parameters satdata;
-    double p[3] = {2., 3., 4.};
+    double p = 3.;
     float m, dm;
     struct sf_params sparams;
     struct transtion_qtt tqtt;
@@ -33,19 +33,16 @@ int main(void)
         print_parameters(satdata); // test
         fprintf(stderr, "\n==============================================\n\n");
 
-        for(int j = 0; j < 3; j++)
-        {
-            sparams = fit_sf_params(satdata, p[j]);
+        sparams = fit_sf_params(satdata, p);
 
-            tqtt = eval_transition_qtt(satdata, p[j]);
+        tqtt = eval_transition_qtt(satdata, p);
 
-            if (tqtt.nt > 0.001) // =if transition occurs
-                fprintf(posterior, "%g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g\n",
-                        tqtt.nt, tqtt.pt, satdata.rhosat0, satdata.lasat0, satdata.ksat0,
-                        satdata.qsat0, satdata.zsat0, satdata.jsym0, satdata.lsym0, 
-                        satdata.ksym0, satdata.qsym0, satdata.zsym0, m, dm, satdata.b, 
-                        sparams.p, sparams.sigma0, sparams.b, sparams.chi2);
-        }
+        if (tqtt.nt > 0.0005) // =if transition occurs
+            fprintf(posterior, "%g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g\n",
+                    tqtt.nt, tqtt.pt, satdata.rhosat0, satdata.lasat0, satdata.ksat0,
+                    satdata.qsat0, satdata.zsat0, satdata.jsym0, satdata.lsym0, 
+                    satdata.ksym0, satdata.qsym0, satdata.zsym0, m, dm, satdata.b, 
+                    sparams.p, sparams.sigma0, sparams.b, sparams.chi2);
     }
 
     fclose(sets);

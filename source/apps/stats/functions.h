@@ -1,7 +1,7 @@
 #ifndef H_FUNCTIONS
 #define H_FUNCTIONS
 
-#define N (325) // using wc -l
+#define N (998) // using wc -l
 #define N_PARAMS (18) // number of parameters in the matrix
 
 #include <stdio.h>
