@@ -10,12 +10,13 @@
 
 struct parameters read_table_of_sets(FILE *, float *, float *);
 
-struct transtion_qtt
+struct transition_qtt
 {
     double nt;
     double pt;
 };
-struct transtion_qtt eval_transition_qtt(struct parameters, double p);
+void eval_transition_qtt(struct parameters, double p,
+        struct transition_qtt *tqtt);
 
 void calc_weights_for_masses_filter(float chi2[N], float w[N]);
 

@@ -35,9 +35,9 @@ struct parameters read_table_of_sets(FILE *sets, float *m, float *dm)
     return satdata;
 }
 
-struct transtion_qtt eval_transition_qtt(struct parameters satdata, double p)
+void eval_transition_qtt(struct parameters satdata, double p,
+        struct transition_qtt *tqtt)
 {
-    struct transtion_qtt tqtt;
     struct sf_params sparams = fit_sf_params(satdata, p);
     struct compo comp;
     double epsws_ic;
@@ -52,14 +52,14 @@ struct transtion_qtt eval_transition_qtt(struct parameters satdata, double p)
     {
         comp = calc_icrust4d_composition(nb, guess_ic, satdata, sparams);
         if (guess_ic[0] != guess_ic[0]) // break if nan
-            break;
+            return;
 
         // calculation of the energy density in the cell in the inner crust
         epsws_ic = calc_crust_ws_cell_energy_density(satdata, sparams, comp, nb);
 
         ccomp = calc_npecore_composition(nb, &guess_npecore, satdata);
         if (guess_npecore != guess_npecore) // break if nan
-            break;
+            return;
 
         // calculation of the energy density in the cell in the core
         epsws_core = calc_core_ws_cell_energy_density(satdata, ccomp, nb);
@@ -80,10 +80,8 @@ struct transtion_qtt eval_transition_qtt(struct parameters satdata, double p)
     fprintf(stderr, "\n==============================================\n");
     fprintf(stderr, "==============================================\n\n");
 
-    tqtt.nt = nb; 
-    tqtt.pt = calc_core_ws_cell_pressure(satdata, ccomp, nb);
-
-    return tqtt;
+    tqtt->nt = nb; 
+    tqtt->pt = calc_core_ws_cell_pressure(satdata, ccomp, nb);
 }
 
 void calc_weights_for_masses_filter(float chi2[N], float w[N]) // where chi2 is associated to the masses filter

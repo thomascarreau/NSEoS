@@ -139,7 +139,7 @@ struct compo calc_ocrust3d_composition(double nb_, double *guess,
             gsl_multiroot_fsolver_set (s, &f, x);
             aa_new = gsl_vector_get (s->x, 0.);
         }
-        while (gsl_vector_get (s->x, 1) < 0.0 || gsl_vector_get (s->x, 1) > 0.5) {
+        while (gsl_vector_get (s->x, 1) < -1.0 || gsl_vector_get (s->x, 1) > 1.0) {
             bstep = bstep/4.;
             basym_new = basym_old + bstep;
             gsl_vector_set (x, 0, aa_new);
@@ -163,10 +163,20 @@ struct compo calc_ocrust3d_composition(double nb_, double *guess,
 
     while (status == GSL_CONTINUE && iter < 5000);
 
-    eq.aa = gsl_vector_get(s->x, 0);
-    eq.del = gsl_vector_get(s->x, 1);
-    eq.n0 = gsl_vector_get(s->x, 2);
-    eq.ng = 0.;
+    if (iter == 5000)
+    {
+        eq.aa = NAN;
+        eq.del = NAN;
+        eq.n0 = NAN;
+        eq.ng = 0.0;
+    } 
+    else 
+    {
+        eq.aa = gsl_vector_get(s->x, 0);
+        eq.del = gsl_vector_get(s->x, 1);
+        eq.n0 = gsl_vector_get(s->x, 2);
+        eq.ng = 0.0;
+    }
 
     guess[0] = eq.aa;
     guess[1] = eq.del;
@@ -275,7 +285,7 @@ struct compo calc_icrust4d_composition(double nb_, double *guess,
             gsl_multiroot_fsolver_set (s, &f, x);
             aa_new = gsl_vector_get (s->x, 0.);
         }
-        while (gsl_vector_get (s->x, 1) < 0.1 || gsl_vector_get (s->x, 1) > 1.0) {
+        while (gsl_vector_get (s->x, 1) < -1.0 || gsl_vector_get (s->x, 1) > 1.0) {
             bstep = bstep/4.;
             basym_new = basym_old + bstep;
             gsl_vector_set (x, 0, aa_new);
@@ -295,7 +305,7 @@ struct compo calc_icrust4d_composition(double nb_, double *guess,
             gsl_multiroot_fsolver_set (s, &f, x);
             n0_new = gsl_vector_get (s->x, 2);
         }
-        while (gsl_vector_get (s->x, 3) < 0. || gsl_vector_get (s->x, 3) > nb_) {
+        while (gsl_vector_get (s->x, 3) < 1.e-10 || gsl_vector_get (s->x, 3) > nb_) {
             gstep = gstep/4.;
             ng_new = ng_old + gstep;
             gsl_vector_set (x, 0, aa_new);
@@ -311,10 +321,20 @@ struct compo calc_icrust4d_composition(double nb_, double *guess,
 
     while (status == GSL_CONTINUE && iter < 5000);
 
-    eq.aa = gsl_vector_get(s->x, 0);
-    eq.del = gsl_vector_get(s->x, 1);
-    eq.n0 = gsl_vector_get(s->x, 2);
-    eq.ng = gsl_vector_get(s->x, 3);
+    if (iter == 5000)
+    {
+        eq.aa = NAN;
+        eq.del = NAN;
+        eq.n0 = NAN;
+        eq.ng = NAN;
+    } 
+    else 
+    {
+        eq.aa = gsl_vector_get(s->x, 0);
+        eq.del = gsl_vector_get(s->x, 1);
+        eq.n0 = gsl_vector_get(s->x, 2);
+        eq.ng = gsl_vector_get(s->x, 3);
+    }
 
     guess[0] = eq.aa;
     guess[1] = eq.del;

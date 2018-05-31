@@ -20,7 +20,7 @@ int main(void)
     double p = 3.;
     float m, dm;
     struct sf_params sparams;
-    struct transtion_qtt tqtt;
+    struct transition_qtt tqtt;
 
     posterior = fopen("posterior.out", "w+"); 
 
@@ -35,7 +35,9 @@ int main(void)
 
         sparams = fit_sf_params(satdata, p);
 
-        tqtt = eval_transition_qtt(satdata, p);
+        tqtt.nt = 0.0005;
+
+        eval_transition_qtt(satdata, p, &tqtt);
 
         if (tqtt.nt > 0.0005) // =if transition occurs
             fprintf(posterior, "%g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g\n",
