@@ -161,9 +161,9 @@ struct compo calc_ocrust3d_composition(double nb_, double *guess,
         status = gsl_multiroot_test_residual (s->f, 9e-9);
     }
 
-    while (status == GSL_CONTINUE && iter < 5000);
+    while (status == GSL_CONTINUE && iter < 1000);
 
-    if (iter == 5000)
+    if (iter == 1000)
     {
         eq.aa = NAN;
         eq.del = NAN;
@@ -295,7 +295,7 @@ struct compo calc_icrust4d_composition(double nb_, double *guess,
             gsl_multiroot_fsolver_set (s, &f, x);
             basym_new = gsl_vector_get (s->x, 1);
         }
-        while (gsl_vector_get (s->x, 2) < 0.) {
+        while (gsl_vector_get (s->x, 2) < 0. || gsl_vector_get(s->x, 2) > 1.0) {
             rstep = rstep/4.;
             n0_new = n0_old + rstep;
             gsl_vector_set (x, 0, aa_new);
@@ -319,9 +319,9 @@ struct compo calc_icrust4d_composition(double nb_, double *guess,
         status = gsl_multiroot_test_residual (s->f, 9e-9);
     }
 
-    while (status == GSL_CONTINUE && iter < 5000);
+    while (status == GSL_CONTINUE && iter < 1000);
 
-    if (iter == 5000)
+    if (iter == 1000)
     {
         eq.aa = NAN;
         eq.del = NAN;
