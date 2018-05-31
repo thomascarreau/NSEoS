@@ -4,7 +4,7 @@
 
 #include "functions.h"
 
-#define MASSES (1) // 0 -> w/o masses filter
+#define MASSES (0) // 0 -> w/o masses filter
 
 int main(void)
 {
@@ -42,8 +42,9 @@ int main(void)
        | 12 -> m
        | 13 -> dm
        | 14 -> b
-       | 15 -> sigma0
-       | 16 -> bs
+       | 15 -> p
+       | 16 -> sigma0
+       | 17 -> bs
        \___________________
 
        */
@@ -51,10 +52,10 @@ int main(void)
 
     for(int i = 0; i < N; i++)
     {
-        fscanf(posterior, "%f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f",
+        fscanf(posterior, "%f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f",
                 &p[0][i], &p[1][i], &p[2][i], &p[3][i], &p[4][i], &p[5][i], &p[6][i],
                 &p[7][i], &p[8][i], &p[9][i], &p[10][i], &p[11][i], &p[12][i], &p[13][i],
-                &p[14][i], &p[15][i], &p[16][i], &chi2[i]);
+                &p[14][i], &p[15][i], &p[16][i], &p[17][i], &chi2[i]);
     }
 
     if (MASSES == 1)
@@ -72,11 +73,12 @@ int main(void)
         fprintf(statistics, "%g %g %g\n", st.average[i], st.variance[i], st.deviation[i]);
 
     for(int i = 0; i < N_PARAMS; i++)
-        fprintf(matrix, "%g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g\n", st.correlation[i][0],
+        fprintf(matrix, "%g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g\n", st.correlation[i][0],
                 st.correlation[i][1], st.correlation[i][2], st.correlation[i][3], st.correlation[i][4], 
                 st.correlation[i][5], st.correlation[i][6], st.correlation[i][7], st.correlation[i][8], 
                 st.correlation[i][9], st.correlation[i][10], st.correlation[i][11], st.correlation[i][12], 
-                st.correlation[i][13], st.correlation[i][14], st.correlation[i][15], st.correlation[i][16]);
+                st.correlation[i][13], st.correlation[i][14], st.correlation[i][15], st.correlation[i][16],
+                st.correlation[i][17]);
 
     fclose(posterior);
     fclose(statistics);

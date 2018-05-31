@@ -40,13 +40,29 @@ void eval_transition_qtt(struct parameters satdata, double p,
 {
     struct sf_params sparams = fit_sf_params(satdata, p);
     struct compo comp;
-    double epsws_ic;
-    double epsws_core;
     int transition = 0;
-    double guess_ic[4] = {100., 0.4, 0.14, 1.e-4}; // initial guess for the inner crust
+    double guess_oc[3] = {60., 0.15, 0.9*satdata.rhosat0}; // initial guess for the outer crust
+    double muncl = -1.; // sign of muncl is negative is the outer crust
+    double nb = 1.e-6;
+
+    while(1)
+    {
+        comp = calc_ocrust3d_composition(nb, guess_oc, satdata, sparams);
+        if (guess_oc[0] != guess_oc[0]) // exit if nan
+            return;
+
+        muncl = calc_muncl(satdata, sparams, comp, nb);
+        if (muncl > 0.) // neutron drip -> transtion to inner crust
+            break;
+
+        nb += nb/50.;
+    }
+
+    double guess_ic[4] = {guess_oc[0], guess_oc[1], guess_oc[2], 1.e-4}; // initial guess for the inner crust
     struct core_compo ccomp;
     double guess_npecore = 0.7; // initial guess for the core
-    double nb = 0.0005;
+    double epsws_ic;
+    double epsws_core;
 
     while(1)
     {
