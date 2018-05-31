@@ -40,7 +40,6 @@ void eval_transition_qtt(struct parameters satdata, double p,
 {
     struct sf_params sparams = fit_sf_params(satdata, p);
     struct compo comp;
-    int transition = 0;
     double guess_oc[3] = {60., 0.15, 0.9*satdata.rhosat0}; // initial guess for the outer crust
     double muncl = -1.; // sign of muncl is negative is the outer crust
     double nb = 1.e-6;
@@ -63,6 +62,7 @@ void eval_transition_qtt(struct parameters satdata, double p,
     double guess_npecore = 0.7; // initial guess for the core
     double epsws_ic;
     double epsws_core;
+    int transition = 0;
 
     while(1)
     {
