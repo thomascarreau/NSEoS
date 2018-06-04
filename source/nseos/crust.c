@@ -315,6 +315,15 @@ struct compo calc_icrust4d_composition(double nb_, double *guess,
             gsl_multiroot_fsolver_set (s, &f, x);
             ng_new = gsl_vector_get (s->x, 3);
         }
+        
+        if  (gsl_vector_get(s->x,1) > 0.99)
+            iter = 1000;
+
+        fprintf(stderr, "%g %g %g %g %g\n", nb_,
+                gsl_vector_get(s->x, 0),
+                gsl_vector_get(s->x, 1),
+                gsl_vector_get(s->x, 2),
+                gsl_vector_get(s->x, 3));
 
         status = gsl_multiroot_test_residual (s->f, 9e-9);
     }
