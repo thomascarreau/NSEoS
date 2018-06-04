@@ -4,25 +4,31 @@
 
 #include "functions.h"
 
-int main(void)
+int main(int argc, char* argv[])
 {
+    if(argc != 3)
+    {
+        fprintf(stderr, "ERROR: syntax is './posterior list_of_sets.in posterior.out\n");
+    }
+
     FILE *sets = NULL;
 
-    sets = fopen("../../input/jm_sets.data", "r");
+    sets = fopen(argv[1], "r");
+
     if(sets == NULL)
     {
         fprintf(stderr, "ERROR: file issue\n");
         return 1;
     }
 
-    FILE *posterior = NULL;
     struct parameters satdata;
     double p[3] = {2.5, 3., 3.5};
     float m, dm;
     struct sf_params sparams;
     struct transition_qtt tqtt;
+    FILE *posterior = NULL;
 
-    posterior = fopen("posterior.out", "w+"); 
+    posterior = fopen(argv[2], "w+"); 
 
     int line = 1;
     while(read_table_of_sets(sets, &satdata, &m, &dm) == 0)
