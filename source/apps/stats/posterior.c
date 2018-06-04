@@ -8,7 +8,7 @@ int main(int argc, char* argv[])
 {
     if(argc != 3)
     {
-        fprintf(stderr, "ERROR: syntax is './posterior list_of_sets.in posterior.out\n");
+        fprintf(stderr, "ERROR: syntax is './posterior list_of_sets.data posterior.out\n");
     }
 
     FILE *sets = NULL;
