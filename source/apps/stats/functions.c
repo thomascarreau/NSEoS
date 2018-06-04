@@ -6,33 +6,37 @@
 
 #include "functions.h"
 
-struct parameters read_table_of_sets(FILE *sets, float *m, float *dm)
+int read_table_of_sets(FILE *sets, struct parameters *satdata, float *m, float *dm)
 {
-    struct parameters satdata;
     float effm, isosplit, kv;
 
-    // reading the parameters
-    fscanf(sets, "%f %f %f %f %f %f %f %f %f %f %f %f %f", 
-            &satdata.lasat0, &satdata.rhosat0, &satdata.ksat0,
-            &satdata.qsat0, &satdata.zsat0, &satdata.jsym0, 
-            &satdata.lsym0, &satdata.ksym0, &satdata.qsym0, 
-            &satdata.zsym0, &effm, &isosplit, &satdata.b);
+    int buffer = 
+        fscanf(sets, "%f %f %f %f %f %f %f %f %f %f %f %f %f", 
+                &satdata->lasat0, &satdata->rhosat0, &satdata->ksat0,
+                &satdata->qsat0, &satdata->zsat0, &satdata->jsym0, 
+                &satdata->lsym0, &satdata->ksym0, &satdata->qsym0, 
+                &satdata->zsym0, &effm, &isosplit, &satdata->b);
 
-    // (effm,isosplit) <-> (barm,bardel)
-    satdata.barm = 1./effm - 1.;
+    if (buffer == 13)
+    {
+        // (effm,isosplit) <-> (barm,bardel)
+        satdata->barm = 1./effm - 1.;
 
-    if (isosplit == 0.0)
-        kv = satdata.barm - 0.5*isosplit*(1.+satdata.barm)*(1.+satdata.barm); // eq (8) of arXiv:1708:06894
+        if (isosplit == 0.0)
+            kv = satdata->barm - 0.5*isosplit*(1.+satdata->barm)*(1.+satdata->barm); // eq (8) of arXiv:1708:06894
+        else
+            kv = (sqrt((satdata->barm + 1.)*(satdata->barm + 1.)*isosplit*isosplit + 1.)
+                    + satdata->barm * isosplit - 1.)/isosplit; // see: ref [103] of arXiv:1708:06894
+
+        satdata->bardel = satdata->barm - kv;
+
+        *m = effm;
+        *dm = isosplit;
+
+        return 0;
+    }
     else
-        kv = (sqrt((satdata.barm + 1.)*(satdata.barm + 1.)*isosplit*isosplit + 1.)
-                + satdata.barm * isosplit - 1.)/isosplit; // see: ref [103] of arXiv:1708:06894
-
-    satdata.bardel = satdata.barm - kv;
-
-    *m = effm;
-    *dm = isosplit;
-
-    return satdata;
+        return 1;
 }
 
 void eval_transition_qtt(struct parameters satdata, double p,

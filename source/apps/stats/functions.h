@@ -1,14 +1,14 @@
 #ifndef H_FUNCTIONS
 #define H_FUNCTIONS
 
-#define N (998) // using wc -l
+#define N (325) // using wc -l
 #define N_PARAMS (18) // number of parameters in the matrix
 
 #include <stdio.h>
 
 #include "../../nseos/empirical.h"
 
-struct parameters read_table_of_sets(FILE *, float *, float *);
+int read_table_of_sets(FILE *, struct parameters *satdata, float *m, float *dm);
 
 struct transition_qtt
 {

@@ -8,7 +8,7 @@ int main(void)
 {
     FILE *sets = NULL;
 
-    sets = fopen("../../input/rng_sets.data", "r");
+    sets = fopen("../../input/jm_sets.data", "r");
     if(sets == NULL)
     {
         fprintf(stderr, "ERROR: file issue\n");
@@ -24,16 +24,15 @@ int main(void)
 
     posterior = fopen("posterior.out", "w+"); 
 
-    for(int i = 0; i < N; i++)
+    int line = 1;
+    while(read_table_of_sets(sets, &satdata, &m, &dm) == 0)
     {
-        satdata = read_table_of_sets(sets, &m, &dm);
-
-        print_parameters(satdata); // test
+        print_parameters(satdata);
         fprintf(stderr, "\n==============================================\n\n");
 
         for(int j = 0; j < 3; j++)
         {
-            fprintf(stderr, "Set %d (p=%g):\n", i+1, p[j]);
+            fprintf(stderr, "Set %d (p=%g):\n", line, p[j]);
 
             sparams = fit_sf_params(satdata, p[j]);
 
@@ -48,6 +47,8 @@ int main(void)
                         satdata.ksym0, satdata.qsym0, satdata.zsym0, m, dm, satdata.b, 
                         sparams.p, sparams.sigma0, sparams.b, sparams.chi2);
         }
+
+        line += 1;
     }
 
     fclose(sets);
