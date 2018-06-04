@@ -8,7 +8,7 @@ int main(void)
 {
     FILE *sets = NULL;
 
-    sets = fopen("../../input/mw_sets.data", "r");
+    sets = fopen("sets.data", "r");
     if(sets == NULL)
     {
         fprintf(stderr, "ERROR: file issue\n");
@@ -26,8 +26,6 @@ int main(void)
 
     for(int i = 0; i < N; i++)
     {
-        fprintf(stderr, "Set %d:\n", i+1);
-
         satdata = read_table_of_sets(sets, &m, &dm);
 
         print_parameters(satdata); // test
@@ -35,6 +33,8 @@ int main(void)
 
         for(int j = 0; j < 3; j++)
         {
+            fprintf(stderr, "Set %d (p=%g):\n", i+1, p[j]);
+
             sparams = fit_sf_params(satdata, p[j]);
 
             tqtt.nt = 0.0005;
