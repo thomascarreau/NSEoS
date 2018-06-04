@@ -8,7 +8,7 @@ int main(void)
 {
     FILE *sets = NULL;
 
-    sets = fopen("sets.data", "r");
+    sets = fopen("../../input/rng_sets.data", "r");
     if(sets == NULL)
     {
         fprintf(stderr, "ERROR: file issue\n");
