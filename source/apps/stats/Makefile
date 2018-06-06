@@ -12,16 +12,13 @@ OBJS = $(STATSBUILDDIR)/functions.o \
 	   $(BUILDDIR)/nuclear_surface_en.o \
 	   $(BUILDDIR)/nuclear_matter.o \
 	   $(BUILDDIR)/empirical.o
-APPS = posterior \
-	   stats
+APP = posterior
 
-all : $(STATSBUILDDIR) \
+$(APP) : $(STATSBUILDDIR) \
 	$(BUILDDIR) \
 	$(OBJS) \
-	posterior.c \
-	stats.c
+	posterior.c
 	$(CC) -o posterior posterior.c $(OBJS) -lgsl -lgslcblas -lm
-	$(CC) -o stats stats.c $(OBJS) -lgsl -lgslcblas -lm
 
 $(STATSBUILDDIR):
 	$(MKDIR) $(STATSBUILDDIR)
@@ -71,4 +68,4 @@ $(STATSBUILDDIR)/functions.o : functions.h \
 	$(CC) -c functions.c -o $(STATSBUILDDIR)/functions.o
 
 clean:
-	$(RM) $(OBJS) $(APPS)
+	$(RM) $(OBJS) $(APP)
