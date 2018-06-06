@@ -35,7 +35,7 @@ def calcStats(posterior):
     for i in range(NPARAMS):
         sig.append(np.std(p[i]))
     # correlation matrix
-    cm = np.corrcoef(p)
+    cm = np.absolute(np.corrcoef(p))
     #==========================================================
     statistics = open(sys.argv[2], "w")
     for i in range(NPARAMS):
