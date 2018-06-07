@@ -9,6 +9,7 @@ struct hnm
 {
     double enpernuc;
     double p; // pressure
+    double vs2; // (vs,n/c)^2
     double mun;
     double jsym;
     double lsym;
