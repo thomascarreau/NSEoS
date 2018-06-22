@@ -191,7 +191,7 @@ struct core_compo calc_npeucore_composition(double nb_, double *guess, struct pa
             gsl_multiroot_fsolver_set (s, &f, x);
             del_new = gsl_vector_get (s->x, 0);
             count += 1;
-            if (count > 1000)
+            if (count > 100)
             {
                 eq.del = NAN;
                 eq.nu = NAN;
@@ -209,7 +209,7 @@ struct core_compo calc_npeucore_composition(double nb_, double *guess, struct pa
             gsl_multiroot_fsolver_set (s, &f, x);
             nu_new = gsl_vector_get (s->x, 1);
             count += 1;
-            if (count > 1000)
+            if (count > 100)
             {
                 eq.del = NAN;
                 eq.nu = NAN;
@@ -221,7 +221,7 @@ struct core_compo calc_npeucore_composition(double nb_, double *guess, struct pa
 
         status = gsl_multiroot_test_residual (s->f, 9e-9);
     }
-    while (status == GSL_CONTINUE && iter < 1000);
+    while (status == GSL_CONTINUE && iter < 100);
 
     eq.del = gsl_vector_get(s->x, 0);
     eq.nu = gsl_vector_get(s->x, 1);
