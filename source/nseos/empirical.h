@@ -1,6 +1,8 @@
 #ifndef H_EMPIRICAL
 #define H_EMPIRICAL
 
+#include <stdio.h>
+
 struct parameters
 {
     float rhosat0;
@@ -34,5 +36,6 @@ struct skyrme_parameters
 struct parameters assign_param(char set[]);
 void print_parameters(struct parameters satdata);
 struct skyrme_parameters assign_skyrme_param(struct skyrme_parameters coeff);
+int read_table_of_sets(FILE *, struct parameters *satdata, float *m, float *dm);
 
 #endif // H_EMPIRICAL
