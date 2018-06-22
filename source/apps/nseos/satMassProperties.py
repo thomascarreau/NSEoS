@@ -17,7 +17,7 @@ def CalcBardel(m, dm):
     kv = CalcKv(m, dm)
     return ks - kv
 
-def DoComparisonWithPaper():
+def CompareWithPaper():
     mass_satdata = [[0.67,0.26,"ratp   ",0.78], [0.80,0.03,"bsk14  ",0.28], 
             [0.80,0.04,"bsk16  ",0.28], [0.80,0.04,"bsk17  ",0.28], 
             [0.69,-0.19,"sly4   ",0.25], [0.69,0.21,"nrapr  ",0.66], 

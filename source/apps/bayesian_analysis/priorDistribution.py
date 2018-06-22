@@ -6,6 +6,8 @@ from random import randint
 # lasat0 nsat0 ksat0 qsat0 zsat0 jsym0 lsym0 ksym0 qsym0 zsym0 ms dms b
 
 def GenerateSet():
+    ''' Randomly generate a set of empirical parameters
+    given a uniform distribution '''
     print \
             float(randint(150,170))/(-10.0), \
             float(randint(150,170))/1000.0, \

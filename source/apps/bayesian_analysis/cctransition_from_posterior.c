@@ -7,7 +7,7 @@ int main(int argc, char* argv[])
 {
     if(argc != 3)
     {
-        fprintf(stderr, "ERROR: syntax is './posterior list_of_sets.data posterior.out\n");
+        fprintf(stderr, "ERROR: syntax is './cctransition_from_posterior posterior.data new_posterior.out\n");
         return 1;
     }
 
