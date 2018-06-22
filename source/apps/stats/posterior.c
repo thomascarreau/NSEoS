@@ -1,8 +1,7 @@
 #include <math.h>
 
 #include "../../nseos/nuclear_surface_en.h"
-
-#include "functions.h"
+#include "../../nseos/eos.h"
 
 int main(int argc, char* argv[])
 {

@@ -3,8 +3,7 @@ RM = rm -r
 LIBDIR = ../../nseos
 MKDIR = mkdir -p
 BUILDDIR = ../../nseos/build
-STATSBUILDDIR = build
-OBJS = $(STATSBUILDDIR)/functions.o \
+OBJS = $(BUILDDIR)/eos.o \
 	   $(BUILDDIR)/core.o \
 	   $(BUILDDIR)/crust.o \
 	   $(BUILDDIR)/nuclear_en.o \
@@ -14,14 +13,10 @@ OBJS = $(STATSBUILDDIR)/functions.o \
 	   $(BUILDDIR)/empirical.o
 APP = posterior
 
-$(APP) : $(STATSBUILDDIR) \
-	$(BUILDDIR) \
+$(APP) : $(BUILDDIR) \
 	$(OBJS) \
 	posterior.c
 	$(CC) -o $(APP) posterior.c $(OBJS) -lgsl -lgslcblas -lm
-
-$(STATSBUILDDIR):
-	$(MKDIR) $(STATSBUILDDIR)
 
 $(BUILDDIR):
 	$(MKDIR) $(BUILDDIR)
@@ -63,9 +58,10 @@ $(BUILDDIR)/core.o : $(LIBDIR)/core.h \
 	$(LIBDIR)/modeling.h
 	$(CC) -c $(LIBDIR)/core.c -o $(BUILDDIR)/core.o
 
-$(STATSBUILDDIR)/functions.o : functions.h \
-	functions.c
-	$(CC) -c functions.c -o $(STATSBUILDDIR)/functions.o
+$(BUILDDIR)/eos.o : $(LIBDIR)/eos.h \
+	$(LIBDIR)/eos.c \
+	$(LIBDIR)/modeling.h
+	$(CC) -c $(LIBDIR)/eos.c -o $(BUILDDIR)/eos.o
 
 clean:
 	$(RM) $(OBJS) $(APP)
