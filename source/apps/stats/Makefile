@@ -18,7 +18,7 @@ $(APP) : $(STATSBUILDDIR) \
 	$(BUILDDIR) \
 	$(OBJS) \
 	posterior.c
-	$(CC) -o posterior posterior.c $(OBJS) -lgsl -lgslcblas -lm
+	$(CC) -o $(APP) posterior.c $(OBJS) -lgsl -lgslcblas -lm
 
 $(STATSBUILDDIR):
 	$(MKDIR) $(STATSBUILDDIR)
