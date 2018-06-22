@@ -33,7 +33,7 @@ def CompareWithPaper():
     print ""
 
 def main():
-    DoComparisonWithPaper()
+    CompareWithPaper()
     keeplooping = 1
     while (keeplooping == 1):
         m = float(raw_input("m = "))
