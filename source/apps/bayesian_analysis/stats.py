@@ -27,7 +27,10 @@ def calculateWeigths(posterior):
 def calcWeightedAverageAndDeviation(values, weights=None):
     average = np.average(values, weights=weights)
     variance = np.average((values-average)**2, weights=weights)
-    return (average, math.sqrt(variance))
+    if variance != 0.:
+        return (average, math.sqrt(variance))
+    else:
+        return (average, 42)
 
 def calcWeightedCorrelationCoefficient(values1, values2, weights=None):
     avg_and_std1 = calcWeightedAverageAndDeviation(values1, weights)  
@@ -42,8 +45,8 @@ def calculateCorrelationMatrix(posterior, weights=None):
             [], [], [], [], [], [], [], [], []]
     for param1 in range(NPARAMS):
         for param2 in range(NPARAMS):
-            m[param1].append(calcWeightedCorrelationCoefficient(posterior[param1],\
-                    posterior[param2]))
+            m[param1].append(abs(calcWeightedCorrelationCoefficient(posterior[param1],\
+                    posterior[param2])))
     return m
 
 def printStatistics(posterior, weights=None):
@@ -55,16 +58,15 @@ def printStatistics(posterior, weights=None):
 
 def printCorrelationMatrix(m):
     matrix = open(sys.argv[3], "w")
-    for param1 in range(NPARAMS):
-        for param2 in range(NPARAMS):
+    for param1 in range(0,15) + range(16,NPARAMS):
+        for param2 in range(0,15) + range(16, NPARAMS):
             matrix.write(str(m[param1][param2]) + " ")
         matrix.write("\n")
     matrix.close()
 
 def main():
     if len(sys.argv) != 4:
-        sys.exit("ERROR: syntax is 'python2 stats.py posterior.in \
-                statistics.out matrix.out'")
+        sys.exit("ERROR: syntax is 'python2 stats.py posterior.in statistics.out matrix.out'")
     posterior = readPosterior()
     w = calculateWeigths(posterior)
     p = np.array(posterior).astype(np.float)
