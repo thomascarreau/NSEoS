@@ -11,12 +11,12 @@ OBJS = $(BUILDDIR)/eos.o \
 	   $(BUILDDIR)/nuclear_surface_en.o \
 	   $(BUILDDIR)/nuclear_matter.o \
 	   $(BUILDDIR)/empirical.o
-APP = cctransition_from_posterior
+APP = posterior
 
 $(APP) : $(BUILDDIR) \
 	$(OBJS) \
-	cctransition_from_posterior.c
-	$(CC) -o $(APP) cctransition_from_posterior.c $(OBJS) -lgsl -lgslcblas -lm
+	posterior.c
+	$(CC) -o $(APP) posterior.c $(OBJS) -lgsl -lgslcblas -lm
 
 $(BUILDDIR):
 	$(MKDIR) $(BUILDDIR)

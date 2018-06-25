@@ -24,7 +24,7 @@ def GenerateSet():
             float(randint(10,100))/10.0
 
 def main():
-    for i in range(1000):
+    for i in range(100000000):
         GenerateSet()
 
 if __name__ == "__main__":
