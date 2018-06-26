@@ -39,14 +39,13 @@ int main(int argc, char* argv[])
     struct hnm test_hnm_nm;
     int ld_test;
 
-    double p = 3.;
+    double p[3] = {2.5, 3.0, 3.5};
     struct sf_params sparams;
     struct transition_qtt tqtt;
     FILE *posterior = NULL;
 
     posterior = fopen(argv[2], "w+"); 
 
-    int line = 1;
     while(read_table_of_sets(rng_sets, &satdata, &m, &dm) == 0)
     {
         ld_test = 0;
@@ -67,18 +66,19 @@ int main(int argc, char* argv[])
 
         if(ld_test == 0)
         {
-            sparams = fit_sf_params(satdata, p);
-            tqtt.nt = 0.0005;
-            eval_transition_qtt(satdata, sparams.p, &tqtt);
-            if (tqtt.nt > 0.0005)
-                fprintf(posterior, "%g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g\n",
-                        tqtt.nt, tqtt.pt, satdata.rhosat0, satdata.lasat0, satdata.ksat0,
-                        satdata.qsat0, satdata.zsat0, satdata.jsym0, satdata.lsym0, 
-                        satdata.ksym0, satdata.qsym0, satdata.zsym0, m, dm, satdata.b, 
-                        sparams.p, sparams.sigma0, sparams.b, sparams.chi2);
+            for(int j = 0; j < 3; j++)
+            {
+                sparams = fit_sf_params(satdata, p[j]);
+                tqtt.nt = 0.0005;
+                eval_transition_qtt(satdata, sparams.p, &tqtt);
+                if (tqtt.nt > 0.0005)
+                    fprintf(posterior, "%g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g\n",
+                            tqtt.nt, tqtt.pt, satdata.rhosat0, satdata.lasat0, satdata.ksat0,
+                            satdata.qsat0, satdata.zsat0, satdata.jsym0, satdata.lsym0, 
+                            satdata.ksym0, satdata.qsym0, satdata.zsym0, m, dm, satdata.b, 
+                            sparams.p, sparams.sigma0, sparams.b, sparams.chi2);
+            }
         }
-
-        line += 1;
     }
 
     fclose(rng_sets);
