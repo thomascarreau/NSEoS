@@ -7,7 +7,7 @@ def CalcKs(m):
 
 def CalcKv(m, dm):
     ks = CalcKs(m)
-    if (dm == 0.0):
+    if (dm != 0.0):
         return (sqrt(dm*dm*(1.+ks)*(1.+ks) + 1.) + dm*ks - 1.)/dm
     else:
         return ks - 0.5*dm*(1.+ks)*(1.+ks)
