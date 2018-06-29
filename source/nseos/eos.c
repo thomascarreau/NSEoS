@@ -7,7 +7,8 @@
 #include "modeling.h"
 #include "eos.h"
 
-int calc_equation_of_state(struct parameters satdata, double p, char *outfile[])
+int calc_equation_of_state(struct parameters satdata, double p, 
+        struct transition_qtt *tqtt, char *outfile[])
 {
     int lines = 0; 
 
@@ -104,8 +105,11 @@ int calc_equation_of_state(struct parameters satdata, double p, char *outfile[])
         lines += 1;
     }
 
-    fprintf(stderr, "n_t = %g /fm^3\n", nb);
-    fprintf(stderr, "P_t = %g MeV/fm^3\n\n", calc_core_ws_cell_pressure(satdata, ccomp, nb));
+    tqtt->nt = nb;
+    tqtt->pt = calc_core_ws_cell_pressure(satdata, ccomp, nb);
+
+    fprintf(stderr, "n_t = %g /fm^3\n", tqtt->nt);
+    fprintf(stderr, "P_t = %g MeV/fm^3\n\n", tqtt->pt);
     fprintf(stderr, "==============================================\n\n");
 
     double mueltot = 0.; // initializing
