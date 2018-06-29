@@ -7,8 +7,10 @@
 #include "modeling.h"
 #include "eos.h"
 
-void calc_equation_of_state(struct parameters satdata, double p, char *outfile[])
+int calc_equation_of_state(struct parameters satdata, double p, char *outfile[])
 {
+    int lines = 0; 
+
     FILE *mycrust;
     FILE *mycore;
     FILE *myeos;
@@ -32,7 +34,7 @@ void calc_equation_of_state(struct parameters satdata, double p, char *outfile[]
     {
         comp = calc_ocrust3d_composition(nb, guess_oc, satdata, sparams);
         if (guess_oc[0] != guess_oc[0]) // exit if nan
-            return;
+            return lines;
 
         muncl = calc_muncl(satdata, sparams, comp, nb);
         if (muncl > 0.) // neutron drip -> transtion to inner crust
@@ -41,6 +43,8 @@ void calc_equation_of_state(struct parameters satdata, double p, char *outfile[]
         print_state_crust(satdata, sparams, comp, nb, mycrust, myeos);
 
         nb += nb/50.;
+
+        lines += 1;
     }
 
     fprintf(stderr, "n_d = %g /fm^3\n\n", nb);
@@ -63,7 +67,7 @@ void calc_equation_of_state(struct parameters satdata, double p, char *outfile[]
                 break;
             }
             else
-                return;
+                return lines;
         }
 
         if (nb > 0.001)
@@ -80,7 +84,7 @@ void calc_equation_of_state(struct parameters satdata, double p, char *outfile[]
                     break;
                 }
                 else
-                    return;
+                    return lines;
             }
 
             // calculation of the energy density in the cell in the core
@@ -96,6 +100,8 @@ void calc_equation_of_state(struct parameters satdata, double p, char *outfile[]
         print_state_crust(satdata, sparams, comp, nb, mycrust, myeos);
 
         nb += 0.0001;
+
+        lines += 1;
     }
 
     fprintf(stderr, "n_t = %g /fm^3\n", nb);
@@ -108,7 +114,7 @@ void calc_equation_of_state(struct parameters satdata, double p, char *outfile[]
     {
         ccomp = calc_npecore_composition(nb, &guess_npecore, satdata);
         if (guess_npecore != guess_npecore) // exit if nan
-            return;
+            return lines;
 
         mueltot = calc_egas_chemical_potential(nb*(1.-ccomp.del)/2.);
         if (mueltot - MMU > 0.) // transition to npeu matter
@@ -117,6 +123,8 @@ void calc_equation_of_state(struct parameters satdata, double p, char *outfile[]
         print_state_core(satdata, ccomp, nb, mycore, myeos);
 
         nb += 0.001;
+
+        lines += 1;
     }
 
     fprintf(stderr, "muons appear at %g /fm^3\n\n", nb);
@@ -133,6 +141,8 @@ void calc_equation_of_state(struct parameters satdata, double p, char *outfile[]
         print_state_core(satdata, ccomp, nb, mycore, myeos);
 
         nb += 0.01;
+
+        lines += 1;
     }
 
     fclose(mycrust);
@@ -141,7 +151,7 @@ void calc_equation_of_state(struct parameters satdata, double p, char *outfile[]
 
     fprintf(stderr, "\\o/\n");
 
-    return;
+    return lines;
 }
 
 void eval_transition_qtt(struct parameters satdata, double p,

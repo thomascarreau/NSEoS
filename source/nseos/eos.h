@@ -1,7 +1,7 @@
 #ifndef H_EOS
 #define H_EOS
 
-void calc_equation_of_state(struct parameters satdata, double p, char *outfile[]);
+int calc_equation_of_state(struct parameters satdata, double p, char *outfile[]);
 
 struct transition_qtt
 {
