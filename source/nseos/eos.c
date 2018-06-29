@@ -48,7 +48,6 @@ void calc_equation_of_state(struct parameters satdata, double p, char *outfile[]
 
     double epsws_ic;
     double epsws_core;
-    int transition = 0;
     double guess_ic[4] = {guess_oc[0], guess_oc[1], guess_oc[2], 1.e-4}; // initial guess for the inner crust
     struct core_compo ccomp;
     double guess_npecore = 0.7; // initial guess for the core
@@ -57,7 +56,15 @@ void calc_equation_of_state(struct parameters satdata, double p, char *outfile[]
     {
         comp = calc_icrust4d_composition(nb, guess_ic, satdata, sparams);
         if (guess_ic[0] != guess_ic[0]) // exit if nan
-            return;
+        {
+            if (epsws_core - epsws_ic < 1.e-3)
+            {
+                fprintf(stderr, "e_core - e_crust = %g\n", epsws_core - epsws_ic);
+                break;
+            }
+            else
+                return;
+        }
 
         if (nb > 0.001)
         {
@@ -66,15 +73,22 @@ void calc_equation_of_state(struct parameters satdata, double p, char *outfile[]
 
             ccomp = calc_npecore_composition(nb, &guess_npecore, satdata);
             if (guess_npecore != guess_npecore) // exit if nan
-                return;
+            {
+                if (epsws_core - epsws_ic < 1.e-3)
+                {
+                    fprintf(stderr, "e_core - e_crust = %g\n", epsws_core - epsws_ic);
+                    break;
+                }
+                else
+                    return;
+            }
 
             // calculation of the energy density in the cell in the core
             epsws_core = calc_core_ws_cell_energy_density(satdata, ccomp, nb);
 
-            if (epsws_core < epsws_ic) // crust-core transition
+            if (epsws_core - epsws_ic < 0.) // crust-core transition
             {
                 fprintf(stderr, "e_core < e_crust\n");
-                transition = 1; // transition occurs
                 break;
             }
         }
@@ -83,9 +97,6 @@ void calc_equation_of_state(struct parameters satdata, double p, char *outfile[]
 
         nb += 0.0001;
     }
-
-    if (transition == 0)
-        fprintf(stderr, "e_core - e_crust = %g MeV/fm^3\n", epsws_core - epsws_ic);
 
     fprintf(stderr, "n_t = %g /fm^3\n", nb);
     fprintf(stderr, "P_t = %g MeV/fm^3\n\n", calc_core_ws_cell_pressure(satdata, ccomp, nb));
@@ -160,20 +171,35 @@ void eval_transition_qtt(struct parameters satdata, double p,
     double guess_npecore = 0.7; // initial guess for the core
     double epsws_ic;
     double epsws_core;
-    int transition = 0;
 
     while(1)
     {
         comp = calc_icrust4d_composition(nb, guess_ic, satdata, sparams);
         if (guess_ic[0] != guess_ic[0]) // break if nan
-            return;
+        {
+            if (epsws_core - epsws_ic < 1.e-3)
+            {
+                fprintf(stderr, "e_core - e_crust = %g\n", epsws_core - epsws_ic);
+                break;
+            }
+            else
+                return;
+        }
 
         // calculation of the energy density in the cell in the inner crust
         epsws_ic = calc_crust_ws_cell_energy_density(satdata, sparams, comp, nb);
 
         ccomp = calc_npecore_composition(nb, &guess_npecore, satdata);
         if (guess_npecore != guess_npecore) // break if nan
-            return;
+        {
+            if (epsws_core - epsws_ic < 1.e-3)
+            {
+                fprintf(stderr, "e_core - e_crust = %g\n", epsws_core - epsws_ic);
+                break;
+            }
+            else
+                return;
+        }
 
         // calculation of the energy density in the cell in the core
         epsws_core = calc_core_ws_cell_energy_density(satdata, ccomp, nb);
@@ -181,15 +207,11 @@ void eval_transition_qtt(struct parameters satdata, double p,
         if (epsws_core < epsws_ic) // crust-core transition
         {
             fprintf(stderr, "e_core < e_crust\n");
-            transition = 1; // transition occurs
             break;
         }
 
         nb += 0.0001;
     }
-
-    if (transition == 0)
-        fprintf(stderr, "e_core - e_crust = %g MeV/fm^3\n", epsws_core - epsws_ic);
 
     fprintf(stderr, "\n==============================================\n");
     fprintf(stderr, "==============================================\n\n");
