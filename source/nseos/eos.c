@@ -7,15 +7,15 @@
 #include "modeling.h"
 #include "eos.h"
 
-void calc_equation_of_state(struct parameters satdata, double p, char *argv[])
+void calc_equation_of_state(struct parameters satdata, double p, char *outfile[])
 {
     FILE *mycrust;
     FILE *mycore;
     FILE *myeos;
 
-    mycrust = fopen(argv[2],"w+");
-    mycore = fopen(argv[3],"w+");
-    myeos = fopen(argv[4],"w+");
+    mycrust = fopen(outfile[2],"w+");
+    mycore = fopen(outfile[3],"w+");
+    myeos = fopen(outfile[4],"w+");
 
     print_parameters(satdata);
     fprintf(stderr, "p = %g\n\n", p);

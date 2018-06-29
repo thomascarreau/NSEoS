@@ -5,6 +5,7 @@
 
 /* Universal constants =========================================================== */
 #define HBARC (197.3269788) // in MeV.fm
+#define G (6.67408e-11) // in m^3/kg/s^2
 
 /* Fondamental physical consants ================================================= */
 #define SPEEDOFL (299792458) // speed of light in vacuum in m/s
