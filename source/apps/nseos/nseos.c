@@ -19,7 +19,7 @@ int main(int argc, char* argv[])
 
     int lines = calc_equation_of_state(satdata, p, &tqtt, argv);
 
-    solve_tov_equation(lines, tqtt, argv);
+    solve_tov_equation(lines, tqtt.pt, argv);
 
     return 0;
 }
