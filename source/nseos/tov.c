@@ -37,41 +37,49 @@ void solve_tov_equation(const int lines, char *outfile[])
     }
 
     gsl_interp_accel *acc
-      = gsl_interp_accel_alloc ();
+        = gsl_interp_accel_alloc ();
     gsl_spline *spline
-      = gsl_spline_alloc (gsl_interp_linear, lines);
+        = gsl_spline_alloc (gsl_interp_linear, lines);
 
-    gsl_spline_init (spline, Rho, P, lines);
-
-    double rhoc = 2.e15; // rhosat in cgs
-    double pc;
-
-    pc = gsl_spline_eval (spline, rhoc, acc);
-
-    double m = 0.;
-    double r = 10.;
+    double rhosat = 2.3e14;
     double dr = 1000.;
+    double rhoc, pc;
+    double rho, p;
+    double m, r;
 
-    double rho = rhoc;
-    double p = pc;
+    int N = 50;
 
-    gsl_spline_init (spline, P, Rho, lines);
-
-    while(rho > 2.e5)
+    for(int j = 0; j < N; j++)
     {
-        r += dr;
-        m += calc_dm(rho, r, dr);
-        p += calc_dp(rho, p, r, dr, m);
+        rhoc = rhosat + ((double)j / (double)N)*(Rho[lines-1] - rhosat);
 
-        if(p > 1.e20)
+        gsl_spline_init (spline, Rho, P, lines);
+        pc = gsl_spline_eval (spline, rhoc, acc);
+
+        rho = rhoc;
+        p = pc;
+
+        m = 0.;
+        r = 10.;
+
+        gsl_spline_init (spline, P, Rho, lines);
+
+        while(rho > 2.e5)
         {
-            rho = gsl_spline_eval(spline, p, acc);
-        }
-        else
-            break;
-    }
+            r += dr;
+            m += calc_dm(rho, r, dr);
+            p += calc_dp(rho, p, r, dr, m);
 
-    fprintf(mytov, "%g %g %g %g\n", rhoc, pc, r/100000., m/1.989e33);
+            if(p > P[0])
+            {
+                rho = gsl_spline_eval(spline, p, acc);
+            }
+            else
+                break;
+        }
+
+        fprintf(mytov, "%g %g %g %g\n", rhoc, pc, r/100000., m/1.989e33);
+    }
 
     gsl_spline_free (spline);
     gsl_interp_accel_free (acc);

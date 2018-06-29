@@ -128,7 +128,6 @@ int calc_equation_of_state(struct parameters satdata, double p, char *outfile[])
     }
 
     fprintf(stderr, "muons appear at %g /fm^3\n\n", nb);
-    fprintf(stderr, "==============================================\n\n");
 
     double guess_npeucore[2] = {guess_npecore, 1.e-5};
 
