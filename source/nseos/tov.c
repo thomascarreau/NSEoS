@@ -2,6 +2,7 @@
 
 #include "mathconst.h"
 #include "phyconst.h"
+#include "eos.h"
 #include "tov.h"
 
 double calc_dm(double rho_, double r_, double dr_)
@@ -18,7 +19,7 @@ double calc_dp(double rho_, double p_, double r_, double dr_, double m_)
         /(1.-2.*g_cgs*m_/r_/speedofl_cgs/speedofl_cgs)*dr_;
 }
 
-void solve_tov_equation(const int lines, char *outfile[])
+void solve_tov_equation(const int lines, struct transition_qtt tqtt, char *outfile[])
 {
     FILE *myeos;
     FILE *mytov;

@@ -1,6 +1,8 @@
 #ifndef H_EOS
 #define H_EOS
 
+#include "empirical.h"
+
 struct transition_qtt
 {
     double nt;
