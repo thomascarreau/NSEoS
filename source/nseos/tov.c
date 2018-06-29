@@ -45,14 +45,14 @@ void solve_tov_equation(const int lines, double pt, char *outfile[])
         = gsl_spline_alloc (gsl_interp_linear, lines);
 
     double rhosat = 2.3e14; // saturation density in g/cm^3
-    double dr = 1000.; // radius step in cm
+    double dr = 100.; // radius step in cm
     double rhoc, pc;
     double rho, p;
     double m, r;
     double p_sav, m_sav, r_sav;
     double mcore, rcore;
 
-    int N = 50; // number of points
+    int N = 100; // number of points
 
     for(int j = 0; j < N; j++)
     {
