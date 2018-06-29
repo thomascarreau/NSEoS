@@ -3,7 +3,8 @@ RM = rm -r
 LIBDIR = ../../nseos
 MKDIR = mkdir -p
 BUILDDIR = ../../nseos/build
-OBJS = $(BUILDDIR)/eos.o \
+OBJS = $(BUILDDIR)/tov.o \
+	   $(BUILDDIR)/eos.o \
 	   $(BUILDDIR)/core.o \
 	   $(BUILDDIR)/crust.o \
 	   $(BUILDDIR)/nuclear_en.o \
@@ -62,6 +63,10 @@ $(BUILDDIR)/eos.o : $(LIBDIR)/eos.h \
 	$(LIBDIR)/eos.c \
 	$(LIBDIR)/modeling.h
 	$(CC) -c $(LIBDIR)/eos.c -o $(BUILDDIR)/eos.o
+
+$(BUILDDIR)/tov.o : $(LIBDIR)/tov.h \
+	$(LIBDIR)/tov.c
+	$(CC) -c $(LIBDIR)/tov.c -o $(BUILDDIR)/tov.o
 
 clean:
 	$(RM) $(OBJS) $(APP)

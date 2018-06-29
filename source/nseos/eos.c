@@ -149,8 +149,6 @@ int calc_equation_of_state(struct parameters satdata, double p, char *outfile[])
     fclose(mycore);
     fclose(myeos);
 
-    fprintf(stderr, "\\o/\n");
-
     return lines;
 }
 
