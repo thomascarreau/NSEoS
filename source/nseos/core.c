@@ -289,5 +289,5 @@ void print_state_core(struct parameters satdata, struct core_compo eq,
     pressws = calc_core_ws_cell_pressure(satdata, eq, nb_);
 
     fprintf(core, "%g %g %g %g\n", nb_, xp, xe, xu);
-    fprintf(eos, "%g %g %g\n", nb_, rhob, pressws);
+    fprintf(eos, "%g %g\n", rhob, pressws);
 }
