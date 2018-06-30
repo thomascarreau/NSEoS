@@ -18,7 +18,7 @@ double calc_dp(double rho_, double p_, double r_, double dr_, double m_)
         /(1.-2.*g_cgs*m_/r_/speedofl_cgs/speedofl_cgs)*dr_;
 }
 
-void solve_tov_equation(const int lines, double pt, char *outfile[])
+void solve_tov_equation(int lines, double pt, char *outfile[])
 {
     double msun = 1.989e33; // in g
     double p_factor_nu_to_cgs = 1.6022e33; // MeV/fm^3 to dyn/cm^2
