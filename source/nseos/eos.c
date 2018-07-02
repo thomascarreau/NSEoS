@@ -8,7 +8,7 @@
 #include "eos.h"
 
 int calc_equation_of_state(struct parameters satdata, double p, 
-        struct transition_qtt *tqtt, char *outfile[])
+        struct transition_qtt *tqtt, double *epst, char *outfile[])
 {
     int lines = 0; 
 
@@ -107,6 +107,7 @@ int calc_equation_of_state(struct parameters satdata, double p,
 
     tqtt->nt = nb;
     tqtt->pt = calc_core_ws_cell_pressure(satdata, ccomp, nb);
+    *epst = calc_core_ws_cell_energy_density(satdata, ccomp, nb);
 
     fprintf(stderr, "n_t = %g /fm^3\n", tqtt->nt);
     fprintf(stderr, "P_t = %g MeV/fm^3\n\n", tqtt->pt);

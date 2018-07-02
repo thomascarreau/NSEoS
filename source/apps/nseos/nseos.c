@@ -16,10 +16,11 @@ int main(int argc, char* argv[])
     struct parameters satdata = assign_param(argv[1]);
     double p = 3.;
     struct transition_qtt tqtt;
+    double epst;
 
-    int lines = calc_equation_of_state(satdata, p, &tqtt, argv);
+    int lines = calc_equation_of_state(satdata, p, &tqtt, &epst, argv);
 
-    solve_tov_equation(lines, tqtt.pt, argv);
+    solve_tov_equation(lines, tqtt.pt, epst, argv);
 
     return 0;
 }
