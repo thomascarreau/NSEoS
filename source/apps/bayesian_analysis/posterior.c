@@ -5,24 +5,33 @@
 #include "../../nseos/eos.h"
 #include "../../nseos/modeling.h"
 
+void get_low_density_posterior(FILE *prior);
+
 int main(int argc, char* argv[])
 {
-    if(argc != 3)
+    if(argc != 2)
     {
-        fprintf(stderr, "ERROR: syntax is './posterior rng.in posterior.out\n");
+        fprintf(stderr, "ERROR: syntax is './posterior prior.in\n");
         return 1;
     }
 
-    FILE *rng_sets = NULL;
-
-    rng_sets = fopen(argv[1], "r");
-
-    if(rng_sets == NULL)
+    FILE *prior = NULL;
+    prior = fopen(argv[1], "r");
+    if(prior == NULL)
     {
         fprintf(stderr, "ERROR: file issue\n");
         return 1;
     }
 
+    get_low_density_posterior(prior);
+
+    fclose(prior);
+
+    return 0;
+}
+
+void get_low_density_posterior(FILE *prior)
+{
     struct parameters satdata;
     float m, dm;
 
@@ -44,9 +53,9 @@ int main(int argc, char* argv[])
     struct transition_qtt tqtt;
     FILE *posterior = NULL;
 
-    posterior = fopen(argv[2], "w+"); 
+    posterior = fopen("posterior_ld.out", "w+"); 
 
-    while(read_table_of_sets(rng_sets, &satdata, &m, &dm) == 0)
+    while(read_table_of_sets(prior, &satdata, &m, &dm) == 0)
     {
         ld_test = 0;
         for(int i = 3; i < 10; i++)
@@ -81,10 +90,5 @@ int main(int argc, char* argv[])
         }
     }
 
-    fclose(rng_sets);
     fclose(posterior);
-
-    fprintf(stderr, "\\o/\n");
-
-    return 0;
 }

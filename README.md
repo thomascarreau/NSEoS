@@ -21,12 +21,12 @@ Usage
 
 In `NSEoS/source/apps/nseos`:
 
-    ./nseos set.in crust.out core.out eos.out
+    ./nseos set.in crust.out core.out eos.out tov.out
 
 The first output file gives you the crust composition (number density, mass of the cluster, global asymmetry in the cluster, 
 number of charges, cluster density, gas density, and radius of the cell). 
 The second output file gives you the core composition (number density, fraction of protons, electrons, and muons). 
-Finally, the third output file gives you the EoS (number density, mass density, and pressure).
+The third output file gives you the EoS (mass density, and pressure). Finally, the last output file gives you the TOV solution (central density, central pressure, radius, mass, core radius, core mass, normalized moment of inertia, and normalized moment of inertia of the crust).
 
 ### Available sets of empirical parameters
 
