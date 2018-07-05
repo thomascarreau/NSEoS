@@ -10,7 +10,8 @@ struct transition_qtt
 };
 
 int calc_equation_of_state(struct parameters satdata, double p, 
-        struct transition_qtt *tqtt, double *epst, char *outfile[]);
+        struct transition_qtt *tqtt, double *epst, 
+        FILE *crust, FILE *core, FILE *eos);
 
 void eval_transition_qtt(struct parameters satdata, double p,
         struct transition_qtt *tqtt);

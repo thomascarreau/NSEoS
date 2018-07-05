@@ -20,22 +20,16 @@ double calc_dp(double rho_, double p_, double r_, double dr_, double m_)
         /(1.-2.*G_CGS*m_/r_/SPEEDOFL_CGS/SPEEDOFL_CGS)*dr_;
 }
 
-void solve_tov_equation(int lines, double pt, double epst, char *outfile[])
+void solve_tov_equation(int lines, double pt, double epst, FILE *eos, FILE *tov)
 {
     double msun = 1.989e33; // in g
     double p_factor_nu_to_cgs = 1.6022e33; // MeV/fm^3 to dyn/cm^2
-
-    FILE *myeos;
-    FILE *mytov;
-
-    myeos = fopen(outfile[4], "r");
-    mytov = fopen(outfile[5], "w+");
 
     double Rho[lines], P[lines];
 
     for(int i = 0; i < lines; i++)
     {
-        fscanf(myeos, "%lf %lf", &Rho[i], &P[i]);
+        fscanf(eos, "%lf %lf", &Rho[i], &P[i]);
         P[i] *= p_factor_nu_to_cgs;
         if(i > 0 && P[i] < P[i-1])
             P[i] = P[i-1] + 1.e20;
@@ -113,7 +107,7 @@ void solve_tov_equation(int lines, double pt, double epst, char *outfile[])
         rcore /= 100000.;
         mcore /= msun;
 
-        fprintf(mytov, "%g %g %g %g %g %g %g %g\n", rhoc, pc, 
+        fprintf(tov, "%g %g %g %g %g %g %g %g\n", rhoc, pc, 
                 r, m,
                 rcore, mcore,
                 i_over_mr2, icrust_over_mr2);
@@ -121,7 +115,4 @@ void solve_tov_equation(int lines, double pt, double epst, char *outfile[])
 
     gsl_spline_free (spline);
     gsl_interp_accel_free (acc);
-
-    fclose(myeos);
-    fclose(mytov);
 }

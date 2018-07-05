@@ -13,14 +13,32 @@ int main(int argc, char* argv[])
         return 1;
     }
 
+    // =================== EOS ===================
+
     struct parameters satdata = assign_param(argv[1]);
     double p = 3.;
     struct transition_qtt tqtt;
     double epst;
 
-    int lines = calc_equation_of_state(satdata, p, &tqtt, &epst, argv);
+    FILE *mycrust = fopen(argv[2], "w+");
+    FILE *mycore = fopen(argv[3], "w+");
+    FILE *myeos = fopen(argv[4], "w+");
 
-    solve_tov_equation(lines, tqtt.pt, epst, argv);
+    int lines = calc_equation_of_state(satdata, p, &tqtt, &epst, mycrust, mycore, myeos);
+
+    fclose(mycrust);
+    fclose(mycore);
+    fclose(myeos);
+
+    // =================== TOV ===================
+
+    myeos = fopen(argv[4], "r");
+    FILE *mytov = fopen(argv[5], "w+");
+
+    solve_tov_equation(lines, tqtt.pt, epst, myeos, mytov);
+
+    fclose(myeos);
+    fclose(mytov);
 
     return 0;
 }

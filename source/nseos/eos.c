@@ -8,17 +8,10 @@
 #include "eos.h"
 
 int calc_equation_of_state(struct parameters satdata, double p, 
-        struct transition_qtt *tqtt, double *epst, char *outfile[])
+        struct transition_qtt *tqtt, double *epst,
+        FILE *crust, FILE *core, FILE *eos)
 {
     int lines = 0; 
-
-    FILE *mycrust;
-    FILE *mycore;
-    FILE *myeos;
-
-    mycrust = fopen(outfile[2],"w+");
-    mycore = fopen(outfile[3],"w+");
-    myeos = fopen(outfile[4],"w+");
 
     print_parameters(satdata);
     fprintf(stderr, "p = %g\n\n", p);
@@ -41,7 +34,7 @@ int calc_equation_of_state(struct parameters satdata, double p,
         if (muncl > 0.) // neutron drip -> transtion to inner crust
             break;
 
-        print_state_crust(satdata, sparams, comp, nb, mycrust, myeos);
+        print_state_crust(satdata, sparams, comp, nb, crust, eos);
 
         nb += nb/50.;
 
@@ -98,7 +91,7 @@ int calc_equation_of_state(struct parameters satdata, double p,
             }
         }
 
-        print_state_crust(satdata, sparams, comp, nb, mycrust, myeos);
+        print_state_crust(satdata, sparams, comp, nb, crust, eos);
 
         nb += 0.0001;
 
@@ -125,7 +118,7 @@ int calc_equation_of_state(struct parameters satdata, double p,
         if (mueltot - MMU > 0.) // transition to npeu matter
             break;
 
-        print_state_core(satdata, ccomp, nb, mycore, myeos);
+        print_state_core(satdata, ccomp, nb, core, eos);
 
         nb += 0.001;
 
@@ -142,16 +135,12 @@ int calc_equation_of_state(struct parameters satdata, double p,
         if (guess_npeucore[0] != guess_npeucore[0]) // break if nan; see q&d part in core.c
             break;
 
-        print_state_core(satdata, ccomp, nb, mycore, myeos);
+        print_state_core(satdata, ccomp, nb, core, eos);
 
         nb += 0.01;
 
         lines += 1;
     }
-
-    fclose(mycrust);
-    fclose(mycore);
-    fclose(myeos);
 
     return lines;
 }
