@@ -20,7 +20,7 @@ double calc_dp(double rho_, double p_, double r_, double dr_, double m_)
         /(1.-2.*G_CGS*m_/r_/SPEEDOFL_CGS/SPEEDOFL_CGS)*dr_;
 }
 
-void solve_tov_equation(int lines, double pt, double epst, FILE *eos, FILE *tov)
+double solve_tov_equation(int lines, double pt, double epst, FILE *eos, FILE *tov)
 {
     double msun = 1.989e33; // in g
     double p_factor_nu_to_cgs = 1.6022e33; // MeV/fm^3 to dyn/cm^2
@@ -75,11 +75,19 @@ void solve_tov_equation(int lines, double pt, double epst, FILE *eos, FILE *tov)
             m += calc_dm(rho, r, dr);
             p += calc_dp(rho, p, r, dr, m);
 
-            if(p_sav > pt * p_factor_nu_to_cgs 
-                    && p < pt * p_factor_nu_to_cgs)
+            if (pt*p_factor_nu_to_cgs != P[0])
             {
-                mcore = (m_sav + m)/2.;
-                rcore = (r_sav + r)/2.;
+                if(p_sav > pt * p_factor_nu_to_cgs 
+                        && p < pt * p_factor_nu_to_cgs)
+                {
+                    mcore = (m_sav + m)/2.;
+                    rcore = (r_sav + r)/2.;
+                }
+            }
+            else
+            {
+                mcore = m;
+                rcore = r;
             }
 
             if(p > P[0])
@@ -97,10 +105,13 @@ void solve_tov_equation(int lines, double pt, double epst, FILE *eos, FILE *tov)
         rs = 2.*G_CGS*m;
         // see: PRC82,025810(2010)
         i_over_mr2 = 0.21/(1.-rs/r/SPEEDOFL_CGS/SPEEDOFL_CGS);
-        icrust_over_mr2 = 16.*PI/3.*pow(rcore,6.)*pt*p_factor_nu_to_cgs/rs
-            *(1. - rs/r/SPEEDOFL_CGS/SPEEDOFL_CGS*i_over_mr2)
-            *(1. + 48./5.*(rcore/rs*SPEEDOFL_CGS*SPEEDOFL_CGS - 1.)*(pt/epst))
-            /m/r/r;
+        if (pt*p_factor_nu_to_cgs != P[0])
+            icrust_over_mr2 = 16.*PI/3.*pow(rcore,6.)*pt*p_factor_nu_to_cgs/rs
+                *(1. - rs/r/SPEEDOFL_CGS/SPEEDOFL_CGS*i_over_mr2)
+                *(1. + 48./5.*(rcore/rs*SPEEDOFL_CGS*SPEEDOFL_CGS - 1.)*(pt/epst))
+                /m/r/r;
+        else
+            icrust_over_mr2 = 0.;
 
         r /= 100000.;
         m /= msun;
@@ -112,6 +123,8 @@ void solve_tov_equation(int lines, double pt, double epst, FILE *eos, FILE *tov)
                 rcore, mcore,
                 i_over_mr2, icrust_over_mr2);
     }
+
+    return m;
 
     gsl_spline_free (spline);
     gsl_interp_accel_free (acc);
