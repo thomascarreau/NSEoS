@@ -1,3 +1,9 @@
 source/input/satdata/sly4d.in
 
-source/apps/bayesian_analysis/prior_100Msets.in
+source/nseos/build/*
+
+source/apps/nseos/*.out
+
+source/apps/nseos/nseos
+
+source/apps/bayesian_analysis/*
