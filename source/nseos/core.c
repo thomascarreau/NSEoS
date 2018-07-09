@@ -73,7 +73,7 @@ struct core_compo calc_npecore_composition(double nb_, double *guess, struct par
 
     gsl_multiroot_function f = {&assign_npecore_fun, n, &p};
 
-    T = gsl_multiroot_fsolver_broyden;
+    T = gsl_multiroot_fsolver_dnewton;
     s = gsl_multiroot_fsolver_alloc(T,1);
     gsl_multiroot_fsolver_set(s, &f, x);
 
@@ -91,13 +91,23 @@ struct core_compo calc_npecore_composition(double nb_, double *guess, struct par
         if (status)
             break;
 
-        // dirty backstepping
+        // (VERY) dirty backstepping
+        int count = 0;
         while (gsl_vector_get (s->x, 0) < 0.1 || gsl_vector_get (s->x, 0) > 1.0) {
             dstep = dstep/4.;
             del_new = del_old + dstep;
             gsl_vector_set (x, 0, del_new);
             gsl_multiroot_fsolver_set (s, &f, x);
             del_new = gsl_vector_get (s->x, 0);
+            count += 1;
+            if (count > 1000)
+            {
+                eq.del = NAN;
+                eq.nu = NAN;
+                guess[0] = eq.del;
+                guess[1] = eq.nu;
+                return eq;
+            }
         }
 
         status = gsl_multiroot_test_residual (s->f, 9e-9);
