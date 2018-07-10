@@ -1,6 +1,7 @@
 #include <math.h>
 
 #include "phyconst.h"
+#include "nuclear_matter.h"
 #include "coulomb.h"
 #include "crust.h"
 #include "core.h"
@@ -128,14 +129,19 @@ int calc_equation_of_state(struct parameters satdata, double p,
     fprintf(stderr, "muons appear at %g /fm^3\n\n", nb);
 
     double guess_npeucore[2] = {guess_npecore, 1.e-5};
+    struct hnm test_causality;
+    double vs2 = 0.5;
 
-    while (nb < 10.*satdata.rhosat0)
+    while (vs2 > 0. && vs2 < 1.)
     {
         ccomp = calc_npeucore_composition(nb, guess_npeucore, satdata);
         if (guess_npeucore[0] != guess_npeucore[0]) // break if nan; see q&d part in core.c
             break;
 
         print_state_core(satdata, ccomp, nb, core, eos);
+
+        test_causality = calc_meta_model_nuclear_matter(satdata, TAYLOR_EXP_ORDER, nb, ccomp.del);
+        vs2 = test_causality.vs2;
 
         nb += 0.01;
 
