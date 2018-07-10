@@ -14,6 +14,6 @@ int calc_equation_of_state(struct parameters satdata, double p,
         FILE *crust, FILE *core, FILE *eos);
 
 void eval_transition_qtt(struct parameters satdata, double p,
-        struct transition_qtt *tqtt);
+        struct transition_qtt *tqtt, double *epst);
 
 #endif // H_EOS

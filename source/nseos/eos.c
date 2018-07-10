@@ -146,7 +146,7 @@ int calc_equation_of_state(struct parameters satdata, double p,
 }
 
 void eval_transition_qtt(struct parameters satdata, double p,
-        struct transition_qtt *tqtt)
+        struct transition_qtt *tqtt, double *epst)
 {
     struct sf_params sparams = fit_sf_params(satdata, p);
     struct compo comp;
@@ -219,4 +219,5 @@ void eval_transition_qtt(struct parameters satdata, double p,
 
     tqtt->nt = nb; 
     tqtt->pt = calc_core_ws_cell_pressure(satdata, ccomp, nb);
+    *epst = calc_core_ws_cell_energy_density(satdata, ccomp, nb); // needed to calculate Icrust
 }
