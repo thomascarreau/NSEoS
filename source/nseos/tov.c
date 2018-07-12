@@ -48,6 +48,7 @@ double solve_tov_equation(int lines, double pt, double epst, FILE *eos, FILE *to
     double p_sav, m_sav, r_sav;
     double mcore, rcore;
     double rs, i_over_mr2, icrust_over_mr2;
+    double mmax = 0.;
 
     int N = 100; // number of points
 
@@ -91,9 +92,7 @@ double solve_tov_equation(int lines, double pt, double epst, FILE *eos, FILE *to
             }
 
             if(p > P[0])
-            {
                 rho = gsl_spline_eval(spline, p, acc);
-            }
             else
                 break;
 
@@ -118,13 +117,16 @@ double solve_tov_equation(int lines, double pt, double epst, FILE *eos, FILE *to
         rcore /= 100000.;
         mcore /= msun;
 
+        if (m > mmax)
+            mmax = m;
+
         fprintf(tov, "%g %g %g %g %g %g %g %g\n", rhoc, pc, 
                 r, m,
                 rcore, mcore,
                 i_over_mr2, icrust_over_mr2);
     }
 
-    return m;
+    return mmax;
 
     gsl_spline_free (spline);
     gsl_interp_accel_free (acc);
