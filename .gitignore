@@ -1,4 +1,5 @@
 source/input/satdata/sly4d.in
+source/input/satdata/test.in
 
 source/nseos/build/*
 
