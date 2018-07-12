@@ -26,23 +26,54 @@ double solve_tov_equation(int lines, double pt, double epst, FILE *eos, FILE *to
     double p_factor_nu_to_cgs = 1.6022e33; // MeV/fm^3 to dyn/cm^2
 
     double Rho[lines], P[lines];
+    double Rho_tmp, P_tmp;
 
+    int j = 0;
+    int l = lines;
+
+    // here we read the EoS table
     for(int i = 0; i < lines; i++)
     {
-        fscanf(eos, "%lf %lf", &Rho[i], &P[i]);
-        P[i] *= p_factor_nu_to_cgs;
-        if(i > 0 && P[i] < P[i-1])
+        if (j < l)
         {
-            fprintf(stderr, "pi = %g ; pi-1 = %g ; rhoi = %g\n", P[i], P[i-1], Rho[i]); // DEBUG
-            P[i] = P[i-1] + 1.e20;
-            fprintf(stderr, "new pi = %g\n", P[i]);
+            fscanf(eos, "%lf %lf", &Rho_tmp, &P_tmp);
+            P_tmp *= p_factor_nu_to_cgs;
         }
+
+        if (j == 0)
+        {
+            Rho[j] = Rho_tmp;
+            P[j] = P_tmp;
+            j += 1;
+        }
+        else if (j > 0 
+                && Rho_tmp > Rho[j-1] && P_tmp > P[j-1])
+            // to avoid interpolation issues
+        {
+            Rho[j] = Rho_tmp;
+            P[j] = P_tmp;
+            j += 1;
+        }
+        else
+            l -= 1;
     }
+    //=============================================================== OLD
+    /* for(int i = 0; i < lines; i++) */
+    /* { */
+    /*     fscanf(eos, "%lf %lf", &Rho[i], &P[i]); */
+    /*     P[i] *= p_factor_nu_to_cgs; */
+    /*     if(i > 0 && P[i] < P[i-1]) */
+    /*     { */
+    /*         fprintf(stderr, "pi = %g ; pi-1 = %g ; rhoi = %g\n", P[i], P[i-1], Rho[i]); // DEBUG */
+    /*         P[i] = P[i-1] + 1.e20; */
+    /*         fprintf(stderr, "new pi = %g\n", P[i]); */
+    /*     } */
+    /* } */
 
     gsl_interp_accel *acc
         = gsl_interp_accel_alloc ();
     gsl_spline *spline
-        = gsl_spline_alloc (gsl_interp_linear, lines);
+        = gsl_spline_alloc (gsl_interp_linear, l);
 
     double rhosat = 2.3e14; // saturation density in g/cm^3
     double dr = 100.; // radius step in cm
@@ -58,9 +89,9 @@ double solve_tov_equation(int lines, double pt, double epst, FILE *eos, FILE *to
 
     for(int j = 0; j < N; j++)
     {
-        rhoc = rhosat + ((double)j / (double)N)*(Rho[lines-1] - rhosat);
+        rhoc = rhosat + ((double)j / (double)N)*(Rho[l-1] - rhosat);
 
-        gsl_spline_init (spline, Rho, P, lines);
+        gsl_spline_init (spline, Rho, P, l);
         pc = gsl_spline_eval (spline, rhoc, acc);
 
         rho = rhoc;
@@ -72,7 +103,7 @@ double solve_tov_equation(int lines, double pt, double epst, FILE *eos, FILE *to
         m_sav = m;
         r_sav = r;
 
-        gsl_spline_init (spline, P, Rho, lines);
+        gsl_spline_init (spline, P, Rho, l);
 
         while(rho > 2.e5)
         {
