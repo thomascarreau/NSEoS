@@ -32,7 +32,11 @@ double solve_tov_equation(int lines, double pt, double epst, FILE *eos, FILE *to
         fscanf(eos, "%lf %lf", &Rho[i], &P[i]);
         P[i] *= p_factor_nu_to_cgs;
         if(i > 0 && P[i] < P[i-1])
+        {
+            fprintf(stderr, "pi = %g ; pi-1 = %g ; rhoi = %g\n", P[i], P[i-1], Rho[i]); // DEBUG
             P[i] = P[i-1] + 1.e20;
+            fprintf(stderr, "new pi = %g\n", P[i]);
+        }
     }
 
     gsl_interp_accel *acc

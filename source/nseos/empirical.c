@@ -5,7 +5,7 @@
 #include "modeling.h"
 #include "empirical.h"
 
-struct parameters assign_param(char set[])
+struct parameters assign_param(char set[], float b)
 {
     struct parameters satdata;
     FILE *fin;
@@ -22,7 +22,7 @@ struct parameters assign_param(char set[])
     fscanf(fin, "%f %f", &effm, &isosplit);
     satdata.barm = 1./effm - 1.;
     satdata.bardel = satdata.barm - isosplit;
-    satdata.b = 10.*log(2.);
+    satdata.b = b;
 
     fclose(fin);
 

@@ -33,7 +33,7 @@ struct skyrme_parameters
     float x3;
 };
 
-struct parameters assign_param(char set[]);
+struct parameters assign_param(char set[], float b);
 void print_parameters(struct parameters satdata);
 struct skyrme_parameters assign_skyrme_param(struct skyrme_parameters coeff);
 int read_table_of_sets(FILE *, struct parameters *satdata, float *m, float *dm);
