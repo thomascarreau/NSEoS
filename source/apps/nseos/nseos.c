@@ -15,8 +15,7 @@ int main(int argc, char* argv[])
 
     // =================== EOS ===================
 
-    /* float b = 10.*log(2.); */
-    float b = 1.1;
+    float b = 10.*log(2.);
     struct parameters satdata = assign_param(argv[1], b);
     double p = 3.;
     struct transition_qtt tqtt;
