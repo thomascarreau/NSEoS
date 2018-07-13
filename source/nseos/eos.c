@@ -9,7 +9,7 @@
 #include "eos.h"
 
 int calc_equation_of_state(struct parameters satdata, double p, 
-        struct transition_qtt *tqtt, double *epst,
+        struct transition_qtt *tqtt, double *epst, int *hd_checker,
         FILE *crust, FILE *core, FILE *eos)
 {
     int lines = 0; 
@@ -19,11 +19,16 @@ int calc_equation_of_state(struct parameters satdata, double p,
     fprintf(stderr, "==============================================\n\n");
     struct sf_params sparams = fit_sf_params(satdata, p);
 
+    double nb = 1e-10;
+    double pressure;
+    double pressure_sav = 0.;
+    struct hnm test_hd;
+
+    // ============================== OUTER CRUST ==============================
+
     struct compo comp;
     double muncl = -1.; // sign of muncl is negative is the outer crust
     double guess_oc[3] = {60., 0.15, 0.1595}; // initial guess for the outer crust
-
-    double nb = 1e-10;
 
     while(1)
     {
@@ -35,7 +40,17 @@ int calc_equation_of_state(struct parameters satdata, double p,
         if (muncl > 0.) // neutron drip -> transtion to inner crust
             break;
 
+        pressure = calc_crust_ws_cell_pressure(satdata, comp, nb);
+
+        if (*hd_checker == 0 && pressure < pressure_sav)
+        {
+            fprintf(stderr, "HD CHECKER: dP/dnB < 0 (outer crust) ; nB = %g /fm^3\n\n", nb);
+            *hd_checker = 1;
+        }
+
         print_state_crust(satdata, sparams, comp, nb, crust, eos);
+
+        pressure_sav = pressure;
 
         nb += nb/50.;
 
@@ -44,6 +59,8 @@ int calc_equation_of_state(struct parameters satdata, double p,
 
     fprintf(stderr, "n_d = %g /fm^3\n\n", nb);
     fprintf(stderr, "==============================================\n\n");
+
+    // ============================== INNER CRUST ==============================
 
     double epsws_ic;
     double epsws_core;
@@ -92,7 +109,17 @@ int calc_equation_of_state(struct parameters satdata, double p,
             }
         }
 
+        pressure = calc_crust_ws_cell_pressure(satdata, comp, nb);
+
+        if (*hd_checker == 0 && pressure < pressure_sav)
+        {
+            fprintf(stderr, "HD CHECKER: dP/dnB < 0 (inner crust) ; nB = %g /fm^3\n\n", nb);
+            *hd_checker = 1;
+        }
+
         print_state_crust(satdata, sparams, comp, nb, crust, eos);
+
+        pressure_sav = pressure;
 
         nb += 0.0001;
 
@@ -107,6 +134,8 @@ int calc_equation_of_state(struct parameters satdata, double p,
     fprintf(stderr, "P_t = %g MeV/fm^3\n\n", tqtt->pt);
     fprintf(stderr, "==============================================\n\n");
 
+    // ============================== npe CORE ==============================
+
     double mueltot = 0.; // initializing
 
     while(1)
@@ -119,7 +148,31 @@ int calc_equation_of_state(struct parameters satdata, double p,
         if (mueltot - MMU > 0.) // transition to npeu matter
             break;
 
+        test_hd = calc_meta_model_nuclear_matter(satdata, TAYLOR_EXP_ORDER, nb, ccomp.del);
+
+        if (test_hd.vs2 < 0. || test_hd.vs2 > 1.)
+        {
+            fprintf(stderr, "HD CHECKER: vs/c < 0 or > 1 (npe core) ; nB = %g /fm^3\n\n", nb);
+            return lines;
+        }
+
+        pressure = calc_core_ws_cell_pressure(satdata, ccomp, nb);
+
+        if (*hd_checker == 0 && nb != tqtt->nt && pressure < pressure_sav)
+        {
+            fprintf(stderr, "HD CHECKER: dP/dnB < 0 (npe core) ; nB = %g /fm^3\n\n", nb);
+            *hd_checker = 1;
+        }
+
+        if (*hd_checker == 0 && test_hd.jsym < 0)
+        {
+            fprintf(stderr, "HD CHECKER: Jsym < 0 (npe core) ; nB = %g /fm^3\n\n", nb);
+            *hd_checker = 1;
+        }
+
         print_state_core(satdata, ccomp, nb, core, eos);
+
+        pressure_sav = pressure;
 
         nb += 0.001;
 
@@ -128,8 +181,9 @@ int calc_equation_of_state(struct parameters satdata, double p,
 
     fprintf(stderr, "muons appear at %g /fm^3\n\n", nb);
 
+    // ============================== npeu CORE ==============================
+
     double guess_npeucore[2] = {guess_npecore, 1.e-5};
-    struct hnm test_causality;
     double vs2 = 0.5;
 
     while (vs2 > 0. && vs2 < 1.)
@@ -138,10 +192,27 @@ int calc_equation_of_state(struct parameters satdata, double p,
         if (guess_npeucore[0] != guess_npeucore[0]) // break if nan; see q&d part in core.c
             break;
 
+        pressure = calc_core_ws_cell_pressure(satdata, ccomp, nb);
+
+        if (*hd_checker == 0 && pressure < pressure_sav)
+        {
+            fprintf(stderr, "HD CHECKER: dP/dnB < 0 (core npeu) ; nB = %g /fm^3\n\n", nb);
+            *hd_checker = 1;
+        }
+
+        test_hd = calc_meta_model_nuclear_matter(satdata, TAYLOR_EXP_ORDER, nb, ccomp.del);
+
+        if (*hd_checker == 0 && test_hd.jsym < 0)
+        {
+            fprintf(stderr, "HD CHECKER: Jsym < 0 (core npeu) ; nB = %g /fm^3\n\n", nb);
+            *hd_checker = 1;
+        }
+
         print_state_core(satdata, ccomp, nb, core, eos);
 
-        test_causality = calc_meta_model_nuclear_matter(satdata, TAYLOR_EXP_ORDER, nb, ccomp.del);
-        vs2 = test_causality.vs2;
+        pressure_sav = pressure;
+
+        vs2 = test_hd.vs2;
 
         nb += 0.01;
 
