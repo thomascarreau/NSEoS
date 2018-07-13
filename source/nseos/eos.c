@@ -34,7 +34,10 @@ int calc_equation_of_state(struct parameters satdata, double p,
     {
         comp = calc_ocrust3d_composition(nb, guess_oc, satdata, sparams);
         if (guess_oc[0] != guess_oc[0]) // exit if nan
+        {
+            *hd_checker = 1;
             return lines;
+        }
 
         muncl = calc_muncl(satdata, sparams, comp, nb);
         if (muncl > 0.) // neutron drip -> transtion to inner crust
@@ -79,7 +82,10 @@ int calc_equation_of_state(struct parameters satdata, double p,
                 break;
             }
             else
+            {
+                *hd_checker = 1;
                 return lines;
+            }
         }
 
         if (nb > 0.001)
@@ -96,7 +102,10 @@ int calc_equation_of_state(struct parameters satdata, double p,
                     break;
                 }
                 else
+                {
+                    *hd_checker = 1;
                     return lines;
+                }
             }
 
             // calculation of the energy density in the cell in the core
@@ -142,7 +151,11 @@ int calc_equation_of_state(struct parameters satdata, double p,
     {
         ccomp = calc_npecore_composition(nb, &guess_npecore, satdata);
         if (guess_npecore != guess_npecore) // exit if nan
+        {
+            if (nb < 3.*satdata.rhosat0)
+                *hd_checker = 1;
             return lines;
+        }
 
         mueltot = calc_egas_chemical_potential(nb*(1.-ccomp.del)/2.);
         if (mueltot - MMU > 0.) // transition to npeu matter
@@ -153,6 +166,8 @@ int calc_equation_of_state(struct parameters satdata, double p,
         if (test_hd.vs2 < 0. || test_hd.vs2 > 1.)
         {
             fprintf(stderr, "HD CHECKER: vs/c < 0 or > 1 (npe core) ; nB = %g /fm^3\n\n", nb);
+            if (nb < 3.*satdata.rhosat0)
+                *hd_checker = 1;
             return lines;
         }
 
@@ -190,7 +205,11 @@ int calc_equation_of_state(struct parameters satdata, double p,
     {
         ccomp = calc_npeucore_composition(nb, guess_npeucore, satdata);
         if (guess_npeucore[0] != guess_npeucore[0]) // break if nan; see q&d part in core.c
-            break;
+        {
+            if (nb < 3.*satdata.rhosat0)
+                *hd_checker = 1;
+            return lines;
+        }
 
         pressure = calc_core_ws_cell_pressure(satdata, ccomp, nb);
 
