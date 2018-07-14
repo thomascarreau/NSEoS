@@ -7,6 +7,8 @@
 
 #define G_CGS (G*1000.)
 #define SPEEDOFL_CGS (SPEEDOFL*100.)
+#define MSUN_CGS (1.989e33)
+#define P_FACTOR_NU_TO_CGS (1.6022e33) // MeV/fm^3 to dyn/cm^2
 
 double calc_dm(double rho_, double r_, double dr_)
 {
@@ -20,24 +22,46 @@ double calc_dp(double rho_, double p_, double r_, double dr_, double m_)
         /(1.-2.*G_CGS*m_/r_/SPEEDOFL_CGS/SPEEDOFL_CGS)*dr_;
 }
 
-double solve_tov_equation(int lines, double pt, double epst, FILE *eos, FILE *tov)
+// see: PRC82,025810(2010)
+double calc_normalized_moment_of_inertia(double r_, double m_)
 {
-    double msun = 1.989e33; // in g
-    double p_factor_nu_to_cgs = 1.6022e33; // MeV/fm^3 to dyn/cm^2
+    double rs = 2.*G_CGS*m_;
+    double i_over_mr2 = 0.21/(1.-rs/r_/SPEEDOFL_CGS/SPEEDOFL_CGS);
+    return i_over_mr2;
+}
 
+double calc_normalized_crustal_moment_of_inertia(double r_, double m_, double i_over_mr2, 
+        double epst, double pt, double rcore)
+{
+    double rs = 2.*G_CGS*m_;
+    double icrust_over_mr2 = 16.*PI/3.*pow(rcore,6.)*pt*P_FACTOR_NU_TO_CGS/rs
+        *(1. - rs/r_/SPEEDOFL_CGS/SPEEDOFL_CGS*i_over_mr2)
+        *(1. + 48./5.*(rcore/rs*SPEEDOFL_CGS*SPEEDOFL_CGS - 1.)*(pt/epst))
+        /m_/r_/r_;
+    return icrust_over_mr2;
+}
+
+double get_observable_for_a_given_mass(double m, double mm, double mp, double om, double op)
+{
+    return (op-om)/(mp-mm)*(m-mm) + om; // stupid linear interpolation
+}
+
+double solve_tov_equation(int lines, double pt, double epst, FILE *eos, 
+        struct tov_solution *tovs14, FILE *tov)
+{
     double Rho[lines], P[lines];
     double Rho_tmp, P_tmp;
 
     int j = 0;
     int l = lines;
 
-    // here we read the EoS table
+    // reading the EoS table
     for(int i = 0; i < lines; i++)
     {
         if (j < l)
         {
             fscanf(eos, "%lf %lf", &Rho_tmp, &P_tmp);
-            P_tmp *= p_factor_nu_to_cgs;
+            P_tmp *= P_FACTOR_NU_TO_CGS;
         }
 
         if (j == 0)
@@ -61,7 +85,7 @@ double solve_tov_equation(int lines, double pt, double epst, FILE *eos, FILE *to
     /* for(int i = 0; i < lines; i++) */
     /* { */
     /*     fscanf(eos, "%lf %lf", &Rho[i], &P[i]); */
-    /*     P[i] *= p_factor_nu_to_cgs; */
+    /*     P[i] *= P_FACTOR_NU_TO_CGS; */
     /*     if(i > 0 && P[i] < P[i-1]) */
     /*     { */
     /*         fprintf(stderr, "pi = %g ; pi-1 = %g ; rhoi = %g\n", P[i], P[i-1], Rho[i]); // DEBUG */
@@ -82,8 +106,24 @@ double solve_tov_equation(int lines, double pt, double epst, FILE *eos, FILE *to
     double m, r;
     double p_sav, m_sav, r_sav;
     double mcore, rcore;
-    double rs, i_over_mr2, icrust_over_mr2;
-    double mmax = 0.;
+    double i_over_mr2, icrust_over_mr2;
+
+    double rhoc_last = 0.;
+    double pc_last = 0.;
+    double r_last = 0.;
+    double m_last = 0.;
+    double i_over_mr2_last = 0.;
+    double rcore_last = 0.;
+    double mcore_last = 0.;
+    double icrust_over_mr2_last = 0.;
+    tovs14->mmax = 0.;
+    tovs14->rhoc = 0.;
+    tovs14->pc = 0.;
+    tovs14->r = 0.;
+    tovs14->i_over_mr2 = 0;
+    tovs14->rcore = 0;
+    tovs14->mcore = 0;
+    tovs14->icrust_over_mr2 = 0;
 
     int N = 100; // number of points
 
@@ -111,10 +151,10 @@ double solve_tov_equation(int lines, double pt, double epst, FILE *eos, FILE *to
             m += calc_dm(rho, r, dr);
             p += calc_dp(rho, p, r, dr, m);
 
-            if (pt*p_factor_nu_to_cgs != P[0])
+            if (pt*P_FACTOR_NU_TO_CGS != P[0])
             {
-                if(p_sav > pt * p_factor_nu_to_cgs 
-                        && p < pt * p_factor_nu_to_cgs)
+                if(p_sav > pt * P_FACTOR_NU_TO_CGS 
+                        && p < pt * P_FACTOR_NU_TO_CGS)
                 {
                     mcore = (m_sav + m)/2.;
                     rcore = (r_sav + r)/2.;
@@ -136,24 +176,40 @@ double solve_tov_equation(int lines, double pt, double epst, FILE *eos, FILE *to
             m_sav = m;
         }
 
-        rs = 2.*G_CGS*m;
-        // see: PRC82,025810(2010)
-        i_over_mr2 = 0.21/(1.-rs/r/SPEEDOFL_CGS/SPEEDOFL_CGS);
-        if (pt*p_factor_nu_to_cgs != P[0])
-            icrust_over_mr2 = 16.*PI/3.*pow(rcore,6.)*pt*p_factor_nu_to_cgs/rs
-                *(1. - rs/r/SPEEDOFL_CGS/SPEEDOFL_CGS*i_over_mr2)
-                *(1. + 48./5.*(rcore/rs*SPEEDOFL_CGS*SPEEDOFL_CGS - 1.)*(pt/epst))
-                /m/r/r;
+        i_over_mr2 = calc_normalized_moment_of_inertia(r, m);
+        if (pt*P_FACTOR_NU_TO_CGS != P[0])
+            icrust_over_mr2 = calc_normalized_crustal_moment_of_inertia(r, m, i_over_mr2,
+                    epst, pt, rcore);
         else
             icrust_over_mr2 = 0.;
 
         r /= 100000.;
-        m /= msun;
+        m /= MSUN_CGS;
         rcore /= 100000.;
-        mcore /= msun;
+        mcore /= MSUN_CGS;
 
-        if (m > mmax)
-            mmax = m;
+        if (m > tovs14->mmax)
+            tovs14->mmax = m;
+
+        if (m > 1.4 && m_last < 1.4)
+        {
+            tovs14->rhoc = get_observable_for_a_given_mass(1.4, m_last, m, rhoc_last, rhoc);
+            tovs14->pc = get_observable_for_a_given_mass(1.4, m_last, m, pc_last, pc);
+            tovs14->r = get_observable_for_a_given_mass(1.4, m_last, m, r_last, r);
+            tovs14->i_over_mr2 = get_observable_for_a_given_mass(1.4, m_last, m, i_over_mr2_last, i_over_mr2);
+            tovs14->rcore = get_observable_for_a_given_mass(1.4, m_last, m, rcore_last, rcore);
+            tovs14->mcore = get_observable_for_a_given_mass(1.4, m_last, m, mcore_last, mcore);
+            tovs14->icrust_over_mr2 = get_observable_for_a_given_mass(1.4, m_last, m, icrust_over_mr2_last, icrust_over_mr2);
+        }
+
+        rhoc_last = rhoc;
+        pc_last = pc;
+        r_last = r;
+        m_last = m;
+        i_over_mr2_last = i_over_mr2;
+        rcore_last = rcore;
+        mcore_last = mcore;
+        icrust_over_mr2_last = icrust_over_mr2;
 
         fprintf(tov, "%g %g %g %g %g %g %g %g\n", rhoc, pc, 
                 r, m,
@@ -161,7 +217,7 @@ double solve_tov_equation(int lines, double pt, double epst, FILE *eos, FILE *to
                 i_over_mr2, icrust_over_mr2);
     }
 
-    return mmax;
+    return tovs14->mmax;
 
     gsl_spline_free (spline);
     gsl_interp_accel_free (acc);
