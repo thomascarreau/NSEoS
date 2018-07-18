@@ -201,7 +201,6 @@ double solve_tov_equation(int lines, double pt, double epst, FILE *eos,
             tovs14->mcore = get_observable_for_a_given_mass(1.4, m_last, m, mcore_last, mcore);
             tovs14->icrust_over_mr2 = get_observable_for_a_given_mass(1.4, m_last, m, icrust_over_mr2_last, icrust_over_mr2);
         }
-
         rhoc_last = rhoc;
         pc_last = pc;
         r_last = r;
@@ -217,8 +216,8 @@ double solve_tov_equation(int lines, double pt, double epst, FILE *eos,
                 i_over_mr2, icrust_over_mr2);
     }
 
-    return tovs14->mmax;
-
     gsl_spline_free (spline);
     gsl_interp_accel_free (acc);
+
+    return tovs14->mmax;
 }
