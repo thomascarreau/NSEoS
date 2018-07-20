@@ -20,12 +20,12 @@ int main(int argc, char* argv[])
     double p = 3.;
     struct transition_qtt tqtt;
     double epst;
+    int hd_checker = 0;
 
     FILE *mycrust = fopen(argv[2], "w+");
     FILE *mycore = fopen(argv[3], "w+");
     FILE *myeos = fopen(argv[4], "w+");
 
-    int hd_checker = 0;
     int lines = calc_equation_of_state(satdata, p, &tqtt, &epst, &hd_checker, mycrust, mycore, myeos);
 
     fclose(mycrust);
@@ -34,11 +34,15 @@ int main(int argc, char* argv[])
 
     // =================== TOV ===================
 
-    myeos = fopen(argv[4], "r");
     struct tov_solution tovs14;
+
+    myeos = fopen(argv[4], "r");
     FILE *mytov = fopen(argv[5], "w+");
 
     double mmax = solve_tov_equation(lines, tqtt.pt, epst, myeos, &tovs14, mytov);
+
+    fclose(myeos);
+    fclose(mytov);
 
     if (mmax > 1.4)
     {
@@ -57,9 +61,6 @@ int main(int argc, char* argv[])
         fprintf(stderr, "==============================================\n\n");
         fprintf(stderr, "Mmax = %g Msun\n", mmax);
     }
-
-    fclose(myeos);
-    fclose(mytov);
 
     return 0;
 }

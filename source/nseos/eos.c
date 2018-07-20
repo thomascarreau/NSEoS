@@ -76,7 +76,7 @@ int calc_equation_of_state(struct parameters satdata, double p,
         comp = calc_icrust4d_composition(nb, guess_ic, satdata, sparams);
         if (guess_ic[0] != guess_ic[0]) // exit if nan
         {
-            if (epsws_core - epsws_ic < 1.e-3)
+            if (epsws_core - epsws_ic < 1.e-3) // crust-core transition
             {
                 fprintf(stderr, "e_core - e_crust = %g\n", epsws_core - epsws_ic);
                 break;
@@ -96,7 +96,7 @@ int calc_equation_of_state(struct parameters satdata, double p,
             ccomp = calc_npecore_composition(nb, &guess_npecore, satdata);
             if (guess_npecore != guess_npecore) // exit if nan
             {
-                if (epsws_core - epsws_ic < 1.e-3)
+                if (epsws_core - epsws_ic < 1.e-3) // crust-core transition
                 {
                     fprintf(stderr, "e_core - e_crust = %g\n", epsws_core - epsws_ic);
                     break;
