@@ -204,7 +204,7 @@ int calc_equation_of_state(struct parameters satdata, double p,
     while (vs2 > 0. && vs2 < 1.)
     {
         ccomp = calc_npeucore_composition(nb, guess_npeucore, satdata);
-        if (guess_npeucore[0] != guess_npeucore[0]) // break if nan; see q&d part in core.c
+        if (guess_npeucore[0] != guess_npeucore[0]) // exit if nan
         {
             if (nb < 3.*satdata.rhosat0)
                 *hd_checker = 1;

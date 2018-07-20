@@ -38,17 +38,25 @@ int main(int argc, char* argv[])
     struct tov_solution tovs14;
     FILE *mytov = fopen(argv[5], "w+");
 
-    solve_tov_equation(lines, tqtt.pt, epst, myeos, &tovs14, mytov);
+    double mmax = solve_tov_equation(lines, tqtt.pt, epst, myeos, &tovs14, mytov);
 
-    fprintf(stderr, "==============================================\n\n");
-    fprintf(stderr, "Mmax        = %g Msun\n", tovs14.mmax);
-    fprintf(stderr, "rhoc_14     = %g g/cm^3\n", tovs14.rhoc);
-    fprintf(stderr, "pc_14       = %g dyn/cm^2\n", tovs14.pc);
-    fprintf(stderr, "R_14        = %g km\n", tovs14.r);
-    fprintf(stderr, "Rcore_14    = %g km\n", tovs14.rcore);
-    fprintf(stderr, "Mcore_14    = %g Msun\n", tovs14.mcore);
-    fprintf(stderr, "I/MR^2_14   = %g\n", tovs14.i_over_mr2);
-    fprintf(stderr, "Icrust/I_14 = %g\n", tovs14.icrust_over_mr2/tovs14.i_over_mr2);
+    if (mmax > 1.4)
+    {
+        fprintf(stderr, "==============================================\n\n");
+        fprintf(stderr, "Mmax        = %g Msun\n", mmax);
+        fprintf(stderr, "rhoc_14     = %g g/cm^3\n", tovs14.rhoc);
+        fprintf(stderr, "pc_14       = %g dyn/cm^2\n", tovs14.pc);
+        fprintf(stderr, "R_14        = %g km\n", tovs14.r);
+        fprintf(stderr, "Rcore_14    = %g km\n", tovs14.rcore);
+        fprintf(stderr, "Mcore_14    = %g Msun\n", tovs14.mcore);
+        fprintf(stderr, "I/MR^2_14   = %g\n", tovs14.i_over_mr2);
+        fprintf(stderr, "Icrust/I_14 = %g\n", tovs14.icrust_over_mr2/tovs14.i_over_mr2);
+    }
+    else
+    {
+        fprintf(stderr, "==============================================\n\n");
+        fprintf(stderr, "Mmax = %g Msun\n", mmax);
+    }
 
     fclose(myeos);
     fclose(mytov);
