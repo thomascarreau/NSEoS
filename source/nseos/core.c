@@ -104,8 +104,9 @@ struct core_compo calc_npecore_composition(double nb_, double *guess, struct par
             {
                 eq.del = NAN;
                 eq.nu = NAN;
-                guess[0] = eq.del;
-                guess[1] = eq.nu;
+                *guess = eq.del;
+                gsl_multiroot_fsolver_free(s);
+                gsl_vector_free(x);
                 return eq;
             }
         }
@@ -225,6 +226,8 @@ struct core_compo calc_npeucore_composition(double nb_, double *guess, struct pa
                 eq.nu = NAN;
                 guess[0] = eq.del;
                 guess[1] = eq.nu;
+                gsl_multiroot_fsolver_free(s);
+                gsl_vector_free(x);
                 return eq;
             }
         }
