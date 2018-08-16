@@ -55,6 +55,9 @@ double solve_tov_equation(int lines, double pt, double epst, FILE *eos,
     int j = 0;
     int l = lines;
 
+    if (l < 10) // to avoid the 'insufficient number of points for interpolation type' error
+        return 0.;
+
     // reading the EoS table
     for(int i = 0; i < lines; i++)
     {
@@ -127,7 +130,7 @@ double solve_tov_equation(int lines, double pt, double epst, FILE *eos,
 
     int N = 100; // number of points
 
-    if (Rho[l-1] < rhosat) // to avoid the interpolation error
+    if (Rho[l-1] < rhosat) // to avoid the 'interpolation error' error
         return 0.;
 
     for(int j = 0; j < N; j++)
