@@ -127,6 +127,9 @@ double solve_tov_equation(int lines, double pt, double epst, FILE *eos,
 
     int N = 100; // number of points
 
+    if (Rho[l-1] < rhosat) // to avoid the interpolation error
+        return 0.;
+
     for(int j = 0; j < N; j++)
     {
         rhoc = rhosat + ((double)j / (double)N)*(Rho[l-1] - rhosat);
