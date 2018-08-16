@@ -47,7 +47,7 @@ double get_observable_for_a_given_mass(double m, double mm, double mp, double om
 }
 
 double solve_tov_equation(int lines, double pt, double epst, FILE *eos, 
-        struct tov_solution *tovs14, FILE *tov)
+        struct tov_solution *tovs_m, double fixed_m, FILE *tov)
 {
     double Rho[lines], P[lines];
     double Rho_tmp, P_tmp;
@@ -116,14 +116,14 @@ double solve_tov_equation(int lines, double pt, double epst, FILE *eos,
     double rcore_last = 0.;
     double mcore_last = 0.;
     double icrust_over_mr2_last = 0.;
-    tovs14->mmax = 0.;
-    tovs14->rhoc = 0.;
-    tovs14->pc = 0.;
-    tovs14->r = 0.;
-    tovs14->i_over_mr2 = 0;
-    tovs14->rcore = 0;
-    tovs14->mcore = 0;
-    tovs14->icrust_over_mr2 = 0;
+    tovs_m->mmax = 0.;
+    tovs_m->rhoc = 0.;
+    tovs_m->pc = 0.;
+    tovs_m->r = 0.;
+    tovs_m->i_over_mr2 = 0;
+    tovs_m->rcore = 0;
+    tovs_m->mcore = 0;
+    tovs_m->icrust_over_mr2 = 0;
 
     int N = 100; // number of points
 
@@ -188,18 +188,18 @@ double solve_tov_equation(int lines, double pt, double epst, FILE *eos,
         rcore /= 100000.;
         mcore /= MSUN_CGS;
 
-        if (m > tovs14->mmax)
-            tovs14->mmax = m;
+        if (m > tovs_m->mmax)
+            tovs_m->mmax = m;
 
-        if (m > 1.4 && m_last < 1.4)
+        if (m > fixed_m && m_last < fixed_m)
         {
-            tovs14->rhoc = get_observable_for_a_given_mass(1.4, m_last, m, rhoc_last, rhoc);
-            tovs14->pc = get_observable_for_a_given_mass(1.4, m_last, m, pc_last, pc);
-            tovs14->r = get_observable_for_a_given_mass(1.4, m_last, m, r_last, r);
-            tovs14->i_over_mr2 = get_observable_for_a_given_mass(1.4, m_last, m, i_over_mr2_last, i_over_mr2);
-            tovs14->rcore = get_observable_for_a_given_mass(1.4, m_last, m, rcore_last, rcore);
-            tovs14->mcore = get_observable_for_a_given_mass(1.4, m_last, m, mcore_last, mcore);
-            tovs14->icrust_over_mr2 = get_observable_for_a_given_mass(1.4, m_last, m, icrust_over_mr2_last, icrust_over_mr2);
+            tovs_m->rhoc = get_observable_for_a_given_mass(fixed_m, m_last, m, rhoc_last, rhoc);
+            tovs_m->pc = get_observable_for_a_given_mass(fixed_m, m_last, m, pc_last, pc);
+            tovs_m->r = get_observable_for_a_given_mass(fixed_m, m_last, m, r_last, r);
+            tovs_m->i_over_mr2 = get_observable_for_a_given_mass(fixed_m, m_last, m, i_over_mr2_last, i_over_mr2);
+            tovs_m->rcore = get_observable_for_a_given_mass(fixed_m, m_last, m, rcore_last, rcore);
+            tovs_m->mcore = get_observable_for_a_given_mass(fixed_m, m_last, m, mcore_last, mcore);
+            tovs_m->icrust_over_mr2 = get_observable_for_a_given_mass(fixed_m, m_last, m, icrust_over_mr2_last, icrust_over_mr2);
         }
         rhoc_last = rhoc;
         pc_last = pc;
@@ -219,5 +219,5 @@ double solve_tov_equation(int lines, double pt, double epst, FILE *eos,
     gsl_spline_free (spline);
     gsl_interp_accel_free (acc);
 
-    return tovs14->mmax;
+    return tovs_m->mmax;
 }

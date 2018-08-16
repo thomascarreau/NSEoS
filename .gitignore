@@ -8,3 +8,5 @@ source/apps/nseos/*.out
 source/apps/nseos/nseos
 
 source/apps/bayesian_analysis/*
+
+source/apps/draft_PRL/*

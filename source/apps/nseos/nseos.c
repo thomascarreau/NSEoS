@@ -35,16 +35,17 @@ int main(int argc, char* argv[])
     // =================== TOV ===================
 
     struct tov_solution tovs14;
+    double fixed_m = 1.4;
 
     myeos = fopen(argv[4], "r");
     FILE *mytov = fopen(argv[5], "w+");
 
-    double mmax = solve_tov_equation(lines, tqtt.pt, epst, myeos, &tovs14, mytov);
+    double mmax = solve_tov_equation(lines, tqtt.pt, epst, myeos, &tovs14, fixed_m, mytov);
 
     fclose(myeos);
     fclose(mytov);
 
-    if (mmax > 1.4)
+    if (mmax > fixed_m)
     {
         fprintf(stderr, "==============================================\n\n");
         fprintf(stderr, "Mmax        = %g Msun\n", mmax);
