@@ -219,7 +219,7 @@ double solve_tov_equation(int lines, double pt, double epst, FILE *eos,
         fprintf(tov, "%g %g %g %g %g %g %g %g\n", rhoc, pc, 
                 r, m,
                 rcore, mcore,
-                i_over_mr2, icrust_over_mr2);
+                i_over_mr2, icrust_over_mr2/i_over_mr2);
     }
 
     gsl_spline_free (spline);
