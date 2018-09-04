@@ -8,6 +8,8 @@ source/apps/nseos/*.out
 
 source/apps/nseos/nseos
 
+source/apps/nseos/satMassProperties.py
+
 source/apps/bayesian_analysis/*
 
 source/apps/draft_PRL/*

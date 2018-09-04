@@ -5,13 +5,29 @@
 #include "modeling.h"
 #include "empirical.h"
 
+/* (effm,isosplit) <-> (barm,bardel) */
+void eval_barm_and_bardel(float effm, float isosplit,
+        float *barm, float *bardel)
+{
+    float kv;
+
+    *barm = 1./effm - 1.; // = ks
+
+    if (isosplit == 0.0)
+        kv = (*barm) - 0.5*isosplit*(1.+(*barm))*(1.+(*barm)); // eq (8) of arXiv:1708:06894
+    else
+        kv = (sqrt(((*barm) + 1.)*((*barm) + 1.)*isosplit*isosplit + 1.)
+                + (*barm) * isosplit - 1.)/isosplit; // see: ref [103] of arXiv:1708:06894
+
+    *bardel = *barm - kv;
+}
+
 struct parameters assign_param(char set[], float b)
 {
     struct parameters satdata;
     FILE *fin;
     float effm;
     float isosplit;
-    float kv;
 
     char path_of_set[50] = "../../input/satdata/";
     strcat(path_of_set, set);
@@ -22,15 +38,7 @@ struct parameters assign_param(char set[], float b)
     fscanf(fin, "%f %f %f %f %f", &satdata.jsym0, &satdata.lsym0, &satdata.ksym0, &satdata.qsym0, &satdata.zsym0);
     fscanf(fin, "%f %f", &effm, &isosplit);
 
-    satdata.barm = 1./effm - 1.;
-
-    if (isosplit == 0.0)
-        kv = satdata.barm - 0.5*isosplit*(1.+satdata.barm)*(1.+satdata.barm); // eq (8) of arXiv:1708:06894
-    else
-        kv = (sqrt((satdata.barm + 1.)*(satdata.barm + 1.)*isosplit*isosplit + 1.)
-                + satdata.barm * isosplit - 1.)/isosplit; // see: ref [103] of arXiv:1708:06894
-
-    satdata.bardel = satdata.barm - kv;
+    eval_barm_and_bardel(effm, isosplit, &satdata.barm, &satdata.bardel);
 
     satdata.b = b;
 
@@ -64,7 +72,7 @@ struct skyrme_parameters assign_skyrme_param(struct skyrme_parameters coeff)
 
 int read_table_of_sets(FILE *sets, struct parameters *satdata, float *m, float *dm)
 {
-    float effm, isosplit, kv;
+    float effm, isosplit;
 
     int buffer = 
         fscanf(sets, "%f %f %f %f %f %f %f %f %f %f %f %f %f", 
@@ -75,16 +83,7 @@ int read_table_of_sets(FILE *sets, struct parameters *satdata, float *m, float *
 
     if (buffer == 13)
     {
-        // (effm,isosplit) <-> (barm,bardel)
-        satdata->barm = 1./effm - 1.;
-
-        if (isosplit == 0.0)
-            kv = satdata->barm - 0.5*isosplit*(1.+satdata->barm)*(1.+satdata->barm); // eq (8) of arXiv:1708:06894
-        else
-            kv = (sqrt((satdata->barm + 1.)*(satdata->barm + 1.)*isosplit*isosplit + 1.)
-                    + satdata->barm * isosplit - 1.)/isosplit; // see: ref [103] of arXiv:1708:06894
-
-        satdata->bardel = satdata->barm - kv;
+        eval_barm_and_bardel(effm, isosplit, &satdata->barm, &satdata->bardel);
 
         *m = effm;
         *dm = isosplit;

@@ -33,6 +33,8 @@ struct skyrme_parameters
     float x3;
 };
 
+void eval_barm_and_bardel(float effm, float isosplit,
+        float *ks, float *kv);
 struct parameters assign_param(char set[], float b);
 void print_parameters(struct parameters satdata);
 struct skyrme_parameters assign_skyrme_param(struct skyrme_parameters coeff);
