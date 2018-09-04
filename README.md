@@ -26,7 +26,7 @@ In `NSEoS/source/apps/nseos`:
 The first output file gives you the crust composition (number density, mass of the cluster, global asymmetry in the cluster, 
 number of charges, cluster density, gas density, and radius of the cell). 
 The second output file gives you the core composition (number density, fraction of protons, electrons, and muons). 
-The third output file gives you the EoS (mass density, and pressure). Finally, the last output file gives you the TOV solution (central density, central pressure, radius, mass, core radius, core mass, normalized moment of inertia, and normalized moment of inertia of the crust).
+The third output file gives you the EoS (mass density, and pressure). Finally, the last output file gives you the TOV solution (central density, central pressure, radius, mass, core radius, core mass, normalized moment of inertia, and fraction of moment of inertia residing in the crust).
 
 ### Available sets of empirical parameters
 
