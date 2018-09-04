@@ -11,6 +11,7 @@ struct parameters assign_param(char set[], float b)
     FILE *fin;
     float effm;
     float isosplit;
+    float kv;
 
     char path_of_set[50] = "../../input/satdata/";
     strcat(path_of_set, set);
@@ -20,8 +21,17 @@ struct parameters assign_param(char set[], float b)
     fscanf(fin, "%f %f %f %f %f", &satdata.rhosat0, &satdata.lasat0, &satdata.ksat0, &satdata.qsat0, &satdata.zsat0);
     fscanf(fin, "%f %f %f %f %f", &satdata.jsym0, &satdata.lsym0, &satdata.ksym0, &satdata.qsym0, &satdata.zsym0);
     fscanf(fin, "%f %f", &effm, &isosplit);
+
     satdata.barm = 1./effm - 1.;
-    satdata.bardel = satdata.barm - isosplit;
+
+    if (isosplit == 0.0)
+        kv = satdata.barm - 0.5*isosplit*(1.+satdata.barm)*(1.+satdata.barm); // eq (8) of arXiv:1708:06894
+    else
+        kv = (sqrt((satdata.barm + 1.)*(satdata.barm + 1.)*isosplit*isosplit + 1.)
+                + satdata.barm * isosplit - 1.)/isosplit; // see: ref [103] of arXiv:1708:06894
+
+    satdata.bardel = satdata.barm - kv;
+
     satdata.b = b;
 
     fclose(fin);
