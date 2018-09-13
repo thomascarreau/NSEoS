@@ -1,4 +1,4 @@
-source/input/satdata/sly4d.in
+source/input/satdata/*_d.in
 source/input/satdata/test.in
 source/input/satdata/ref.in
 
