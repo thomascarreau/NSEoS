@@ -17,7 +17,7 @@ int main(int argc, char* argv[])
 
     float b = 10.*log(2.);
     struct parameters satdata = assign_param(argv[1], b);
-    double p = 3.;
+    double p = 3.0;
     struct transition_qtt tqtt;
     double epst;
     int hd_checker = 0;
