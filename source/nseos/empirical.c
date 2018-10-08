@@ -76,7 +76,7 @@ int read_table_of_sets(FILE *sets, struct parameters *satdata, float *m, float *
 
     int buffer = 
         fscanf(sets, "%f %f %f %f %f %f %f %f %f %f %f %f %f", 
-                &satdata->lasat0, &satdata->rhosat0, &satdata->ksat0,
+                &satdata->rhosat0, &satdata->lasat0, &satdata->ksat0,
                 &satdata->qsat0, &satdata->zsat0, &satdata->jsym0, 
                 &satdata->lsym0, &satdata->ksym0, &satdata->qsym0, 
                 &satdata->zsym0, &effm, &isosplit, &satdata->b);
