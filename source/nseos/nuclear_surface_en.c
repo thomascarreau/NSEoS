@@ -220,7 +220,7 @@ int be_f (const gsl_vector * x, void *data, gsl_vector * f)
                 + prms.b + pow(1.-ypnuc,-prms.p));
         double esurf = 4.*PI*r0*r0*sigma*pow(aa[i],-1./3.);
         // coulomb
-        double Ecoul = calc_coulomb_en(satdata, aa[i], ii, n0, 0.);
+        double Ecoul = calc_coulomb_en(satdata, aa[i], ii);
         double ecoul = Ecoul/aa[i];
         // total
         double Be = ebulk + esurf + ecoul;

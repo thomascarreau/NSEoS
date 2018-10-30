@@ -2,7 +2,7 @@
 
 #include "phyconst.h"
 #include "nuclear_matter.h"
-#include "coulomb.h"
+#include "lepton.h"
 #include "crust.h"
 #include "core.h"
 #include "modeling.h"
@@ -233,7 +233,7 @@ int calc_equation_of_state(struct parameters satdata, double p,
 
         vs2 = test_hd.vs2;
 
-        nb += 0.01;
+        nb += 0.005;
 
         lines += 1;
     }

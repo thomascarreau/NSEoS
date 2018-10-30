@@ -20,6 +20,10 @@ struct compo
     double n0;
     double ng;
 };
+double calc_zp_en(struct parameters satdata, struct sf_params sparams, 
+        double aa_, double ii_, double n0_, double np_); // zero point quantum vibration
+double calc_ion_en(struct parameters satdata, struct sf_params sparams,
+        double aa_, double del_, double n0_, double np_);
 struct crust_fun_4d calc_crust_fun_4d(struct parameters satdata, struct sf_params sparams, 
         double aa_, double del_, double n0_, double np_, double ng_);
 struct rparams_crust

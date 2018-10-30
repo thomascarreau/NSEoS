@@ -7,6 +7,7 @@ OBJS = $(BUILDDIR)/tov.o \
 	   $(BUILDDIR)/eos.o \
 	   $(BUILDDIR)/core.o \
 	   $(BUILDDIR)/crust.o \
+	   $(BUILDDIR)/lepton.o \
 	   $(BUILDDIR)/nuclear_en.o \
 	   $(BUILDDIR)/coulomb.o \
 	   $(BUILDDIR)/nuclear_surface_en.o \
@@ -48,6 +49,12 @@ $(BUILDDIR)/coulomb.o : $(LIBDIR)/coulomb.h \
 $(BUILDDIR)/nuclear_en.o : $(LIBDIR)/nuclear_en.h \
 	$(LIBDIR)/nuclear_en.c
 	$(CC) -c $(LIBDIR)/nuclear_en.c -o $(BUILDDIR)/nuclear_en.o
+
+$(BUILDDIR)/lepton.o : $(LIBDIR)/lepton.h \
+	$(LIBDIR)/lepton.c \
+	$(LIBDIR)/mathconst.h \
+	$(LIBDIR)/phyconst.h
+	$(CC) -c $(LIBDIR)/lepton.c -o $(BUILDDIR)/lepton.o
 
 $(BUILDDIR)/crust.o : $(LIBDIR)/crust.h \
 	$(LIBDIR)/crust.c \

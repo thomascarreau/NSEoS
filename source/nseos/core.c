@@ -1,7 +1,7 @@
 #include <gsl/gsl_multiroots.h>
 
 #include "nuclear_matter.h"
-#include "coulomb.h"
+#include "lepton.h"
 #include "modeling.h"
 #include "core.h"
 

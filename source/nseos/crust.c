@@ -1,52 +1,81 @@
 #include <stdio.h>
 #include <gsl/gsl_multiroots.h>
 
+#include "lepton.h"
 #include "nuclear_en.h"
 #include "modeling.h"
 #include "crust.h"
+
+double calc_zp_en(struct parameters satdata, struct sf_params sparams, double aa_, double ii_, double n0_, double np_)
+{
+    double hbaromega_p;
+    double zz;
+    double mi;
+    double vws;
+    double u1;
+
+    zz = aa_*(1.-ii_)/2.;
+    mi = zz*RMP + (aa_-zz)*RMN + CALC_NUCLEAR_EN(satdata, sparams, TAYLOR_EXP_ORDER, aa_, ii_, n0_);
+    vws = zz/np_;
+
+    hbaromega_p = sqrt(pow(HBARC,2.)*4.*PI*pow(zz,2.)*ALPHAFS*HBARC
+            /mi/vws);
+
+    u1 = 0.5113875; // bcc lattice
+
+    return 3./2.*hbaromega_p*u1;
+}
+
+double calc_ion_en(struct parameters satdata, struct sf_params sparams,
+        double aa_, double del_, double n0_, double np_)
+{
+    return CALC_NUCLEAR_EN(satdata, sparams, TAYLOR_EXP_ORDER, aa_, del_, n0_)
+        + calc_zp_en(satdata, sparams, aa_, del_, n0_, np_)
+        + calc_lattice_en(satdata, aa_, del_, n0_, np_);
+}
 
 struct crust_fun_4d calc_crust_fun_4d(struct parameters satdata, struct sf_params sparams, 
         double aa_, double del_, double n0_, double np_, double ng_)
 {
     struct crust_fun_4d result;
-    double enuc;
+    double eion;
     double epsa;
     double epsb;
     double epsr;
-    double enuc_ap, enuc_am;
-    double enuc_bp, enuc_bm;
-    double enuc_rp, enuc_rm;
-    double denucdaa;
-    double denucddel;
-    double denucdn0;
+    double eion_ap, eion_am;
+    double eion_bp, eion_bm;
+    double eion_rp, eion_rm;
+    double deiondaa;
+    double deionddel;
+    double deiondn0;
     double muel;
     double dmu;
     struct hnm ngas;
 
-    enuc = CALC_NUCLEAR_EN(satdata, sparams, TAYLOR_EXP_ORDER, aa_, del_, n0_, np_);
+    eion = calc_ion_en(satdata, sparams, aa_, del_, n0_, np_);
     epsa = 0.001;
     epsb = 0.0001;
     epsr = 0.0001;
-    enuc_ap = CALC_NUCLEAR_EN(satdata, sparams, TAYLOR_EXP_ORDER, aa_+epsa, del_, n0_, np_);
-    enuc_am = CALC_NUCLEAR_EN(satdata, sparams, TAYLOR_EXP_ORDER, aa_-epsa, del_, n0_, np_);
-    enuc_bp = CALC_NUCLEAR_EN(satdata, sparams, TAYLOR_EXP_ORDER, aa_, del_+epsb, n0_, np_);
-    enuc_bm = CALC_NUCLEAR_EN(satdata, sparams, TAYLOR_EXP_ORDER, aa_, del_-epsb, n0_, np_);
-    enuc_rp = CALC_NUCLEAR_EN(satdata, sparams, TAYLOR_EXP_ORDER, aa_, del_, n0_+epsr, np_);
-    enuc_rm = CALC_NUCLEAR_EN(satdata, sparams, TAYLOR_EXP_ORDER, aa_, del_, n0_-epsr, np_);
-    denucdaa = (enuc_ap - enuc_am)/2./epsa; // 2 points derivatives
-    denucddel = (enuc_bp - enuc_bm)/2./epsb;
-    denucdn0 = (enuc_rp - enuc_rm)/2./epsr;
+    eion_ap = calc_ion_en(satdata, sparams, aa_+epsa, del_, n0_, np_);
+    eion_am = calc_ion_en(satdata, sparams, aa_-epsa, del_, n0_, np_);
+    eion_bp = calc_ion_en(satdata, sparams, aa_, del_+epsb, n0_, np_);
+    eion_bm = calc_ion_en(satdata, sparams, aa_, del_-epsb, n0_, np_);
+    eion_rp = calc_ion_en(satdata, sparams, aa_, del_, n0_+epsr, np_);
+    eion_rm = calc_ion_en(satdata, sparams, aa_, del_, n0_-epsr, np_);
+    deiondaa = (eion_ap - eion_am)/2./epsa; // 2 points derivatives
+    deionddel = (eion_bp - eion_bm)/2./epsb;
+    deiondn0 = (eion_rp - eion_rm)/2./epsr;
 
     muel = calc_egas_chemical_potential(np_);
-    dmu = calc_screening_derivative(satdata, aa_, del_, n0_, np_);
+    dmu = calc_lattice_derivative(satdata, aa_, del_, n0_, np_);
 
     ngas = calc_meta_model_nuclear_matter(satdata, TAYLOR_EXP_ORDER, ng_, 1.);
 
-    result.f_stability = denucdaa - enuc/aa_;
-    result.f_beta = denucddel*2./aa_ - muel - dmu - RMP + RMN;
-    result.f_muneq = enuc/aa_ - (ngas.mun)*(1.-ng_/n0_) 
+    result.f_stability = deiondaa - eion/aa_;
+    result.f_beta = deionddel*2./aa_ - muel - dmu - RMP + RMN;
+    result.f_muneq = eion/aa_ - (ngas.mun)*(1.-ng_/n0_) 
         + (1.-del_)/2.*(muel + dmu + RMP - RMN) - ng_*(ngas.enpernuc)/n0_ ;
-    result.f_presseq = n0_*n0_*denucdn0/aa_ - ng_*ngas.mun + ng_*ngas.enpernuc;
+    result.f_presseq = n0_*n0_*deiondn0/aa_ - ng_*ngas.mun + ng_*ngas.enpernuc;
 
     return result;
 }
@@ -353,20 +382,20 @@ struct compo calc_icrust4d_composition(double nb_, double *guess,
 double calc_muncl(struct parameters satdata, struct sf_params sparams, struct compo eq, double nb_)
 {
     double np;
-    double enuc;
+    double eion;
     double epsb;
-    double enuc_bp, enuc_bm;
-    double denucddel;
+    double eion_bp, eion_bm;
+    double deionddel;
 
     np = nb_*(1.-eq.del)/2.;
 
-    enuc = CALC_NUCLEAR_EN(satdata, sparams, TAYLOR_EXP_ORDER, eq.aa, eq.del, eq.n0, np);
+    eion = calc_ion_en(satdata, sparams, eq.aa, eq.del, eq.n0, np);
     epsb = 0.0001;
-    enuc_bp = CALC_NUCLEAR_EN(satdata, sparams, TAYLOR_EXP_ORDER, eq.aa, eq.del+epsb, eq.n0, np);
-    enuc_bm = CALC_NUCLEAR_EN(satdata, sparams, TAYLOR_EXP_ORDER, eq.aa, eq.del-epsb, eq.n0, np);
-    denucddel = (enuc_bp - enuc_bm)/2./epsb;
+    eion_bp = calc_ion_en(satdata, sparams, eq.aa, eq.del+epsb, eq.n0, np);
+    eion_bm = calc_ion_en(satdata, sparams, eq.aa, eq.del-epsb, eq.n0, np);
+    deionddel = (eion_bp - eion_bm)/2./epsb;
 
-    return enuc/eq.aa + (1.-eq.del)/eq.aa * denucddel;
+    return eion/eq.aa + (1.-eq.del)/eq.aa * deionddel;
 }
 
 double calc_crust_ws_cell_energy_density(struct parameters satdata, struct sf_params sparams, struct compo eq,
@@ -375,7 +404,7 @@ double calc_crust_ws_cell_energy_density(struct parameters satdata, struct sf_pa
     double np;
     double vws;
     double epseltot;
-    double enuc;
+    double eion;
     struct hnm ngas;
     double epsg;
     double epsws; 
@@ -385,12 +414,12 @@ double calc_crust_ws_cell_energy_density(struct parameters satdata, struct sf_pa
 
     epseltot = calc_egas_energy_density(np);
 
-    enuc = CALC_NUCLEAR_EN(satdata, sparams, TAYLOR_EXP_ORDER, eq.aa, eq.del, eq.n0, np);
+    eion = calc_ion_en(satdata, sparams, eq.aa, eq.del, eq.n0, np);
 
     ngas = calc_meta_model_nuclear_matter(satdata, TAYLOR_EXP_ORDER, eq.ng, 1.);
     epsg = eq.ng*ngas.enpernuc;
 
-    epsws = enuc/vws + epseltot + epsg*(1.-eq.aa/eq.n0/vws)
+    epsws = eion/vws + epseltot + epsg*(1.-eq.aa/eq.n0/vws)
         + np*(RMP-RMN) + nb_*RMN;
 
     return epsws;
