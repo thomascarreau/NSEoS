@@ -21,7 +21,7 @@ double calc_zp_en(struct parameters satdata, struct sf_params sparams, double aa
     hbaromega_p = sqrt(pow(HBARC,2.)*4.*PI*pow(zz,2.)*ALPHAFS*HBARC
             /mi/vws);
 
-    u1 = 0.5113875; // bcc lattice
+    u1 = 0.5113875; // bcc lattice; Table 2.4 of Haensel book
 
     return 3./2.*hbaromega_p*u1;
 }
@@ -42,39 +42,44 @@ struct crust_fun_4d calc_crust_fun_4d(struct parameters satdata, struct sf_param
     double epsa;
     double epsb;
     double epsr;
+    double epsp;
     double eion_ap, eion_am;
     double eion_bp, eion_bm;
     double eion_rp, eion_rm;
+    double eion_pp, eion_pm;
     double deiondaa;
     double deionddel;
     double deiondn0;
+    double deiondnp;
     double muel;
-    double dmu;
     struct hnm ngas;
 
     eion = calc_ion_en(satdata, sparams, aa_, del_, n0_, np_);
     epsa = 0.001;
     epsb = 0.0001;
     epsr = 0.0001;
+    epsp = np_/1000.;
     eion_ap = calc_ion_en(satdata, sparams, aa_+epsa, del_, n0_, np_);
     eion_am = calc_ion_en(satdata, sparams, aa_-epsa, del_, n0_, np_);
     eion_bp = calc_ion_en(satdata, sparams, aa_, del_+epsb, n0_, np_);
     eion_bm = calc_ion_en(satdata, sparams, aa_, del_-epsb, n0_, np_);
     eion_rp = calc_ion_en(satdata, sparams, aa_, del_, n0_+epsr, np_);
     eion_rm = calc_ion_en(satdata, sparams, aa_, del_, n0_-epsr, np_);
+    eion_pp = calc_ion_en(satdata, sparams, aa_, del_, n0_, np_+epsp);
+    eion_pm = calc_ion_en(satdata, sparams, aa_, del_, n0_, np_-epsp);
     deiondaa = (eion_ap - eion_am)/2./epsa; // 2 points derivatives
     deionddel = (eion_bp - eion_bm)/2./epsb;
     deiondn0 = (eion_rp - eion_rm)/2./epsr;
+    deiondnp = (eion_pp - eion_pm)/2./epsp;
 
     muel = calc_egas_chemical_potential(np_);
-    dmu = calc_lattice_derivative(satdata, aa_, del_, n0_, np_);
 
     ngas = calc_meta_model_nuclear_matter(satdata, TAYLOR_EXP_ORDER, ng_, 1.);
 
     result.f_stability = deiondaa - eion/aa_;
-    result.f_beta = deionddel*2./aa_ - muel - dmu - RMP + RMN;
-    result.f_muneq = eion/aa_ - (ngas.mun)*(1.-ng_/n0_) 
-        + (1.-del_)/2.*(muel + dmu + RMP - RMN) - ng_*(ngas.enpernuc)/n0_ ;
+    result.f_beta = (deionddel + np_/(1.-del_)*deiondnp)*2./aa_ - muel - RMP + RMN;
+    result.f_muneq = eion/aa_ + (1.-del_)/aa_*deionddel 
+        - ngas.mun + ng_/n0_*(ngas.mun - ngas.enpernuc);
     result.f_presseq = n0_*n0_*deiondn0/aa_ - ng_*ngas.mun + ng_*ngas.enpernuc;
 
     return result;
@@ -433,20 +438,35 @@ double calc_ngas_pressure(struct parameters satdata, double ng_)
     return ng_*ngas.mun - ng_*ngas.enpernuc;
 }
 
-double calc_crust_ws_cell_pressure(struct parameters satdata, struct compo eq, double nb_)
+double calc_ion_pressure(struct parameters satdata, struct sf_params sparams, 
+        double aa_, double del_, double n0_, double np_)
+{
+    double epsp;
+    double eion_pp, eion_pm;
+    double deiondnp;
+
+    epsp = np_/1000.;
+    eion_pp = calc_ion_en(satdata, sparams, aa_, del_, n0_, np_+epsp);
+    eion_pm = calc_ion_en(satdata, sparams, aa_, del_, n0_, np_-epsp);
+    deiondnp = (eion_pp - eion_pm)/2./epsp;
+
+    return 2.*np_*np_/aa_/(1.-del_)*deiondnp;
+}
+
+double calc_crust_ws_cell_pressure(struct parameters satdata, struct sf_params sparams, 
+        struct compo eq, double nb_)
 {
     double np;
     double egas_pressure;
-    double lattice_pressure;
+    double ion_pressure;
     double ngas_pressure;
     double ws_cell_pressure;
 
-
     np = (nb_-eq.ng)*(1.-eq.del)/2./(1.-eq.ng/eq.n0);
     egas_pressure = calc_egas_pressure(np);
-    lattice_pressure = calc_lattice_pressure(satdata, eq.aa, eq.del, eq.n0, np);
+    ion_pressure = calc_ion_pressure(satdata, sparams, eq.aa, eq.del, eq.n0, np);
     ngas_pressure = calc_ngas_pressure(satdata, eq.ng);
-    ws_cell_pressure = egas_pressure + lattice_pressure + ngas_pressure;
+    ws_cell_pressure = egas_pressure + ion_pressure + ngas_pressure;
 
     return ws_cell_pressure;
 }
@@ -462,7 +482,7 @@ void print_state_crust(struct parameters satdata, struct sf_params sparams, stru
     rws = pow(3.*vws/4./PI,1./3.);
 
     rhob = calc_crust_ws_cell_energy_density(satdata, sparams, eq, nb_)*(ELEMC/1.e-19)/pow(SPEEDOFL/1.e8,2.)*1.e13;
-    pressws = calc_crust_ws_cell_pressure(satdata, eq, nb_);
+    pressws = calc_crust_ws_cell_pressure(satdata, sparams, eq, nb_);
 
     fprintf (compo, "%g %g %g %g %g %g %g\n", nb_, eq.aa, eq.del, eq.aa*(1.-eq.del)/2., eq.n0, eq.ng, rws);
     fprintf(eos, "%g %g\n", rhob, pressws);

@@ -47,7 +47,9 @@ double calc_muncl(struct parameters satdata, struct sf_params sparams, struct co
 double calc_crust_ws_cell_energy_density(struct parameters satdata, struct sf_params sparams, struct compo eq,
         double nb_); // total energy density in the inner-crust WS cell -amu*nB in MeV/fm^3
 double calc_ngas_pressure(struct parameters satdata, double ng_); // in MeV/fm^3
-double calc_crust_ws_cell_pressure(struct parameters satdata, struct compo eq,
+double calc_ion_pressure(struct parameters satdata, struct sf_params sparams, 
+        double aa_, double del_, double n0_, double np_);
+double calc_crust_ws_cell_pressure(struct parameters satdata, struct sf_params sparams, struct compo eq,
         double nb_); // pressure in the inner-crust WS cell in MeV/fm^3
 void print_state_crust(struct parameters satdata, struct sf_params sparams, struct compo eq,
         double nb_, FILE *compo, FILE *eos);

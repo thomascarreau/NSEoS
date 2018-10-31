@@ -43,7 +43,7 @@ int calc_equation_of_state(struct parameters satdata, double p,
         if (muncl > 0.) // neutron drip -> transtion to inner crust
             break;
 
-        pressure = calc_crust_ws_cell_pressure(satdata, comp, nb);
+        pressure = calc_crust_ws_cell_pressure(satdata, sparams, comp, nb);
 
         if (*hd_checker == 0 && pressure < pressure_sav)
         {
@@ -118,7 +118,7 @@ int calc_equation_of_state(struct parameters satdata, double p,
             }
         }
 
-        pressure = calc_crust_ws_cell_pressure(satdata, comp, nb);
+        pressure = calc_crust_ws_cell_pressure(satdata, sparams, comp, nb);
 
         if (*hd_checker == 0 && pressure < pressure_sav)
         {
