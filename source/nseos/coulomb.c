@@ -36,15 +36,15 @@ double calc_lattice_en(struct parameters satdata, double aa_, double ii_, double
 double calc_lattice_pressure(struct parameters satdata, double aa_, double ii_, double n0_, double np_)
 {
     double rsat;
-    double ac;
+    double cm;
     double rpt;
-    double lattice_pressure;
+    double zz;
 
     rsat = pow(3./4./PI/satdata.rhosat0,1./3.);
-    ac = 3./5.*ALPHAFS*HBARC/rsat;
+    cm = 0.895929255682; // bcc lattice; Table 2.4 of Haensel book
     rpt = 2.*np_/(1.-ii_)/n0_;
-    lattice_pressure = 0.5*ac*pow(aa_,2./3.)*np_*np_/n0_
-        *(1.-pow(rpt,-2/3.));
+    zz = aa_*(1.-ii_)/2.;
 
-    return lattice_pressure;
+    return ALPHAFS*HBARC/rsat*np_*zz*pow(aa_,-1./3.)
+        *(-cm/3.*pow(rpt,1./3.) + 3./10.*rpt);
 }
