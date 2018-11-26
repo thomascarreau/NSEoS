@@ -8,7 +8,8 @@
 
 double get_shell_energy_per_nucleon(float nb_, float zz_)
 {
-    FILE *bsk_table = fopen("../../input/shell_corr/bsk24_nb_zz_esh.dat", "r");
+    FILE *bsk_table = 
+        fopen("../../input/shell_corr/bsk24_nb_zz_esh.data", "r");
 
     float esh_nb;
 
