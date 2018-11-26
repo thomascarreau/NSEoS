@@ -47,8 +47,8 @@ int calc_equation_of_state(struct parameters satdata, double p,
 
         if (*hd_checker == 0 && pressure < pressure_sav)
         {
-            fprintf(stderr, "HD CHECKER: dP/dnB < 0 (outer crust) \
-                    ; nB = %g /fm^3\n\n", nb);
+            fprintf(stderr, "HD CHECKER: dP/dnB < 0 (outer crust) ;\
+                    nB = %g /fm^3\n\n", nb);
             *hd_checker = 1;
         }
 
@@ -127,8 +127,8 @@ int calc_equation_of_state(struct parameters satdata, double p,
 
         if (*hd_checker == 0 && pressure < pressure_sav)
         {
-            fprintf(stderr, "HD CHECKER: dP/dnB < 0 (inner crust) \
-                    ; nB = %g /fm^3\n\n", nb);
+            fprintf(stderr, "HD CHECKER: dP/dnB < 0 (inner crust) ;\
+                    nB = %g /fm^3\n\n", nb);
             *hd_checker = 1;
         }
 
@@ -172,8 +172,8 @@ int calc_equation_of_state(struct parameters satdata, double p,
 
         if (test_hd.vs2 < 0. || test_hd.vs2 > 1.)
         {
-            fprintf(stderr, "HD CHECKER: vs/c < 0 or > 1 (npe core) \
-                    ; nB = %g /fm^3\n\n", nb);
+            fprintf(stderr, "HD CHECKER: vs/c < 0 or > 1 (npe core) ;\
+                    nB = %g /fm^3\n\n", nb);
             if (nb < 3.*satdata.rhosat0)
                 *hd_checker = 1;
             return lines;
@@ -183,15 +183,15 @@ int calc_equation_of_state(struct parameters satdata, double p,
 
         if (*hd_checker == 0 && nb != tqtt->nt && pressure < pressure_sav)
         {
-            fprintf(stderr, "HD CHECKER: dP/dnB < 0 (npe core) \
-                    ; nB = %g /fm^3\n\n", nb);
+            fprintf(stderr, "HD CHECKER: dP/dnB < 0 (npe core) ;\
+                    nB = %g /fm^3\n\n", nb);
             *hd_checker = 1;
         }
 
         if (*hd_checker == 0 && test_hd.jsym < 0)
         {
-            fprintf(stderr, "HD CHECKER: Jsym < 0 (npe core) \
-                    ; nB = %g /fm^3\n\n", nb);
+            fprintf(stderr, "HD CHECKER: Jsym < 0 (npe core) ;\
+                    nB = %g /fm^3\n\n", nb);
             *hd_checker = 1;
         }
 
@@ -225,8 +225,8 @@ int calc_equation_of_state(struct parameters satdata, double p,
 
         if (*hd_checker == 0 && pressure < pressure_sav)
         {
-            fprintf(stderr, "HD CHECKER: dP/dnB < 0 (core npeu) \
-                    ; nB = %g /fm^3\n\n", nb);
+            fprintf(stderr, "HD CHECKER: dP/dnB < 0 (core npeu) ;\
+                    nB = %g /fm^3\n\n", nb);
             *hd_checker = 1;
         }
 
@@ -235,8 +235,8 @@ int calc_equation_of_state(struct parameters satdata, double p,
 
         if (*hd_checker == 0 && test_hd.jsym < 0)
         {
-            fprintf(stderr, "HD CHECKER: Jsym < 0 (core npeu) \
-                    ; nB = %g /fm^3\n\n", nb);
+            fprintf(stderr, "HD CHECKER: Jsym < 0 (core npeu) ;\
+                    nB = %g /fm^3\n\n", nb);
             *hd_checker = 1;
         }
 
@@ -276,7 +276,7 @@ void eval_transition_qtt(struct parameters satdata, double p,
 
         nb += nb/50.;
     }
- 
+
     // initial guess for the icrust
     double guess_ic[4] = {guess_oc[0], guess_oc[1], guess_oc[2], 1.e-4};
     struct core_compo ccomp;
