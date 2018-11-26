@@ -22,6 +22,10 @@ struct compo
     double ng;
 }; 
 
+// interpolation of the proton shell energy 
+// from ETFSI calculation with a BSk functional;
+// see: https://academic.oup.com/mnras/article/481/3/2994/5090419
+double get_shell_energy_per_nucleon(float nb_, float zz_);
 // zero point quantum vibration
 double calc_zp_en(struct parameters satdata, struct sf_params sparams, 
         double aa_, double ii_, double n0_, double np_);
@@ -30,21 +34,34 @@ double calc_ion_en(struct parameters satdata, struct sf_params sparams,
 struct crust_fun_4d calc_crust_fun_4d(struct parameters satdata, 
         struct sf_params sparams, 
         double aa_, double del_, double n0_, double np_, double ng_);
+struct crust_fun_4d calc_crust_fun_zz_fixed(struct parameters satdata, 
+        struct sf_params sparams, 
+        double aa_, double del_, double n0_, double np_, double ng_);
 
 struct rparams_crust
 {
     double np;
+    int zz;
 
     struct parameters satdata;
     struct sf_params sparams;
 };
 
+// outer-crust composition w/o quantum effects
 int assign_ocrust_fun_3d(const gsl_vector * x, void *params, gsl_vector * f);
 struct compo calc_ocrust3d_composition(double nb_, double *guess,
         struct parameters satdata, struct sf_params sparams);
 
+// inner-crust composition w/o quantum effects
 int assign_icrust_fun_4d(const gsl_vector * x, void *params, gsl_vector * f);
 struct compo calc_icrust4d_composition(double nb_, double *guess,
+        struct parameters satdata, struct sf_params sparams);
+
+// inner-crust composition w/ perturbative addition of proton sh. corr.
+int assign_icrust_fun_zz_fixed(const gsl_vector * x, void *params, gsl_vector * f);
+struct compo calc_icrust_composition_zz_fixed(double nb_, int zz_, double *guess,
+        struct parameters satdata, struct sf_params sparams);
+struct compo calc_icrust_composition_w_shl(double nb_,
         struct parameters satdata, struct sf_params sparams);
 
 double calc_muncl(struct parameters satdata, struct sf_params sparams, 

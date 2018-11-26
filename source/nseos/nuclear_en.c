@@ -57,7 +57,7 @@ double get_shell_en_from_myers_table(int aa_, int zz_)
     int aa, zz;
     float shell_en;
     int checker;
-    FILE *myers_table = fopen("../../input/myers.table", "r");
+    FILE *myers_table = fopen("../../input/shell_corr/myers.table", "r");
 
     aa = 0;
     zz = 0;
@@ -72,7 +72,7 @@ double get_shell_en_from_myers_table(int aa_, int zz_)
 
     if (checker == 0)
     {
-        fprintf(stderr, "ERROR: out of Myers table!");
+        fprintf(stderr, "ERROR: out of Myers table! ; ESH = 0\n");
         shell_en = 0.;
     }
 
