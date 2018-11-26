@@ -32,7 +32,7 @@ double calc_ion_en(struct parameters satdata, struct sf_params sparams,
         double aa_, double del_, double n0_, double np_)
 {
     return CALC_NUCLEAR_EN(satdata, sparams, TAYLOR_EXP_ORDER, aa_, del_, n0_)
-        + calc_zp_en(satdata, sparams, aa_, del_, n0_, np_)
+        /* + calc_zp_en(satdata, sparams, aa_, del_, n0_, np_) */
         + calc_lattice_en(satdata, aa_, del_, n0_, np_);
 }
 
