@@ -1,6 +1,5 @@
 #include <math.h>
 
-#include "../../nseos/empirical.h"
 #include "../../nseos/eos.h"
 #include "../../nseos/tov.h"
 #include "../../nseos/modeling.h"
@@ -9,7 +8,8 @@ int main(int argc, char* argv[])
 {
     if (argc != 6)
     {
-        fprintf(stderr, "ERROR: syntax is './nseos set.in crust.out core.out eos.out tov.out'\n");
+        fprintf(stderr, "ERROR: syntax is './nseos set.in \
+                crust.out core.out eos.out tov.out'\n");
         return 1;
     }
 
@@ -26,7 +26,8 @@ int main(int argc, char* argv[])
     FILE *mycore = fopen(argv[3], "w+");
     FILE *myeos = fopen(argv[4], "w+");
 
-    int lines = calc_equation_of_state(satdata, p, &tqtt, &epst, &hd_checker, mycrust, mycore, myeos);
+    int lines = calc_equation_of_state(satdata, p, 
+            &tqtt, &epst, &hd_checker, mycrust, mycore, myeos);
 
     fclose(mycrust);
     fclose(mycore);
@@ -40,7 +41,8 @@ int main(int argc, char* argv[])
     myeos = fopen(argv[4], "r");
     FILE *mytov = fopen(argv[5], "w+");
 
-    double mmax = solve_tov_equation(lines, tqtt.pt, epst, myeos, &tovs14, fixed_m, mytov);
+    double mmax = solve_tov_equation(lines, tqtt.pt, epst, myeos, 
+            &tovs14, fixed_m, mytov);
 
     fclose(myeos);
     fclose(mytov);
@@ -55,7 +57,8 @@ int main(int argc, char* argv[])
         fprintf(stderr, "Rcore_14    = %g km\n", tovs14.rcore);
         fprintf(stderr, "Mcore_14    = %g Msun\n", tovs14.mcore);
         fprintf(stderr, "I/MR^2_14   = %g\n", tovs14.i_over_mr2);
-        fprintf(stderr, "Icrust/I_14 = %g\n", tovs14.icrust_over_mr2/tovs14.i_over_mr2);
+        fprintf(stderr, "Icrust/I_14 = %g\n", 
+                tovs14.icrust_over_mr2/tovs14.i_over_mr2);
     }
     else
     {

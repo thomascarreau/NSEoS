@@ -6,7 +6,8 @@
 #include "modeling.h"
 #include "crust.h"
 
-double calc_zp_en(struct parameters satdata, struct sf_params sparams, double aa_, double ii_, double n0_, double np_)
+double calc_zp_en(struct parameters satdata, struct sf_params sparams, 
+        double aa_, double ii_, double n0_, double np_)
 {
     double hbaromega_p;
     double zz;
@@ -15,7 +16,8 @@ double calc_zp_en(struct parameters satdata, struct sf_params sparams, double aa
     double u1;
 
     zz = aa_*(1.-ii_)/2.;
-    mi = zz*RMP + (aa_-zz)*RMN + CALC_NUCLEAR_EN(satdata, sparams, TAYLOR_EXP_ORDER, aa_, ii_, n0_);
+    mi = zz*RMP + (aa_-zz)*RMN 
+        + CALC_NUCLEAR_EN(satdata, sparams, TAYLOR_EXP_ORDER, aa_, ii_, n0_);
     vws = zz/np_;
 
     hbaromega_p = sqrt(pow(HBARC,2.)*4.*PI*pow(zz,2.)*ALPHAFS*HBARC
@@ -34,7 +36,8 @@ double calc_ion_en(struct parameters satdata, struct sf_params sparams,
         + calc_lattice_en(satdata, aa_, del_, n0_, np_);
 }
 
-struct crust_fun_4d calc_crust_fun_4d(struct parameters satdata, struct sf_params sparams, 
+struct crust_fun_4d calc_crust_fun_4d(struct parameters satdata, 
+        struct sf_params sparams, 
         double aa_, double del_, double n0_, double np_, double ng_)
 {
     struct crust_fun_4d result;
@@ -77,7 +80,8 @@ struct crust_fun_4d calc_crust_fun_4d(struct parameters satdata, struct sf_param
     ngas = calc_meta_model_nuclear_matter(satdata, TAYLOR_EXP_ORDER, ng_, 1.);
 
     result.f_stability = deiondaa - eion/aa_;
-    result.f_beta = (deionddel + np_/(1.-del_)*deiondnp)*2./aa_ - muel - RMP + RMN;
+    result.f_beta = (deionddel + np_/(1.-del_)*deiondnp)*2./aa_ - muel 
+        - RMP + RMN;
     result.f_muneq = eion/aa_ + (1.-del_)/aa_*deionddel 
         - ngas.mun + ng_/n0_*(ngas.mun - ngas.enpernuc);
     result.f_presseq = n0_*n0_*deiondn0/aa_ - ng_*ngas.mun + ng_*ngas.enpernuc;
@@ -173,7 +177,8 @@ struct compo calc_ocrust3d_composition(double nb_, double *guess,
             gsl_multiroot_fsolver_set (s, &f, x);
             aa_new = gsl_vector_get (s->x, 0.);
         }
-        while (gsl_vector_get (s->x, 1) < 0.01 || gsl_vector_get (s->x, 1) > 1.0) {
+        while (gsl_vector_get (s->x, 1) < 0.01 
+                || gsl_vector_get (s->x, 1) > 1.0) {
             bstep = bstep/4.;
             basym_new = basym_old + bstep;
             gsl_vector_set (x, 0, aa_new);
@@ -319,7 +324,8 @@ struct compo calc_icrust4d_composition(double nb_, double *guess,
             gsl_multiroot_fsolver_set (s, &f, x);
             aa_new = gsl_vector_get (s->x, 0.);
         }
-        while (gsl_vector_get (s->x, 1) < -1.0 || gsl_vector_get (s->x, 1) > 1.0) {
+        while (gsl_vector_get (s->x, 1) < -1.0 
+                || gsl_vector_get (s->x, 1) > 1.0) {
             bstep = bstep/4.;
             basym_new = basym_old + bstep;
             gsl_vector_set (x, 0, aa_new);
@@ -329,7 +335,8 @@ struct compo calc_icrust4d_composition(double nb_, double *guess,
             gsl_multiroot_fsolver_set (s, &f, x);
             basym_new = gsl_vector_get (s->x, 1);
         }
-        while (gsl_vector_get (s->x, 2) < 0. || gsl_vector_get(s->x, 2) > 1.0) {
+        while (gsl_vector_get (s->x, 2) < 0. 
+                || gsl_vector_get(s->x, 2) > 1.0) {
             rstep = rstep/4.;
             n0_new = n0_old + rstep;
             gsl_vector_set (x, 0, aa_new);
@@ -339,7 +346,8 @@ struct compo calc_icrust4d_composition(double nb_, double *guess,
             gsl_multiroot_fsolver_set (s, &f, x);
             n0_new = gsl_vector_get (s->x, 2);
         }
-        while (gsl_vector_get (s->x, 3) < 1.e-10 || gsl_vector_get (s->x, 3) > nb_) {
+        while (gsl_vector_get (s->x, 3) < 1.e-10 
+                || gsl_vector_get (s->x, 3) > nb_) {
             gstep = gstep/4.;
             ng_new = ng_old + gstep;
             gsl_vector_set (x, 0, aa_new);
@@ -384,7 +392,8 @@ struct compo calc_icrust4d_composition(double nb_, double *guess,
     return eq;
 }
 
-double calc_muncl(struct parameters satdata, struct sf_params sparams, struct compo eq, double nb_)
+double calc_muncl(struct parameters satdata, struct sf_params sparams, 
+        struct compo eq, double nb_)
 {
     double np;
     double eion;
@@ -403,8 +412,9 @@ double calc_muncl(struct parameters satdata, struct sf_params sparams, struct co
     return eion/eq.aa + (1.-eq.del)/eq.aa * deionddel;
 }
 
-double calc_crust_ws_cell_energy_density(struct parameters satdata, struct sf_params sparams, struct compo eq,
-        double nb_)
+double calc_crust_ws_cell_energy_density(struct parameters satdata, 
+        struct sf_params sparams, 
+        struct compo eq, double nb_)
 {
     double np;
     double vws;
@@ -421,7 +431,8 @@ double calc_crust_ws_cell_energy_density(struct parameters satdata, struct sf_pa
 
     eion = calc_ion_en(satdata, sparams, eq.aa, eq.del, eq.n0, np);
 
-    ngas = calc_meta_model_nuclear_matter(satdata, TAYLOR_EXP_ORDER, eq.ng, 1.);
+    ngas = calc_meta_model_nuclear_matter(satdata, TAYLOR_EXP_ORDER, 
+            eq.ng, 1.);
     epsg = eq.ng*ngas.enpernuc;
 
     epsws = eion/vws + epseltot + epsg*(1.-eq.aa/eq.n0/vws)
@@ -453,7 +464,8 @@ double calc_ion_pressure(struct parameters satdata, struct sf_params sparams,
     return 2.*np_*np_/aa_/(1.-del_)*deiondnp;
 }
 
-double calc_crust_ws_cell_pressure(struct parameters satdata, struct sf_params sparams, 
+double calc_crust_ws_cell_pressure(struct parameters satdata, 
+        struct sf_params sparams, 
         struct compo eq, double nb_)
 {
     double np;
@@ -464,15 +476,17 @@ double calc_crust_ws_cell_pressure(struct parameters satdata, struct sf_params s
 
     np = (nb_-eq.ng)*(1.-eq.del)/2./(1.-eq.ng/eq.n0);
     egas_pressure = calc_egas_pressure(np);
-    ion_pressure = calc_ion_pressure(satdata, sparams, eq.aa, eq.del, eq.n0, np);
+    ion_pressure = calc_ion_pressure(satdata, sparams, 
+            eq.aa, eq.del, eq.n0, np);
     ngas_pressure = calc_ngas_pressure(satdata, eq.ng);
     ws_cell_pressure = egas_pressure + ion_pressure + ngas_pressure;
 
     return ws_cell_pressure;
 }
 
-void print_state_crust(struct parameters satdata, struct sf_params sparams, struct compo eq, 
-        double nb_, FILE *compo, FILE *eos)
+void print_state_crust(struct parameters satdata, struct sf_params sparams, 
+        struct compo eq, double nb_, 
+        FILE *compo, FILE *eos)
 {
     double vws, rws;
     double rhob;
@@ -481,9 +495,11 @@ void print_state_crust(struct parameters satdata, struct sf_params sparams, stru
     vws = eq.aa/(nb_-eq.ng)*(1.-eq.ng/eq.n0);
     rws = pow(3.*vws/4./PI,1./3.);
 
-    rhob = calc_crust_ws_cell_energy_density(satdata, sparams, eq, nb_)*(ELEMC/1.e-19)/pow(SPEEDOFL/1.e8,2.)*1.e13;
+    rhob = calc_crust_ws_cell_energy_density(satdata, sparams, eq, nb_)
+        *(ELEMC/1.e-19)/pow(SPEEDOFL/1.e8,2.)*1.e13;
     pressws = calc_crust_ws_cell_pressure(satdata, sparams, eq, nb_);
 
-    fprintf (compo, "%g %g %g %g %g %g %g\n", nb_, eq.aa, eq.del, eq.aa*(1.-eq.del)/2., eq.n0, eq.ng, rws);
+    fprintf (compo, "%g %g %g %g %g %g %g\n", nb_, 
+            eq.aa, eq.del, eq.aa*(1.-eq.del)/2., eq.n0, eq.ng, rws);
     fprintf(eos, "%g %g\n", rhob, pressws);
 }

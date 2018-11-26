@@ -17,9 +17,10 @@ struct tov_solution
     double icrust_over_mr2;
 };
 double calc_normalized_moment_of_inertia(double r_, double m_);
-double calc_normalized_crustal_moment_of_inertia(double r_, double m_, double i_over_mr2, 
-        double epst, double pt, double rcore);
-double get_observable_for_a_given_mass(double m, double mm, double mp, double om, double op);
+double calc_normalized_crustal_moment_of_inertia(double r_, double m_, 
+        double i_over_mr2, double epst, double pt, double rcore);
+double get_observable_for_a_given_mass(double m, double mm, double mp, 
+        double om, double op);
 double solve_tov_equation(int lines, double pt, double epst, FILE *eos, 
         struct tov_solution *tovs_m, double fixed_m, FILE *tov);
 

@@ -11,7 +11,8 @@ double calc_egas_energy_density(double ne_)
     double egas_energy_density;
 
     t = HBARC*cpow(3.0*PI2*ne_,1./3.)/MEL;
-    egas_energy_density = cpow(MEL,4.)/8./PI2/cpow(HBARC,3.)*((2.*t*t+1.)*t*cpow(t*t+1.,1./2.) - log(t + cpow(t*t+1.,1./2.)));
+    egas_energy_density = cpow(MEL,4.)/8./PI2/cpow(HBARC,3.)
+        *((2.*t*t+1.)*t*cpow(t*t+1.,1./2.) - log(t + cpow(t*t+1.,1./2.)));
 
     return egas_energy_density;
 }
@@ -22,7 +23,8 @@ double calc_egas_chemical_potential(double ne_)
     double egas_chemical_potential;
 
     t = HBARC*cpow(3.0*PI2*ne_,1./3.)/MEL;
-    egas_chemical_potential = cpow(MEL,3.)/8./cpow(3.*ne_*PI2,2./3.)/cpow(HBARC,2.)
+    egas_chemical_potential = 
+        cpow(MEL,3.)/8./cpow(3.*ne_*PI2,2./3.)/cpow(HBARC,2.)
         *(cpow(t*t+1.,1./2.)*(1.+6.*t*t) + t*t*(2.*t*t+1.)/cpow(t*t+1.,1./2.)
                 - 1./cpow(t*t+1.,1./2.));
 
@@ -48,7 +50,8 @@ double calc_ugas_energy_density(double nu_)
     double ugas_energy_density;
 
     t = HBARC*cpow(3.0*PI2*nu_,1./3.)/MMU;
-    ugas_energy_density = cpow(MMU,4.)/8./PI2/cpow(HBARC,3.)*((2.*t*t+1.)*t*cpow(t*t+1.,1./2.) - log(t + cpow(t*t+1.,1./2.)));
+    ugas_energy_density = cpow(MMU,4.)/8./PI2/cpow(HBARC,3.)
+        *((2.*t*t+1.)*t*cpow(t*t+1.,1./2.) - log(t + cpow(t*t+1.,1./2.)));
 
     return ugas_energy_density;
 }
@@ -59,7 +62,8 @@ double calc_ugas_chemical_potential(double nu_)
     double ugas_chemical_potential;
 
     t = HBARC*cpow(3.0*PI2*nu_,1./3.)/MMU;
-    ugas_chemical_potential = cpow(MMU,3.)/8./cpow(3.*nu_*PI2,2./3.)/cpow(HBARC,2.)
+    ugas_chemical_potential = 
+        cpow(MMU,3.)/8./cpow(3.*nu_*PI2,2./3.)/cpow(HBARC,2.)
         *(cpow(t*t+1.,1./2.)*(1.+6.*t*t) + t*t*(2.*t*t+1.)/cpow(t*t+1.,1./2.)
                 - 1./cpow(t*t+1.,1./2.));
 

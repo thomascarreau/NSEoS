@@ -30,8 +30,8 @@ double calc_normalized_moment_of_inertia(double r_, double m_)
     return i_over_mr2;
 }
 
-double calc_normalized_crustal_moment_of_inertia(double r_, double m_, double i_over_mr2, 
-        double epst, double pt, double rcore)
+double calc_normalized_crustal_moment_of_inertia(double r_, double m_, 
+        double i_over_mr2, double epst, double pt, double rcore)
 {
     double rs = 2.*G_CGS*m_;
     double icrust_over_mr2 = 16.*PI/3.*pow(rcore,6.)*pt*P_FACTOR_NU_TO_CGS/rs
@@ -41,7 +41,8 @@ double calc_normalized_crustal_moment_of_inertia(double r_, double m_, double i_
     return icrust_over_mr2;
 }
 
-double get_observable_for_a_given_mass(double m, double mm, double mp, double om, double op)
+double get_observable_for_a_given_mass(double m, double mm, double mp, 
+        double om, double op)
 {
     return (op-om)/(mp-mm)*(m-mm) + om; // stupid linear interpolation
 }
@@ -55,7 +56,8 @@ double solve_tov_equation(int lines, double pt, double epst, FILE *eos,
     int j = 0;
     int l = lines;
 
-    if (l < 10) // to avoid the 'insufficient number of points for interpolation type' error
+    // to avoid 'insufficient number of points for interpolation type' error
+    if (l < 10) 
         return 0.;
 
     // reading the EoS table
@@ -84,18 +86,6 @@ double solve_tov_equation(int lines, double pt, double epst, FILE *eos,
         else
             l -= 1;
     }
-    //=============================================================== OLD
-    /* for(int i = 0; i < lines; i++) */
-    /* { */
-    /*     fscanf(eos, "%lf %lf", &Rho[i], &P[i]); */
-    /*     P[i] *= P_FACTOR_NU_TO_CGS; */
-    /*     if(i > 0 && P[i] < P[i-1]) */
-    /*     { */
-    /*         fprintf(stderr, "pi = %g ; pi-1 = %g ; rhoi = %g\n", P[i], P[i-1], Rho[i]); // DEBUG */
-    /*         P[i] = P[i-1] + 1.e20; */
-    /*         fprintf(stderr, "new pi = %g\n", P[i]); */
-    /*     } */
-    /* } */
 
     gsl_interp_accel *acc
         = gsl_interp_accel_alloc ();
@@ -184,8 +174,8 @@ double solve_tov_equation(int lines, double pt, double epst, FILE *eos,
 
         i_over_mr2 = calc_normalized_moment_of_inertia(r, m);
         if (pt*P_FACTOR_NU_TO_CGS != P[0])
-            icrust_over_mr2 = calc_normalized_crustal_moment_of_inertia(r, m, i_over_mr2,
-                    epst, pt, rcore);
+            icrust_over_mr2 = calc_normalized_crustal_moment_of_inertia(r, m, 
+                    i_over_mr2, epst, pt, rcore);
         else
             icrust_over_mr2 = 0.;
 
@@ -199,13 +189,20 @@ double solve_tov_equation(int lines, double pt, double epst, FILE *eos,
 
         if (m > fixed_m && m_last < fixed_m)
         {
-            tovs_m->rhoc = get_observable_for_a_given_mass(fixed_m, m_last, m, rhoc_last, rhoc);
-            tovs_m->pc = get_observable_for_a_given_mass(fixed_m, m_last, m, pc_last, pc);
-            tovs_m->r = get_observable_for_a_given_mass(fixed_m, m_last, m, r_last, r);
-            tovs_m->i_over_mr2 = get_observable_for_a_given_mass(fixed_m, m_last, m, i_over_mr2_last, i_over_mr2);
-            tovs_m->rcore = get_observable_for_a_given_mass(fixed_m, m_last, m, rcore_last, rcore);
-            tovs_m->mcore = get_observable_for_a_given_mass(fixed_m, m_last, m, mcore_last, mcore);
-            tovs_m->icrust_over_mr2 = get_observable_for_a_given_mass(fixed_m, m_last, m, icrust_over_mr2_last, icrust_over_mr2);
+            tovs_m->rhoc = get_observable_for_a_given_mass(fixed_m, 
+                    m_last, m, rhoc_last, rhoc);
+            tovs_m->pc = get_observable_for_a_given_mass(fixed_m, 
+                    m_last, m, pc_last, pc);
+            tovs_m->r = get_observable_for_a_given_mass(fixed_m, 
+                    m_last, m, r_last, r);
+            tovs_m->i_over_mr2 = get_observable_for_a_given_mass(fixed_m, 
+                    m_last, m, i_over_mr2_last, i_over_mr2);
+            tovs_m->rcore = get_observable_for_a_given_mass(fixed_m, 
+                    m_last, m, rcore_last, rcore);
+            tovs_m->mcore = get_observable_for_a_given_mass(fixed_m, 
+                    m_last, m, mcore_last, mcore);
+            tovs_m->icrust_over_mr2 = get_observable_for_a_given_mass(fixed_m, 
+                    m_last, m, icrust_over_mr2_last, icrust_over_mr2);
         }
         rhoc_last = rhoc;
         pc_last = pc;

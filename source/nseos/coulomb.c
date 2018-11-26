@@ -17,7 +17,8 @@ double calc_coulomb_en(struct parameters satdata, double aa_, double ii_)
     return ac*zz*zz*pow(aa_,-1./3.);
 }
 
-double calc_lattice_en(struct parameters satdata, double aa_, double ii_, double n0_, double np_)
+double calc_lattice_en(struct parameters satdata, 
+        double aa_, double ii_, double n0_, double np_)
 {
     double rsat;
     double cm;
@@ -33,7 +34,8 @@ double calc_lattice_en(struct parameters satdata, double aa_, double ii_, double
         *(-cm*pow(rpt,1./3.) + 3./10.*rpt);
 }
 
-double calc_lattice_pressure(struct parameters satdata, double aa_, double ii_, double n0_, double np_)
+double calc_lattice_pressure(struct parameters satdata, 
+        double aa_, double ii_, double n0_, double np_)
 {
     double rsat;
     double cm;

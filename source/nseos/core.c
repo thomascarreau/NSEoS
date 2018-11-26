@@ -5,7 +5,8 @@
 #include "modeling.h"
 #include "core.h"
 
-struct core_fun calc_core_fun(struct parameters satdata, double del_, double nu_, double nb_)
+struct core_fun calc_core_fun(struct parameters satdata, 
+        double del_, double nu_, double nb_)
 {
     struct core_fun result;
     double epsd;
@@ -18,8 +19,10 @@ struct core_fun calc_core_fun(struct parameters satdata, double del_, double nu_
 
     // energy per particle of infinite matter
     epsd = del_/1000.;
-    meta_p = calc_meta_model_nuclear_matter(satdata, TAYLOR_EXP_ORDER, nb_, del_+epsd);
-    meta_m = calc_meta_model_nuclear_matter(satdata, TAYLOR_EXP_ORDER, nb_, del_-epsd);
+    meta_p = calc_meta_model_nuclear_matter(satdata, TAYLOR_EXP_ORDER, 
+            nb_, del_+epsd);
+    meta_m = calc_meta_model_nuclear_matter(satdata, TAYLOR_EXP_ORDER, 
+            nb_, del_-epsd);
     dehnmddel = (meta_p.enpernuc - meta_m.enpernuc)/2./epsd;
 
     // electron(muon) chemical potential (including rest mass)
@@ -50,7 +53,8 @@ int assign_npecore_fun(const gsl_vector * x, void *params, gsl_vector * f)
     return GSL_SUCCESS;
 }
 
-struct core_compo calc_npecore_composition(double nb_, double *guess, struct parameters satdata)
+struct core_compo calc_npecore_composition(double nb_, double *guess, 
+        struct parameters satdata)
 {
     struct core_compo eq;
 
@@ -93,7 +97,8 @@ struct core_compo calc_npecore_composition(double nb_, double *guess, struct par
 
         // (VERY) dirty backstepping
         int count = 0;
-        while (gsl_vector_get (s->x, 0) < 0.1 || gsl_vector_get (s->x, 0) > 1.0) {
+        while (gsl_vector_get (s->x, 0) < 0.1 
+                || gsl_vector_get (s->x, 0) > 1.0) {
             dstep = dstep/4.;
             del_new = del_old + dstep;
             gsl_vector_set (x, 0, del_new);
@@ -147,7 +152,8 @@ int assign_npeucore_fun(const gsl_vector * x, void *params, gsl_vector * f)
     return GSL_SUCCESS;
 }
 
-struct core_compo calc_npeucore_composition(double nb_, double *guess, struct parameters satdata)
+struct core_compo calc_npeucore_composition(double nb_, double *guess, 
+        struct parameters satdata)
 {
     struct core_compo eq;
 
@@ -194,7 +200,8 @@ struct core_compo calc_npeucore_composition(double nb_, double *guess, struct pa
 
         // (VERY) dirty backstepping
         int count = 0;
-        while (gsl_vector_get (s->x, 0) < 0.1 || gsl_vector_get (s->x, 0) > 1.0) {
+        while (gsl_vector_get (s->x, 0) < 0.1 
+                || gsl_vector_get (s->x, 0) > 1.0) {
             dstep = dstep/4.;
             del_new = del_old + dstep;
             gsl_vector_set (x, 0, del_new);
@@ -211,8 +218,8 @@ struct core_compo calc_npeucore_composition(double nb_, double *guess, struct pa
                 return eq;
             }
         }
-        while (gsl_vector_get (s->x, 1) < 1.e-10 // to avoid the "matrix is singular" error 
-                || gsl_vector_get (s->x, 1) > nb_*(1.-gsl_vector_get(s->x, 0))/2.) {
+        while (gsl_vector_get (s->x, 1) < 1.e-10 || gsl_vector_get (s->x, 1) 
+                > nb_*(1.-gsl_vector_get(s->x, 0))/2.) {
             ustep = ustep/4.;
             nu_new = nu_old + ustep;
             gsl_vector_set (x, 0, del_new);
@@ -248,8 +255,8 @@ struct core_compo calc_npeucore_composition(double nb_, double *guess, struct pa
     return eq;
 }
 
-double calc_core_ws_cell_energy_density(struct parameters satdata, struct core_compo eq,
-        double nb_)
+double calc_core_ws_cell_energy_density(struct parameters satdata, 
+        struct core_compo eq, double nb_)
 {
     double np;
     double epseltot;
@@ -260,14 +267,15 @@ double calc_core_ws_cell_energy_density(struct parameters satdata, struct core_c
     np = nb_*(1.-eq.del)/2.;
     epseltot = calc_egas_energy_density(np-eq.nu);
     epsutot = calc_ugas_energy_density(eq.nu);
-    meta = calc_meta_model_nuclear_matter(satdata, TAYLOR_EXP_ORDER, nb_, eq.del);
+    meta = calc_meta_model_nuclear_matter(satdata, TAYLOR_EXP_ORDER, 
+            nb_, eq.del);
     epsws = nb_*meta.enpernuc + epseltot + epsutot + np*(RMP-RMN) + nb_*RMN;
 
     return epsws;
 }
 
-double calc_core_ws_cell_pressure(struct parameters satdata, struct core_compo eq, 
-        double nb_)
+double calc_core_ws_cell_pressure(struct parameters satdata, 
+        struct core_compo eq, double nb_)
 {
     double np;
     double egas_pressure;
@@ -279,7 +287,8 @@ double calc_core_ws_cell_pressure(struct parameters satdata, struct core_compo e
     egas_pressure = calc_egas_pressure(np-eq.nu);
     ugas_pressure = calc_ugas_pressure(eq.nu);
 
-    meta = calc_meta_model_nuclear_matter(satdata, TAYLOR_EXP_ORDER, nb_, eq.del);
+    meta = calc_meta_model_nuclear_matter(satdata, TAYLOR_EXP_ORDER, 
+            nb_, eq.del);
     ws_cell_pressure = meta.p + egas_pressure + ugas_pressure; 
 
     return ws_cell_pressure;
@@ -298,7 +307,8 @@ void print_state_core(struct parameters satdata, struct core_compo eq,
     xe = (np - eq.nu)/nb_;
     xu = eq.nu/nb_;
 
-    rhob = calc_core_ws_cell_energy_density(satdata, eq, nb_)*(ELEMC/1.e-19)/pow(SPEEDOFL/1.e8,2.)*1.e13;
+    rhob = calc_core_ws_cell_energy_density(satdata, eq, nb_)
+        *(ELEMC/1.e-19)/pow(SPEEDOFL/1.e8,2.)*1.e13;
     pressws = calc_core_ws_cell_pressure(satdata, eq, nb_);
 
     fprintf(core, "%g %g %g %g\n", nb_, xp, xe, xu);

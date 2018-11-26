@@ -24,11 +24,11 @@ int calc_equation_of_state(struct parameters satdata, double p,
     double pressure_sav = 0.;
     struct hnm test_hd;
 
-    // ============================== OUTER CRUST ==============================
+    // ============================= OUTER CRUST =============================
 
     struct compo comp;
     double muncl = -1.; // sign of muncl is negative is the outer crust
-    double guess_oc[3] = {60., 0.15, 0.1595}; // initial guess for the outer crust
+    double guess_oc[3] = {60., 0.15, 0.1595}; // initial guess for the ocrust
 
     while(1)
     {
@@ -47,7 +47,8 @@ int calc_equation_of_state(struct parameters satdata, double p,
 
         if (*hd_checker == 0 && pressure < pressure_sav)
         {
-            fprintf(stderr, "HD CHECKER: dP/dnB < 0 (outer crust) ; nB = %g /fm^3\n\n", nb);
+            fprintf(stderr, "HD CHECKER: dP/dnB < 0 (outer crust) \
+                    ; nB = %g /fm^3\n\n", nb);
             *hd_checker = 1;
         }
 
@@ -63,11 +64,12 @@ int calc_equation_of_state(struct parameters satdata, double p,
     fprintf(stderr, "n_d = %g /fm^3\n\n", nb);
     fprintf(stderr, "==============================================\n\n");
 
-    // ============================== INNER CRUST ==============================
+    // ============================= INNER CRUST =============================
 
     double epsws_ic;
     double epsws_core;
-    double guess_ic[4] = {guess_oc[0], guess_oc[1], guess_oc[2], 1.e-4}; // initial guess for the inner crust
+    // initial guess for the icrust
+    double guess_ic[4] = {guess_oc[0], guess_oc[1], guess_oc[2], 1.e-4}; 
     struct core_compo ccomp;
     double guess_npecore = 0.7; // initial guess for the core
 
@@ -78,7 +80,8 @@ int calc_equation_of_state(struct parameters satdata, double p,
         {
             if (epsws_core - epsws_ic < 1.e-3) // crust-core transition
             {
-                fprintf(stderr, "e_core - e_crust = %g\n", epsws_core - epsws_ic);
+                fprintf(stderr, "e_core - e_crust = %g\n", 
+                        epsws_core - epsws_ic);
                 break;
             }
             else
@@ -91,14 +94,16 @@ int calc_equation_of_state(struct parameters satdata, double p,
         if (nb > 0.001)
         {
             // calculation of the energy density in the cell in the inner crust
-            epsws_ic = calc_crust_ws_cell_energy_density(satdata, sparams, comp, nb);
+            epsws_ic = calc_crust_ws_cell_energy_density(satdata, sparams, 
+                    comp, nb);
 
             ccomp = calc_npecore_composition(nb, &guess_npecore, satdata);
             if (guess_npecore != guess_npecore) // exit if nan
             {
                 if (epsws_core - epsws_ic < 1.e-3) // crust-core transition
                 {
-                    fprintf(stderr, "e_core - e_crust = %g\n", epsws_core - epsws_ic);
+                    fprintf(stderr, "e_core - e_crust = %g\n", 
+                            epsws_core - epsws_ic);
                     break;
                 }
                 else
@@ -122,7 +127,8 @@ int calc_equation_of_state(struct parameters satdata, double p,
 
         if (*hd_checker == 0 && pressure < pressure_sav)
         {
-            fprintf(stderr, "HD CHECKER: dP/dnB < 0 (inner crust) ; nB = %g /fm^3\n\n", nb);
+            fprintf(stderr, "HD CHECKER: dP/dnB < 0 (inner crust) \
+                    ; nB = %g /fm^3\n\n", nb);
             *hd_checker = 1;
         }
 
@@ -137,7 +143,7 @@ int calc_equation_of_state(struct parameters satdata, double p,
 
     tqtt->nt = nb;
     tqtt->pt = calc_core_ws_cell_pressure(satdata, ccomp, nb);
-    *epst = calc_core_ws_cell_energy_density(satdata, ccomp, nb); // needed to calculate Icrust
+    *epst = calc_core_ws_cell_energy_density(satdata, ccomp, nb);
 
     fprintf(stderr, "n_t = %g /fm^3\n", tqtt->nt);
     fprintf(stderr, "P_t = %g MeV/fm^3\n\n", tqtt->pt);
@@ -161,11 +167,13 @@ int calc_equation_of_state(struct parameters satdata, double p,
         if (mueltot - MMU > 0.) // transition to npeu matter
             break;
 
-        test_hd = calc_meta_model_nuclear_matter(satdata, TAYLOR_EXP_ORDER, nb, ccomp.del);
+        test_hd = calc_meta_model_nuclear_matter(satdata, TAYLOR_EXP_ORDER, 
+                nb, ccomp.del);
 
         if (test_hd.vs2 < 0. || test_hd.vs2 > 1.)
         {
-            fprintf(stderr, "HD CHECKER: vs/c < 0 or > 1 (npe core) ; nB = %g /fm^3\n\n", nb);
+            fprintf(stderr, "HD CHECKER: vs/c < 0 or > 1 (npe core) \
+                    ; nB = %g /fm^3\n\n", nb);
             if (nb < 3.*satdata.rhosat0)
                 *hd_checker = 1;
             return lines;
@@ -175,13 +183,15 @@ int calc_equation_of_state(struct parameters satdata, double p,
 
         if (*hd_checker == 0 && nb != tqtt->nt && pressure < pressure_sav)
         {
-            fprintf(stderr, "HD CHECKER: dP/dnB < 0 (npe core) ; nB = %g /fm^3\n\n", nb);
+            fprintf(stderr, "HD CHECKER: dP/dnB < 0 (npe core) \
+                    ; nB = %g /fm^3\n\n", nb);
             *hd_checker = 1;
         }
 
         if (*hd_checker == 0 && test_hd.jsym < 0)
         {
-            fprintf(stderr, "HD CHECKER: Jsym < 0 (npe core) ; nB = %g /fm^3\n\n", nb);
+            fprintf(stderr, "HD CHECKER: Jsym < 0 (npe core) \
+                    ; nB = %g /fm^3\n\n", nb);
             *hd_checker = 1;
         }
 
@@ -215,15 +225,18 @@ int calc_equation_of_state(struct parameters satdata, double p,
 
         if (*hd_checker == 0 && pressure < pressure_sav)
         {
-            fprintf(stderr, "HD CHECKER: dP/dnB < 0 (core npeu) ; nB = %g /fm^3\n\n", nb);
+            fprintf(stderr, "HD CHECKER: dP/dnB < 0 (core npeu) \
+                    ; nB = %g /fm^3\n\n", nb);
             *hd_checker = 1;
         }
 
-        test_hd = calc_meta_model_nuclear_matter(satdata, TAYLOR_EXP_ORDER, nb, ccomp.del);
+        test_hd = calc_meta_model_nuclear_matter(satdata, TAYLOR_EXP_ORDER, 
+                nb, ccomp.del);
 
         if (*hd_checker == 0 && test_hd.jsym < 0)
         {
-            fprintf(stderr, "HD CHECKER: Jsym < 0 (core npeu) ; nB = %g /fm^3\n\n", nb);
+            fprintf(stderr, "HD CHECKER: Jsym < 0 (core npeu) \
+                    ; nB = %g /fm^3\n\n", nb);
             *hd_checker = 1;
         }
 
@@ -246,7 +259,8 @@ void eval_transition_qtt(struct parameters satdata, double p,
 {
     struct sf_params sparams = fit_sf_params(satdata, p);
     struct compo comp;
-    double guess_oc[3] = {60., 0.15, 0.9*satdata.rhosat0}; // initial guess for the outer crust
+    // initial guess for the ocrust
+    double guess_oc[3] = {60., 0.15, 0.9*satdata.rhosat0};
     double muncl = -1.; // sign of muncl is negative is the outer crust
     double nb = 1.e-6;
 
@@ -262,8 +276,9 @@ void eval_transition_qtt(struct parameters satdata, double p,
 
         nb += nb/50.;
     }
-
-    double guess_ic[4] = {guess_oc[0], guess_oc[1], guess_oc[2], 1.e-4}; // initial guess for the inner crust
+ 
+    // initial guess for the icrust
+    double guess_ic[4] = {guess_oc[0], guess_oc[1], guess_oc[2], 1.e-4};
     struct core_compo ccomp;
     double guess_npecore = 0.7; // initial guess for the core
     double epsws_ic;
@@ -276,7 +291,8 @@ void eval_transition_qtt(struct parameters satdata, double p,
         {
             if (epsws_core - epsws_ic < 1.e-3)
             {
-                fprintf(stderr, "e_core - e_crust = %g\n", epsws_core - epsws_ic);
+                fprintf(stderr, "e_core - e_crust = %g\n", 
+                        epsws_core - epsws_ic);
                 break;
             }
             else
@@ -284,14 +300,16 @@ void eval_transition_qtt(struct parameters satdata, double p,
         }
 
         // calculation of the energy density in the cell in the inner crust
-        epsws_ic = calc_crust_ws_cell_energy_density(satdata, sparams, comp, nb);
+        epsws_ic = calc_crust_ws_cell_energy_density(satdata, sparams, 
+                comp, nb);
 
         ccomp = calc_npecore_composition(nb, &guess_npecore, satdata);
         if (guess_npecore != guess_npecore) // break if nan
         {
             if (epsws_core - epsws_ic < 1.e-3)
             {
-                fprintf(stderr, "e_core - e_crust = %g\n", epsws_core - epsws_ic);
+                fprintf(stderr, "e_core - e_crust = %g\n", 
+                        epsws_core - epsws_ic);
                 break;
             }
             else
@@ -315,5 +333,5 @@ void eval_transition_qtt(struct parameters satdata, double p,
 
     tqtt->nt = nb; 
     tqtt->pt = calc_core_ws_cell_pressure(satdata, ccomp, nb);
-    *epst = calc_core_ws_cell_energy_density(satdata, ccomp, nb); // needed to calculate Icrust
+    *epst = calc_core_ws_cell_energy_density(satdata, ccomp, nb);
 }

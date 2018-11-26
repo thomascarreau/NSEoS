@@ -10,7 +10,7 @@
 double calc_ldm_surface_en(struct parameters satdata, double aa_);
 
 // analytical ETF, see: Aymard et al. (2016)
-//==========================================
+// =========================================
 struct f_params
 {
     int k;
@@ -18,10 +18,12 @@ struct f_params
 }; // integration of Fermi functions
 double my_integrand(double x, void *params_ptr);
 double eta_function(int a, double b);
-double calc_etf_ana_surface_en(struct parameters satdata, double aa_, double ii_, double n0_);
+double calc_etf_ana_surface_en(struct parameters satdata, 
+        double aa_, double ii_, double n0_);
 
-// LS corrected surface energy, see: Lattimer and Swesty (1991); arXiv:1110.4043
-//==============================================================================
+// LS corrected surface energy, see: Lattimer and Swesty (1991)
+// ; arXiv:1110.4043
+// =================
 struct data
 {
     int *zz;
@@ -39,6 +41,7 @@ struct sf_params
     double b;
     double chi2;
 };
-double calc_ls_surface_en(struct sf_params params, double aa_, double ii_, double n0_);
+double calc_ls_surface_en(struct sf_params params, 
+        double aa_, double ii_, double n0_);
 
 #endif // H_NUCLEAR_SURFACE_EN

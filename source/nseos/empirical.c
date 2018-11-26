@@ -14,10 +14,17 @@ void eval_barm_and_bardel(float effm, float isosplit,
     *barm = 1./effm - 1.; // = ks
 
     if (isosplit == 0.0)
-        kv = (*barm) - 0.5*isosplit*(1.+(*barm))*(1.+(*barm)); // eq (8) of arXiv:1708:06894
+    {
+        kv = (*barm) 
+            - 0.5*isosplit*(1.+(*barm))*(1.+(*barm)); 
+        // eq (8) of arXiv:1708:06894
+    }
     else
+    {
         kv = (sqrt(((*barm) + 1.)*((*barm) + 1.)*isosplit*isosplit + 1.)
-                + (*barm) * isosplit - 1.)/isosplit; // see: ref [103] of arXiv:1708:06894
+                + (*barm) * isosplit - 1.)/isosplit; 
+        // see: ref [103] of arXiv:1708:06894
+    }
 
     *bardel = *barm - kv;
 }
@@ -34,8 +41,10 @@ struct parameters assign_param(char set[], float b)
 
     fin = fopen(path_of_set, "r");
 
-    fscanf(fin, "%f %f %f %f %f", &satdata.rhosat0, &satdata.lasat0, &satdata.ksat0, &satdata.qsat0, &satdata.zsat0);
-    fscanf(fin, "%f %f %f %f %f", &satdata.jsym0, &satdata.lsym0, &satdata.ksym0, &satdata.qsym0, &satdata.zsym0);
+    fscanf(fin, "%f %f %f %f %f", &satdata.rhosat0, &satdata.lasat0, 
+            &satdata.ksat0, &satdata.qsat0, &satdata.zsat0);
+    fscanf(fin, "%f %f %f %f %f", &satdata.jsym0, &satdata.lsym0, 
+            &satdata.ksym0, &satdata.qsym0, &satdata.zsym0);
     fscanf(fin, "%f %f", &effm, &isosplit);
 
     eval_barm_and_bardel(effm, isosplit, &satdata.barm, &satdata.bardel);
@@ -49,8 +58,10 @@ struct parameters assign_param(char set[], float b)
 
 void print_parameters(struct parameters satdata)
 {
-    fprintf(stderr, "%g %g %g %g %g\n", satdata.rhosat0, satdata.lasat0, satdata.ksat0, satdata.qsat0, satdata.zsat0);
-    fprintf(stderr, "%g %g %g %g %g\n", satdata.jsym0, satdata.lsym0, satdata.ksym0, satdata.qsym0, satdata.zsym0);
+    fprintf(stderr, "%g %g %g %g %g\n", satdata.rhosat0, satdata.lasat0, 
+            satdata.ksat0, satdata.qsat0, satdata.zsat0);
+    fprintf(stderr, "%g %g %g %g %g\n", satdata.jsym0, satdata.lsym0, 
+            satdata.ksym0, satdata.qsym0, satdata.zsym0);
     fprintf(stderr, "%g %g\n", satdata.barm, satdata.bardel);
     fprintf(stderr, "%g\n", satdata.b);
 }
@@ -70,7 +81,8 @@ struct skyrme_parameters assign_skyrme_param(struct skyrme_parameters coeff)
     return coeff;
 }
 
-int read_table_of_sets(FILE *sets, struct parameters *satdata, float *m, float *dm)
+int read_table_of_sets(FILE *sets, 
+        struct parameters *satdata, float *m, float *dm)
 {
     float effm, isosplit;
 

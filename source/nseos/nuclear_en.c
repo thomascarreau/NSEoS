@@ -18,7 +18,8 @@ double calc_ldm_meta_model_nuclear_en(struct parameters satdata, int max_order,
     return bulk_en + surf_en + coul_en;
 }
 
-double calc_etf_ana_meta_model_nuclear_en(struct parameters satdata, int max_order, 
+double calc_etf_ana_meta_model_nuclear_en(struct parameters satdata, 
+        int max_order, 
         double aa_, double ii_, double n0_)
 {
     struct hnm meta;
@@ -34,8 +35,9 @@ double calc_etf_ana_meta_model_nuclear_en(struct parameters satdata, int max_ord
     return bulk_en + surf_en + coul_en;
 }
 
-double calc_ls_meta_model_nuclear_en(struct parameters satdata, struct sf_params sparams, 
-        int max_order, double aa_, double ii_, double n0_)
+double calc_ls_meta_model_nuclear_en(struct parameters satdata, 
+        struct sf_params sparams, int max_order, 
+        double aa_, double ii_, double n0_)
 {
     struct hnm meta;
     double bulk_en;
@@ -97,8 +99,9 @@ double calc_pairing_en(int aa_, int zz_)
     }
 }
 
-double calc_ls_meta_model_nuclear_en_micro(struct parameters satdata, struct sf_params sparams, 
-        int max_order, double aa_, double ii_, double n0_)
+double calc_ls_meta_model_nuclear_en_micro(struct parameters satdata, 
+        struct sf_params sparams, int max_order, 
+        double aa_, double ii_, double n0_)
 {
     struct hnm meta;
     double bulk_en;

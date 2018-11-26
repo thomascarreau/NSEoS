@@ -3,14 +3,18 @@
 
 #include "nuclear_matter.h"
 
-double calc_meta_model_low_density_correction(struct parameters satdata, int max_order, int order, double xx_)
+double calc_meta_model_low_density_correction(
+        struct parameters satdata, int max_order, int order, 
+        double xx_)
 {
     double bexp;
     bexp = exp(-satdata.b*(3.*xx_+1.));
     return 1. - pow(-3.*xx_,max_order+1-order)*bexp;
 }
 
-double calc_meta_model_low_density_correction_derivative(struct parameters satdata, int max_order, int order, double xx_)
+double calc_meta_model_low_density_correction_derivative(
+        struct parameters satdata, int max_order, int order, 
+        double xx_)
 {
     double bexp;
     bexp = exp(-satdata.b*(3.*xx_+1.));
@@ -18,16 +22,21 @@ double calc_meta_model_low_density_correction_derivative(struct parameters satda
         *(-order - 3.*satdata.b*xx_ + max_order + 1.);
 }
 
-double calc_meta_model_low_density_correction_second_derivative(struct parameters satdata, int max_order, int order, double xx_)
+double calc_meta_model_low_density_correction_second_derivative(
+        struct parameters satdata, int max_order, int order, 
+        double xx_)
 {
     double bexp;
     bexp = exp(-satdata.b*(3.*xx_+1.));
     return -pow(3.,-order+max_order+1)*bexp*pow(-xx_,-order+max_order-1)
         *(order*order + order*(6.*satdata.b*xx_ - 2.*max_order - 1.)
-                + 9.*satdata.b*satdata.b*xx_*xx_ + (max_order+1.)*(max_order-6.*satdata.b*xx_));
+                + 9.*satdata.b*satdata.b*xx_*xx_ 
+                + (max_order+1.)*(max_order-6.*satdata.b*xx_));
 }
 
-struct hnm calc_meta_model_nuclear_matter(struct parameters satdata, int max_order, double nn_, double ii_)
+struct hnm calc_meta_model_nuclear_matter(
+        struct parameters satdata, int max_order, 
+        double nn_, double ii_)
 {
     double tmp;
     double xx;
@@ -72,24 +81,33 @@ struct hnm calc_meta_model_nuclear_matter(struct parameters satdata, int max_ord
     u0 = calc_meta_model_low_density_correction(satdata, max_order, 0, xx);
     u1 = calc_meta_model_low_density_correction(satdata, max_order, 1, xx);
     u2 = calc_meta_model_low_density_correction(satdata, max_order, 2, xx);
-    u0p = calc_meta_model_low_density_correction_derivative(satdata, max_order, 0, xx);
-    u1p = calc_meta_model_low_density_correction_derivative(satdata, max_order, 1, xx);
-    u2p = calc_meta_model_low_density_correction_derivative(satdata, max_order, 2, xx);
-    u0pp = calc_meta_model_low_density_correction_second_derivative(satdata, max_order, 0, xx);
-    u1pp = calc_meta_model_low_density_correction_second_derivative(satdata, max_order, 1, xx);
-    u2pp = calc_meta_model_low_density_correction_second_derivative(satdata, max_order, 2, xx);
+    u0p = calc_meta_model_low_density_correction_derivative(satdata, 
+            max_order, 0, xx);
+    u1p = calc_meta_model_low_density_correction_derivative(satdata, 
+            max_order, 1, xx);
+    u2p = calc_meta_model_low_density_correction_derivative(satdata, 
+            max_order, 2, xx);
+    u0pp = calc_meta_model_low_density_correction_second_derivative(satdata, 
+            max_order, 0, xx);
+    u1pp = calc_meta_model_low_density_correction_second_derivative(satdata, 
+            max_order, 1, xx);
+    u2pp = calc_meta_model_low_density_correction_second_derivative(satdata, 
+            max_order, 2, xx);
 
     rmns = RMN/(1.+ (satdata.barm + ii_*satdata.bardel)*(1.+3.*xx));
     rmps = RMN/(1.+ (satdata.barm - ii_*satdata.bardel)*(1.+3.*xx));
 
     dekinpernucdx = t0fg*cpow((1.+3.*xx),-1./3.)
-        *( cpow((1.+ii_),5./3.)*(1.+(satdata.barm+satdata.bardel*ii_)*(1.+3.*xx))
-                +  cpow((1.-ii_),5./3.)*(1.+(satdata.barm-satdata.bardel*ii_)*(1.+3.*xx)) )
+        *( cpow((1.+ii_),5./3.)*(1.+(satdata.barm+satdata.bardel*ii_)
+                    *(1.+3.*xx))
+                +  cpow((1.-ii_),5./3.)*(1.+(satdata.barm-satdata.bardel*ii_)
+                    *(1.+3.*xx)) )
         + 0.5*t0fg*cpow((1.+3.*xx),2./3.)
         *( cpow((1.+ii_),5./3.)*3.*(satdata.barm+satdata.bardel*ii_)
                 + cpow((1.-ii_),5./3.)*3.*(satdata.barm-satdata.bardel*ii_));
 
-    d2ekinpernucdx2 = 5.*t0fg*cpow((1.+3.*xx),-4./3.)*(cpow((1.+ii_),5./3.)*(RMN/rmns-6./5.) 
+    d2ekinpernucdx2 = 5.*t0fg*cpow((1.+3.*xx),-4./3.)
+        *(cpow((1.+ii_),5./3.)*(RMN/rmns-6./5.) 
             + cpow((1.-ii_),5./3.)*(RMN/rmps-6./5.));
 
     dekinpernucdi = 5./6.*t0fg*cpow((1.+3.*xx),2./3.)
@@ -100,11 +118,14 @@ struct hnm calc_meta_model_nuclear_matter(struct parameters satdata, int max_ord
         a30 = satdata.qsat0 - 2.*t0fg*(4.-5.*satdata.barm);
         a32 = satdata.qsym0 - 10./9.*t0fg*(4.-5.*barfac);
         u3 = calc_meta_model_low_density_correction(satdata, max_order, 3, xx);
-        u3p = calc_meta_model_low_density_correction_derivative(satdata, max_order, 3, xx);
-        u3pp = calc_meta_model_low_density_correction_second_derivative(satdata, max_order, 3, xx);
+        u3p = calc_meta_model_low_density_correction_derivative(satdata, 
+                max_order, 3, xx);
+        u3pp = calc_meta_model_low_density_correction_second_derivative(
+                satdata, max_order, 3, xx);
 
-        epotpernuc = a00*u0 + a10*xx*u1 + 0.5*a20*xx*xx*u2 + 1./6.*a30*xx*xx*xx*u3
-            + (a02*u0 + a12*xx*u1 + 0.5*a22*xx*xx*u2 + 1./6.*a32*xx*xx*xx*u3)*ii_*ii_;
+        epotpernuc = a00*u0 + a10*xx*u1 + 0.5*a20*xx*xx*u2 
+            + 1./6.*a30*xx*xx*xx*u3 + (a02*u0 + a12*xx*u1 + 0.5*a22*xx*xx*u2 
+                    + 1./6.*a32*xx*xx*xx*u3)*ii_*ii_;
         depotpernucdx = a00*u0p + a10*u1 + a10*xx*u1p
             +  a20*u2*xx + 0.5*a20*xx*xx*u2p 
             + a30/6.*(3.*xx*xx*u3 + xx*xx*xx*u3p)
@@ -114,20 +135,27 @@ struct hnm calc_meta_model_nuclear_matter(struct parameters satdata, int max_ord
         d2epotpernucdx2 = (a00 + a02*ii_*ii_)*u0pp
             + (a10 + a12*ii_*ii_)*(2.*u1p + xx*u1pp)
             + 0.5*(a20 + a22*ii_*ii_)*(2.*u2 + 4.*xx*u2p + xx*xx*u2pp)
-            + 1./6.*(a30 + a32*ii_*ii_)*(6.*xx*u3 + 6*xx*xx*u3p + xx*xx*xx*u3pp);
-        depotpernucdi = 2.*ii_*(a02*u0 + a12*xx*u1 + 0.5*a22*xx*xx*u2 + 1./6.*a32*xx*xx*xx*u3);
+            + 1./6.*(a30 + a32*ii_*ii_)
+            *(6.*xx*u3 + 6*xx*xx*u3p + xx*xx*xx*u3pp);
+        depotpernucdi = 2.*ii_*(a02*u0 + a12*xx*u1 + 0.5*a22*xx*xx*u2 
+                + 1./6.*a32*xx*xx*xx*u3);
 
-        result.jsym = 5./9.*t0fg*pow(1.+3.*xx,2./3.)*(1.+satdata.barm*(1.+3.*xx))
+        result.jsym = 5./9.*t0fg*pow(1.+3.*xx,2./3.)
+            *(1.+satdata.barm*(1.+3.*xx))
             + a02*u0 + a12*xx*u1 + 0.5*a22*xx*xx*u2 + 1./6*a32*xx*xx*xx*u3;
 
-        result.lsym = 5./9.*t0fg*(1.+3.*xx)*(2.*pow(1.+3.*xx,-1./3.)*(1.+satdata.barm*(1.+3.*xx))
+        result.lsym = 5./9.*t0fg*(1.+3.*xx)*(2.*pow(1.+3.*xx,-1./3.)
+                *(1.+satdata.barm*(1.+3.*xx))
                 + 3.*satdata.barm*pow(1.+3.*xx,2./3.))
-            + (1.+3.*xx)*(a02*u0p + a12*(u1 + xx*u1p) + a22/2.*(2.*xx*u2 + xx*xx*u2p)
+            + (1.+3.*xx)*(a02*u0p + a12*(u1 + xx*u1p) 
+                    + a22/2.*(2.*xx*u2 + xx*xx*u2p)
                     + a32/6.*(3.*xx*xx*u3 + xx*xx*xx*u3p));
 
-        result.ksym = 10./9.*t0fg*pow(1.+3.*xx,2.)*(6.*satdata.barm*pow(1.+3.*xx,-1./3.)
+        result.ksym = 10./9.*t0fg*pow(1.+3.*xx,2.)
+            *(6.*satdata.barm*pow(1.+3.*xx,-1./3.)
                 - pow(1.+3.*xx,-4./3.)*(1.+satdata.barm*(1.+3.*xx)))
-            + pow(1.+3.*xx,2.)*(a02*u0pp + a12*(2.*u1p + xx*u1pp) + a22/2.*(2.*u2 + 4.*xx*u2p + xx*xx*u2pp)
+            + pow(1.+3.*xx,2.)*(a02*u0pp + a12*(2.*u1p + xx*u1pp) 
+                    + a22/2.*(2.*u2 + 4.*xx*u2p + xx*xx*u2pp)
                     + a32/6.*(6.*xx*u3 + 6.*xx*xx*u3p + xx*xx*xx*u3pp));
     }
     else if(max_order == 4)
@@ -138,13 +166,20 @@ struct hnm calc_meta_model_nuclear_matter(struct parameters satdata, int max_ord
         a42 = satdata.zsym0 - 40./9.*t0fg*(-7.+5.*barfac);
         u3 = calc_meta_model_low_density_correction(satdata, max_order, 3, xx);
         u4 = calc_meta_model_low_density_correction(satdata, max_order, 4, xx);
-        u3p = calc_meta_model_low_density_correction_derivative(satdata, max_order, 3, xx);
-        u4p = calc_meta_model_low_density_correction_derivative(satdata, max_order, 4, xx);
-        u3pp = calc_meta_model_low_density_correction_second_derivative(satdata, max_order, 3, xx);
-        u4pp = calc_meta_model_low_density_correction_second_derivative(satdata, max_order, 4, xx);
+        u3p = calc_meta_model_low_density_correction_derivative(satdata, 
+                max_order, 3, xx);
+        u4p = calc_meta_model_low_density_correction_derivative(satdata, 
+                max_order, 4, xx);
+        u3pp = calc_meta_model_low_density_correction_second_derivative(
+                satdata, max_order, 3, xx);
+        u4pp = calc_meta_model_low_density_correction_second_derivative(
+                satdata, max_order, 4, xx);
 
-        epotpernuc = a00*u0 + a10*xx*u1 + 0.5*a20*xx*xx*u2 + 1./6.*a30*xx*xx*xx*u3 + 1./24.*a40*xx*xx*xx*xx*u4
-            + (a02*u0 + a12*xx*u1 + 0.5*a22*xx*xx*u2 + 1./6.*a32*xx*xx*xx*u3 + 1./24.*a42*xx*xx*xx*xx*u4)*ii_*ii_;
+        epotpernuc = a00*u0 + a10*xx*u1 + 0.5*a20*xx*xx*u2 
+            + 1./6.*a30*xx*xx*xx*u3 + 1./24.*a40*xx*xx*xx*xx*u4
+            + (a02*u0 + a12*xx*u1 + 0.5*a22*xx*xx*u2 
+                    + 1./6.*a32*xx*xx*xx*u3 
+                    + 1./24.*a42*xx*xx*xx*xx*u4)*ii_*ii_;
         depotpernucdx = a00*u0p + a10*u1 + a10*xx*u1p
             +  a20*u2*xx + 0.5*a20*xx*xx*u2p 
             + a30/6.*(3.*xx*xx*u3 + xx*xx*xx*u3p)
@@ -153,27 +188,39 @@ struct hnm calc_meta_model_nuclear_matter(struct parameters satdata, int max_ord
                     + a22*xx*u2 + 0.5*a22*xx*xx*u2p
                     + a32/6.*(3.*xx*xx*u3 + xx*xx*xx*u3p)
                     + a42/24.*(4.*xx*xx*xx*u4+xx*xx*xx*xx*u4p));
-        d2epotpernucdx2 = a00*u0pp + a10*(2.*u1p + xx*u1pp) + a20/2.*(2.*u2 + 4.*xx*u2p + xx*xx*u2pp)
+        d2epotpernucdx2 = a00*u0pp + a10*(2.*u1p + xx*u1pp) 
+            + a20/2.*(2.*u2 + 4.*xx*u2p + xx*xx*u2pp)
             + a30/6.*(6.*xx*u3 + 6.*xx*xx*u3p + xx*xx*xx*u3pp)
             + a40/24.*(12.*xx*xx*u4 + 8.*xx*xx*xx*u4p + xx*xx*xx*xx*u4pp)
-            + ii_*ii_*(a02*u0pp + a12*(2.*u1p + xx*u1pp) + a22/2.*(2.*u2 + 4.*xx*u2p + xx*xx*u2pp)
+            + ii_*ii_*(a02*u0pp + a12*(2.*u1p + xx*u1pp) 
+                    + a22/2.*(2.*u2 + 4.*xx*u2p + xx*xx*u2pp)
                     + a32/6.*(6.*xx*u3 + 6.*xx*xx*u3p + xx*xx*xx*u3pp)
-                    + a42/24.*(12.*xx*xx*u4 + 8.*xx*xx*xx*u4p + xx*xx*xx*xx*u4pp));
-        depotpernucdi = 2.*ii_*(a02*u0 + a12*xx*u1 + 0.5*a22*xx*xx*u2 + 1./6.*a32*xx*xx*xx*u3 + 1./24.*a42*xx*xx*xx*xx*u4);
+                    + a42/24.*(12.*xx*xx*u4 
+                        + 8.*xx*xx*xx*u4p + xx*xx*xx*xx*u4pp));
+        depotpernucdi = 2.*ii_*(a02*u0 + a12*xx*u1 + 0.5*a22*xx*xx*u2 
+                + 1./6.*a32*xx*xx*xx*u3 + 1./24.*a42*xx*xx*xx*xx*u4);
 
-        result.jsym = 5./9.*t0fg*pow(1.+3.*xx,2./3.)*(1.+satdata.barm*(1.+3.*xx))
-            + a02*u0 + a12*xx*u1 + 0.5*a22*xx*xx*u2 + 1./6.*a32*xx*xx*xx*u3 + 1./24.*a42*xx*xx*xx*xx*u4;
+        result.jsym = 5./9.*t0fg*pow(1.+3.*xx,2./3.)
+            *(1.+satdata.barm*(1.+3.*xx))
+            + a02*u0 + a12*xx*u1 + 0.5*a22*xx*xx*u2 + 1./6.*a32*xx*xx*xx*u3 
+            + 1./24.*a42*xx*xx*xx*xx*u4;
 
-        result.lsym = 5./9.*t0fg*(1.+3.*xx)*(2.*pow(1.+3.*xx,-1./3.)*(1.+satdata.barm*(1.+3.*xx))
+        result.lsym = 5./9.*t0fg*(1.+3.*xx)*(2.*pow(1.+3.*xx,-1./3.)
+                *(1.+satdata.barm*(1.+3.*xx))
                 + 3.*satdata.barm*pow(1.+3.*xx,2./3.))
-            + (1.+3.*xx)*(a02*u0p + a12*(u1 + xx*u1p) + a22/2.*(2.*xx*u2 + xx*xx*u2p)
-                    + a32/6.*(3.*xx*xx*u3 + xx*xx*xx*u3p) + a42/24.*(4.*xx*xx*xx*u4 + xx*xx*xx*xx*u4p));
+            + (1.+3.*xx)*(a02*u0p + a12*(u1 + xx*u1p) 
+                    + a22/2.*(2.*xx*u2 + xx*xx*u2p)
+                    + a32/6.*(3.*xx*xx*u3 + xx*xx*xx*u3p) 
+                    + a42/24.*(4.*xx*xx*xx*u4 + xx*xx*xx*xx*u4p));
 
-        result.ksym = 10./9.*t0fg*pow(1.+3.*xx,2.)*(6.*satdata.barm*pow(1.+3.*xx,-1./3.)
+        result.ksym = 10./9.*t0fg*pow(1.+3.*xx,2.)
+            *(6.*satdata.barm*pow(1.+3.*xx,-1./3.)
                 - pow(1.+3.*xx,-4./3.)*(1.+satdata.barm*(1.+3.*xx)))
-            + pow(1.+3.*xx,2.)*(a02*u0pp + a12*(2.*u1p + xx*u1pp) + a22/2.*(2.*u2 + 4.*xx*u2p + xx*xx*u2pp)
+            + pow(1.+3.*xx,2.)*(a02*u0pp + a12*(2.*u1p + xx*u1pp) 
+                    + a22/2.*(2.*u2 + 4.*xx*u2p + xx*xx*u2pp)
                     + a32/6.*(6.*xx*u3 + 6.*xx*xx*u3p + xx*xx*xx*u3pp)
-                    + a42/24.*(12.*xx*xx*u4 + 8.*xx*xx*xx*u4p + xx*xx*xx*xx*u4pp));
+                    + a42/24.*(12.*xx*xx*u4 + 8.*xx*xx*xx*u4p 
+                        + xx*xx*xx*xx*u4pp));
     }
     else
     {
@@ -188,16 +235,21 @@ struct hnm calc_meta_model_nuclear_matter(struct parameters satdata, int max_ord
             + 0.5*(a20 + a22*ii_*ii_)*(2.*u2 + 4.*xx*u2p + xx*xx*u2pp);
         depotpernucdi = 2.*ii_*(a02*u0 + a12*xx*u1 + 0.5*a22*xx*xx*u2);
 
-        result.jsym = 5./9.*t0fg*pow(1.+3.*xx,2./3.)*(1.+satdata.barm*(1.+3.*xx))
+        result.jsym = 5./9.*t0fg*pow(1.+3.*xx,2./3.)
+            *(1.+satdata.barm*(1.+3.*xx))
             + a02*u0 + a12*xx*u1 + 0.5*a22*xx*xx*u2;
 
-        result.lsym = 5./9.*t0fg*(1.+3.*xx)*(2.*pow(1.+3.*xx,-1./3.)*(1.+satdata.barm*(1.+3.*xx))
+        result.lsym = 5./9.*t0fg*(1.+3.*xx)*(2.*pow(1.+3.*xx,-1./3.)
+                *(1.+satdata.barm*(1.+3.*xx))
                 + 3.*satdata.barm*pow(1.+3.*xx,2./3.))
-            + (1.+3.*xx)*(a02*u0p + a12*(u1 + xx*u1p) + a22/2.*(2.*xx*u2 + xx*xx*u2p));
+            + (1.+3.*xx)*(a02*u0p + a12*(u1 + xx*u1p) 
+                    + a22/2.*(2.*xx*u2 + xx*xx*u2p));
 
-        result.ksym = 10./9.*t0fg*pow(1.+3.*xx,2.)*(6.*satdata.barm*pow(1.+3.*xx,-1./3.)
+        result.ksym = 10./9.*t0fg*pow(1.+3.*xx,2.)
+            *(6.*satdata.barm*pow(1.+3.*xx,-1./3.)
                 - pow(1.+3.*xx,-4./3.)*(1.+satdata.barm*(1.+3.*xx)))
-            + pow(1.+3.*xx,2.)*(a02*u0pp + a12*(2.*u1p + xx*u1pp) + a22/2.*(2.*u2 + 4.*xx*u2p + xx*xx*u2pp));
+            + pow(1.+3.*xx,2.)*(a02*u0pp + a12*(2.*u1p + xx*u1pp) 
+                    + a22/2.*(2.*u2 + 4.*xx*u2p + xx*xx*u2pp));
     }
 
     result.enpernuc = 0.5*t0fg*cpow((1.+3.*xx),2./3.)
@@ -214,8 +266,9 @@ struct hnm calc_meta_model_nuclear_matter(struct parameters satdata, int max_ord
     if (nn_ == 0.)
         result.vs2 = 0.;
     else
-    {
-        kis = pow((1.+3.*xx),2.)*d2enpernucdx2 + 18.*result.p/nn_; // isoscalar compressibility
+    { 
+        // isoscalar compressibility
+        kis = pow((1.+3.*xx),2.)*d2enpernucdx2 + 18.*result.p/nn_;
         result.vs2 = kis/9./(RMN + result.enpernuc + result.p/nn_);
     }
 
@@ -238,7 +291,8 @@ double calc_asymmetry_factor_derivative(double m_, double ii_)
     return 0.5*m_*(cpow(1.+ii_,m_-1.) - cpow(1.-ii_,m_-1.));
 }
 
-struct hnm calc_skyrme_nuclear_matter(struct skyrme_parameters coeff, double nn_, double ii_)
+struct hnm calc_skyrme_nuclear_matter(struct skyrme_parameters coeff, 
+        double nn_, double ii_)
 {
     double f53, f2, f83;
     double f53p, f2p, f83p;
@@ -253,41 +307,60 @@ struct hnm calc_skyrme_nuclear_matter(struct skyrme_parameters coeff, double nn_
     f2p = calc_asymmetry_factor_derivative(2., ii_);
     f83p = calc_asymmetry_factor_derivative(8./3., ii_);
 
-    result.enpernuc = 3./5.*HBARC*HBARC/2./RMN*cpow(1.5*PI2,2./3.)*cpow(nn_,2./3.)*f53
+    result.enpernuc = 3./5.*HBARC*HBARC/2./RMN*cpow(1.5*PI2,2./3.)
+        *cpow(nn_,2./3.)*f53
         + 1./8.*coeff.t0*nn_*(2.*(coeff.x0 + 2.) - (2.*coeff.x0 + 1.)*f2)
-        + 1./48.*coeff.t3*cpow(nn_,coeff.sigma+1.)*(2.*(coeff.x3 + 2.) - (2.*coeff.x3 + 1.)*f2)
-        + 3./40.*cpow(1.5*PI2,2./3.)*cpow(nn_,5./3.)*((coeff.t1*(coeff.x1 + 2.) + coeff.t2*(coeff.x2 + 2.))*f53
-                + 0.5*(coeff.t2*(2.*coeff.x2 + 1.) - coeff.t1*(2.*coeff.x1 + 1.))*f83);
+        + 1./48.*coeff.t3*cpow(nn_,coeff.sigma+1.)*(2.*(coeff.x3 + 2.) 
+                - (2.*coeff.x3 + 1.)*f2)
+        + 3./40.*cpow(1.5*PI2,2./3.)*cpow(nn_,5./3.)*((coeff.t1*(coeff.x1 + 2.)
+                    + coeff.t2*(coeff.x2 + 2.))*f53
+                + 0.5*(coeff.t2*(2.*coeff.x2 + 1.) 
+                    - coeff.t1*(2.*coeff.x1 + 1.))*f83);
 
-    denpernucdn = 2./5.*HBARC*HBARC/2./RMN*cpow(1.5*PI2,2./3.)*cpow(nn_,-1./3.)*f53
+    denpernucdn = 2./5.*HBARC*HBARC/2./RMN*cpow(1.5*PI2,2./3.)
+        *cpow(nn_,-1./3.)*f53
         + 1./8.*coeff.t0*(2.*(coeff.x0 + 2.) - (2.*coeff.x0 + 1.)*f2)
-        + 1./48.*(coeff.sigma+1.)*coeff.t3*cpow(nn_,coeff.sigma)*(2.*(coeff.x3 + 2.) - (2.*coeff.x3 + 1.)*f2)
-        + 1./8.*cpow(1.5*PI2,2./3.)*cpow(nn_,2./3.)*((coeff.t1*(coeff.x1 + 2.) + coeff.t2*(coeff.x2 + 2.))*f53
-                + 0.5*(coeff.t2*(2.*coeff.x2 + 1.) - coeff.t1*(2.*coeff.x1 + 1.))*f83);
+        + 1./48.*(coeff.sigma+1.)*coeff.t3*cpow(nn_,coeff.sigma)
+        *(2.*(coeff.x3 + 2.) - (2.*coeff.x3 + 1.)*f2)
+        + 1./8.*cpow(1.5*PI2,2./3.)*cpow(nn_,2./3.)*((coeff.t1*(coeff.x1 + 2.)
+                    + coeff.t2*(coeff.x2 + 2.))*f53
+                + 0.5*(coeff.t2*(2.*coeff.x2 + 1.) 
+                    - coeff.t1*(2.*coeff.x1 + 1.))*f83);
 
-    denpernucdi = 3./5.*HBARC*HBARC/2./RMN*cpow(1.5*PI2,2./3.)*cpow(nn_,2./3.)*f53p
+    denpernucdi = 3./5.*HBARC*HBARC/2./RMN*cpow(1.5*PI2,2./3.)
+        *cpow(nn_,2./3.)*f53p
         + 1./8.*coeff.t0*nn_*(2.*(coeff.x0 + 2.) - (2.*coeff.x0 + 1.)*f2p)
-        + 1./48.*coeff.t3*cpow(nn_,coeff.sigma+1.)*(2.*(coeff.x3 + 2.) - (2.*coeff.x3 + 1.)*f2p)
-        + 3./40.*cpow(1.5*PI2,2./3.)*cpow(nn_,5./3.)*((coeff.t1*(coeff.x1 + 2.) + coeff.t2*(coeff.x2 + 2.))*f53p
-                + 0.5*(coeff.t2*(2.*coeff.x2 + 1.) - coeff.t1*(2.*coeff.x1 + 1.))*f83p);
+        + 1./48.*coeff.t3*cpow(nn_,coeff.sigma+1.)*(2.*(coeff.x3 + 2.) 
+                - (2.*coeff.x3 + 1.)*f2p)
+        + 3./40.*cpow(1.5*PI2,2./3.)*cpow(nn_,5./3.)*((coeff.t1*(coeff.x1 + 2.)
+                    + coeff.t2*(coeff.x2 + 2.))*f53p
+                + 0.5*(coeff.t2*(2.*coeff.x2 + 1.) 
+                    - coeff.t1*(2.*coeff.x1 + 1.))*f83p);
 
-    result.mun = result.enpernuc + nn_*(denpernucdn + (1.-ii_)/nn_*denpernucdi);
+    result.mun = result.enpernuc + nn_*(denpernucdn 
+            + (1.-ii_)/nn_*denpernucdi);
 
     result.p = nn_*nn_*denpernucdn;
 
     result.vs2 = 0.; // need to derive the expression
 
-    result.jsym = HBARC*HBARC/2./RMN/3.*cpow(1.5*PI2,2./3.)*cpow(nn_,2./3.) + 1./8.*coeff.t0*nn_*(1.-coeff.x0)
-        + 1./48.*coeff.t3*cpow(nn_,coeff.sigma+1.)*(1.-coeff.x3) + 1./24.*cpow(1.5*PI2,2./3.)*cpow(nn_,5./3.)
+    result.jsym = HBARC*HBARC/2./RMN/3.*cpow(1.5*PI2,2./3.)*cpow(nn_,2./3.) 
+        + 1./8.*coeff.t0*nn_*(1.-coeff.x0)
+        + 1./48.*coeff.t3*cpow(nn_,coeff.sigma+1.)*(1.-coeff.x3) 
+        + 1./24.*cpow(1.5*PI2,2./3.)*cpow(nn_,5./3.)
         *(coeff.t2*(5.*coeff.x2 + 4.) - 3.*coeff.t1*coeff.x1);
 
-    result.lsym = HBARC*HBARC/RMN/3.*cpow(1.5*PI2,2./3.)*cpow(nn_,2./3.) + 3./8.*coeff.t0*nn_*(1.-coeff.x0)
-        + 1./16.*(coeff.sigma + 1.)*coeff.t3*cpow(nn_,coeff.sigma+1.)*(1.-coeff.x3) + 5./24.*cpow(1.5*PI2,2./3.)*cpow(nn_,5./3.)
+    result.lsym = HBARC*HBARC/RMN/3.*cpow(1.5*PI2,2./3.)*cpow(nn_,2./3.) 
+        + 3./8.*coeff.t0*nn_*(1.-coeff.x0)
+        + 1./16.*(coeff.sigma + 1.)*coeff.t3*cpow(nn_,coeff.sigma+1.)
+        *(1.-coeff.x3) + 5./24.*cpow(1.5*PI2,2./3.)*cpow(nn_,5./3.)
         *(coeff.t2*(5.*coeff.x2 + 4.) - 3.*coeff.t1*coeff.x1);
 
     result.ksym = -HBARC*HBARC/RMN/3.*cpow(1.5*PI2,2./3.)*cpow(nn_,2./3.)
-        + 3./16.*coeff.sigma*(coeff.sigma + 1.)*coeff.t3*cpow(nn_,coeff.sigma+1.)*(1.-coeff.x3) 
-        + 5./12.*cpow(1.5*PI2,2./3.)*cpow(nn_,5./3.)*(coeff.t2*(5.*coeff.x2 + 4.) - 3.*coeff.t1*coeff.x1);
+        + 3./16.*coeff.sigma*(coeff.sigma + 1.)
+        *coeff.t3*cpow(nn_,coeff.sigma+1.)*(1.-coeff.x3) 
+        + 5./12.*cpow(1.5*PI2,2./3.)*cpow(nn_,5./3.)
+        *(coeff.t2*(5.*coeff.x2 + 4.) - 3.*coeff.t1*coeff.x1);
 
     return result;
 }
