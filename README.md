@@ -31,7 +31,8 @@ the core composition (number density, fraction of protons, electrons, and
 muons). The third output file gives you the EoS (mass density, and pressure). 
 Finally, the last output file gives you the TOV solution (central density, 
 central pressure, radius, mass, core radius, core mass, normalized moment of 
-inertia, and fraction of moment of inertia residing in the crust).
+inertia, fraction of moment of inertia residing in the crust, tidal love 
+number, and dimensionless tidal deformability).
 
 ### Available sets of empirical parameters
 
