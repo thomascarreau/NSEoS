@@ -59,6 +59,8 @@ int main(int argc, char* argv[])
         fprintf(stderr, "I/MR^2_14   = %g\n", tovs14.i_over_mr2);
         fprintf(stderr, "Icrust/I_14 = %g\n", 
                 tovs14.icrust_over_mr2/tovs14.i_over_mr2);
+        fprintf(stderr, "k2_14       = %g\n", tovs14.k2);
+        fprintf(stderr, "lambda_14   = %g\n", tovs14.lambda_dimless);
     }
     else
     {

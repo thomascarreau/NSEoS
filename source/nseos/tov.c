@@ -22,6 +22,47 @@ double calc_dp(double rho_, double p_, double r_, double dr_, double m_)
         /(1.-2.*G_CGS*m_/r_/SPEEDOFL_CGS/SPEEDOFL_CGS)*dr_;
 }
 
+double calc_dy(double rho_, double p_, double r_, double dr_, double m_, 
+        double y_, double vs2_)
+{
+    double q1, q2, q;
+
+    q1 = 4.*PI*G_CGS*((5.-y_)*rho_+(9.+y_)*p_/SPEEDOFL_CGS/SPEEDOFL_CGS
+            +(p_/SPEEDOFL_CGS/SPEEDOFL_CGS+rho_)
+            /(vs2_/SPEEDOFL_CGS/SPEEDOFL_CGS))
+        /(SPEEDOFL_CGS*SPEEDOFL_CGS-2.*G_CGS*m_/r_);
+    q2 = pow(2.*G_CGS*(m_+4.*PI*r_*r_*r_*p_/SPEEDOFL_CGS/SPEEDOFL_CGS)
+            /r_/(r_*SPEEDOFL_CGS*SPEEDOFL_CGS-2*G_CGS*m_),2.);
+    q=q1-q2;
+
+    return (-y_*y_/r_ - (y_ - 6.)/(r_-2.*G_CGS*m_/SPEEDOFL_CGS/SPEEDOFL_CGS) 
+            - r_*q)*dr_;
+}
+
+double calc_tidal_love_number(double r_, double m_, double y_)
+{
+    double beta;
+    double denom;
+
+    beta = G_CGS*m_/r_/SPEEDOFL_CGS/SPEEDOFL_CGS; // compactness
+    denom = 6.*beta*(2. - y_ + beta*(5.*y_-8.)) // see: arXiv:1512.07820
+        + 4.*pow(beta,3.)*(13.-11.*y_ + beta*(3.*y_-2.) + 2.*beta*beta*(1.+y_))
+        + 3.*pow(1.-2.*beta,2.)*(2. - y_ + 2.*beta*(y_-1.))*log(1.-2.*beta);
+
+    return 8./5.*pow(beta,5.)*pow(1.-2.*beta,2.)
+        *(2. - y_ + 2.*beta*(y_-1.))/denom;
+}
+
+double calc_dimensionless_tidal_deformability(double r_, double m_, 
+        double k2_)
+{
+    double beta;
+
+    beta = G_CGS*m_/r_/SPEEDOFL_CGS/SPEEDOFL_CGS; // compactness
+
+    return 2.*k2_/3.*pow(beta,-5.);
+}
+
 // see: PRC82,025810(2010)
 double calc_normalized_moment_of_inertia(double r_, double m_)
 {
@@ -95,11 +136,13 @@ double solve_tov_equation(int lines, double pt, double epst, FILE *eos,
     double rhosat = 2.3e14; // saturation density in g/cm^3
     double dr = 100.; // radius step in cm
     double rhoc, pc;
-    double rho, p;
+    double rho, p, vs2;
     double m, r;
-    double p_sav, m_sav, r_sav;
+    double y;
+    double rho_sav, p_sav, m_sav, r_sav;
     double mcore, rcore;
     double i_over_mr2, icrust_over_mr2;
+    double k2, lambda_dimless;
 
     double rhoc_last = 0.;
     double pc_last = 0.;
@@ -109,6 +152,8 @@ double solve_tov_equation(int lines, double pt, double epst, FILE *eos,
     double rcore_last = 0.;
     double mcore_last = 0.;
     double icrust_over_mr2_last = 0.;
+    double k2_last = 0.;
+    double lambda_dimless_last = 0.;
     tovs_m->mmax = 0.;
     tovs_m->rhoc = 0.;
     tovs_m->pc = 0.;
@@ -117,6 +162,8 @@ double solve_tov_equation(int lines, double pt, double epst, FILE *eos,
     tovs_m->rcore = 0;
     tovs_m->mcore = 0;
     tovs_m->icrust_over_mr2 = 0;
+    tovs_m->k2 = 0;
+    tovs_m->lambda_dimless = 0;
 
     int N = 100; // number of points
 
@@ -131,11 +178,13 @@ double solve_tov_equation(int lines, double pt, double epst, FILE *eos,
         pc = gsl_spline_eval (spline, rhoc, acc);
 
         rho = rhoc;
+        rho_sav = rho;
         p = pc;
         p_sav = p;
 
         m = 0.;
         r = 10.;
+        y = 2.;
         m_sav = m;
         r_sav = r;
 
@@ -167,6 +216,10 @@ double solve_tov_equation(int lines, double pt, double epst, FILE *eos,
             else
                 break;
 
+            vs2 = (p_sav - p)/(rho_sav-rho);
+            y += calc_dy(rho_sav, p, r, dr, m, y, vs2);
+
+            rho_sav = rho;
             p_sav = p;
             r_sav = r;
             m_sav = m;
@@ -178,6 +231,9 @@ double solve_tov_equation(int lines, double pt, double epst, FILE *eos,
                     i_over_mr2, epst, pt, rcore);
         else
             icrust_over_mr2 = 0.;
+
+        k2 = calc_tidal_love_number(r, m, y);
+        lambda_dimless = calc_dimensionless_tidal_deformability(r, m, k2);
 
         r /= 100000.;
         m /= MSUN_CGS;
@@ -203,7 +259,12 @@ double solve_tov_equation(int lines, double pt, double epst, FILE *eos,
                     m_last, m, mcore_last, mcore);
             tovs_m->icrust_over_mr2 = get_observable_for_a_given_mass(fixed_m, 
                     m_last, m, icrust_over_mr2_last, icrust_over_mr2);
+            tovs_m->k2 = get_observable_for_a_given_mass(fixed_m, 
+                    m_last, m, k2_last, k2);
+            tovs_m->lambda_dimless = get_observable_for_a_given_mass(fixed_m, 
+                    m_last, m, lambda_dimless_last, lambda_dimless);
         }
+
         rhoc_last = rhoc;
         pc_last = pc;
         r_last = r;
@@ -212,11 +273,14 @@ double solve_tov_equation(int lines, double pt, double epst, FILE *eos,
         rcore_last = rcore;
         mcore_last = mcore;
         icrust_over_mr2_last = icrust_over_mr2;
+        k2_last = k2;
+        lambda_dimless_last = lambda_dimless;
 
-        fprintf(tov, "%g %g %g %g %g %g %g %g\n", rhoc, pc, 
+        fprintf(tov, "%g %g %g %g %g %g %g %g %g %g\n", rhoc, pc, 
                 r, m,
                 rcore, mcore,
-                i_over_mr2, icrust_over_mr2/i_over_mr2);
+                i_over_mr2, icrust_over_mr2/i_over_mr2,
+                k2, lambda_dimless);
     }
 
     gsl_spline_free (spline);

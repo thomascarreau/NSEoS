@@ -5,6 +5,11 @@
 
 double calc_dm(double rho_, double r_, double dr_);
 double calc_dp(double rho_, double p_, double r_, double dr_, double m_);
+double calc_dy(double rho_, double p_, double r_, double dr_, double m_, 
+        double y_, double vs2_);
+double calc_tidal_love_number(double r_, double m_, double y_);
+double calc_dimensionless_tidal_deformability(double r_, double m_, 
+        double k2_);
 struct tov_solution
 {
     double mmax;
@@ -15,6 +20,8 @@ struct tov_solution
     double rcore;
     double mcore;
     double icrust_over_mr2;
+    double k2;
+    double lambda_dimless;
 };
 double calc_normalized_moment_of_inertia(double r_, double m_);
 double calc_normalized_crustal_moment_of_inertia(double r_, double m_, 
