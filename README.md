@@ -44,6 +44,8 @@ number, and dimensionless tidal deformability).
 
 * BSk17: `bsk17.in`
 
+* BSk24: `bsk24.in`
+
 * NRAPR: `nrapr.in`
 
 * RATP: `ratp.in`
@@ -57,8 +59,6 @@ number, and dimensionless tidal deformability).
 * SLy4: `sly4.in`
 
 #### Relativistic
-
-* NL3: `nl3.in`
 
 * TM1: `tm1.in`
 
