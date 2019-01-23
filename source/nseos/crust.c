@@ -694,20 +694,48 @@ double calc_muncl(struct parameters satdata, struct sf_params sparams,
         struct compo eq, double nb_)
 {
     double np;
-    double eion;
-    double epsb;
+    double epsa, epsb;
+    double eion_ap, eion_am;
     double eion_bp, eion_bm;
+    double deiondaa;
     double deionddel;
 
     np = nb_*(1.-eq.del)/2.;
 
-    eion = calc_ion_en(satdata, sparams, eq.aa, eq.del, eq.n0, np);
+    epsa = 0.001;
     epsb = 0.0001;
+    eion_ap = calc_ion_en(satdata, sparams, eq.aa+epsa, eq.del, eq.n0, np);
+    eion_am = calc_ion_en(satdata, sparams, eq.aa-epsa, eq.del, eq.n0, np);
     eion_bp = calc_ion_en(satdata, sparams, eq.aa, eq.del+epsb, eq.n0, np);
     eion_bm = calc_ion_en(satdata, sparams, eq.aa, eq.del-epsb, eq.n0, np);
+    deiondaa = (eion_ap - eion_am)/2./epsa;
     deionddel = (eion_bp - eion_bm)/2./epsb;
 
-    return eion/eq.aa + (1.-eq.del)/eq.aa * deionddel;
+    return deiondaa + (1.-eq.del)/eq.aa * deionddel;
+}
+
+double calc_mupcl(struct parameters satdata, struct sf_params sparams, 
+        struct compo eq, double nb_)
+{
+    double np;
+    double epsa, epsb;
+    double eion_ap, eion_am;
+    double eion_bp, eion_bm;
+    double deiondaa;
+    double deionddel;
+
+    np = nb_*(1.-eq.del)/2.;
+
+    epsa = 0.001;
+    epsb = 0.0001;
+    eion_ap = calc_ion_en(satdata, sparams, eq.aa+epsa, eq.del, eq.n0, np);
+    eion_am = calc_ion_en(satdata, sparams, eq.aa-epsa, eq.del, eq.n0, np);
+    eion_bp = calc_ion_en(satdata, sparams, eq.aa, eq.del+epsb, eq.n0, np);
+    eion_bm = calc_ion_en(satdata, sparams, eq.aa, eq.del-epsb, eq.n0, np);
+    deiondaa = (eion_ap - eion_am)/2./epsa;
+    deionddel = (eion_bp - eion_bm)/2./epsb;
+
+    return deiondaa - (1.+eq.del)/eq.aa * deionddel;
 }
 
 double calc_crust_ws_cell_energy_density(struct parameters satdata, 

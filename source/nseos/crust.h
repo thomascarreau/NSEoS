@@ -66,6 +66,8 @@ struct compo calc_icrust_composition_w_shl(double nb_,
 
 double calc_muncl(struct parameters satdata, struct sf_params sparams, 
         struct compo eq, double nb_);
+double calc_mupcl(struct parameters satdata, struct sf_params sparams, 
+        struct compo eq, double nb_);
 double calc_crust_ws_cell_energy_density(struct parameters satdata, 
         struct sf_params sparams, 
         struct compo eq, double nb_);
