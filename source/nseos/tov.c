@@ -288,3 +288,176 @@ double solve_tov_equation(int lines, double pt, double epst, FILE *eos,
 
     return tovs_m->mmax;
 }
+
+int eval_observables_from_glitch_activity(
+        int lines, double pt, double epst, FILE *eos, double g, double sigma_g,
+        FILE *f_pulsar)
+{
+    double Rho[lines], P[lines];
+    double Rho_tmp, P_tmp;
+
+    int j = 0;
+    int l = lines;
+
+    // to avoid 'insufficient number of points for interpolation type' error
+    if (l < 10) 
+        return 0;
+
+    // reading the EoS table
+    for(int i = 0; i < lines; i++)
+    {
+        if (j < l)
+        {
+            fscanf(eos, "%lf %lf", &Rho_tmp, &P_tmp);
+            P_tmp *= P_FACTOR_NU_TO_CGS;
+        }
+
+        if (j == 0)
+        {
+            Rho[j] = Rho_tmp;
+            P[j] = P_tmp;
+            j += 1;
+        }
+        else if (j > 0 
+                && Rho_tmp > Rho[j-1] && P_tmp > P[j-1])
+            // to avoid interpolation issues
+        {
+            Rho[j] = Rho_tmp;
+            P[j] = P_tmp;
+            j += 1;
+        }
+        else
+            l -= 1;
+    }
+
+    gsl_interp_accel *acc
+        = gsl_interp_accel_alloc ();
+    gsl_spline *spline
+        = gsl_spline_alloc (gsl_interp_linear, l);
+
+    double rhosat = 2.3e14; // saturation density in g/cm^3
+    double dr = 100.; // radius step in cm
+    double rhoc, pc;
+    double rho, p, vs2;
+    double m, r;
+    double y;
+    double rho_sav, p_sav, m_sav, r_sav;
+    double mcore, rcore;
+    double i_over_mr2, icrust_over_mr2;
+    double k2, lambda_dimless;
+
+    double gp = g + sigma_g;
+    double gm = g - sigma_g;
+    double gp_checker = 0;
+    double gm_checker = 0;
+
+    int N = 100; // number of points
+
+    if (Rho[l-1] < rhosat) // to avoid the 'interpolation error' error
+        return 0.;
+
+    for(int j = 0; j < N; j++)
+    {
+        rhoc = rhosat + ((double)j / (double)N)*(Rho[l-1] - rhosat);
+
+        gsl_spline_init (spline, Rho, P, l);
+        pc = gsl_spline_eval (spline, rhoc, acc);
+
+        rho = rhoc;
+        rho_sav = rho;
+        p = pc;
+        p_sav = p;
+
+        m = 0.;
+        r = 10.;
+        y = 2.;
+        m_sav = m;
+        r_sav = r;
+
+        gsl_spline_init (spline, P, Rho, l);
+
+        while(rho > 2.e5)
+        {
+            r += dr;
+            m += calc_dm(rho, r, dr);
+            p += calc_dp(rho, p, r, dr, m);
+
+            if (pt*P_FACTOR_NU_TO_CGS != P[0])
+            {
+                if(p_sav > pt * P_FACTOR_NU_TO_CGS 
+                        && p < pt * P_FACTOR_NU_TO_CGS)
+                {
+                    mcore = (m_sav + m)/2.;
+                    rcore = (r_sav + r)/2.;
+                }
+            }
+            else
+            {
+                mcore = m;
+                rcore = r;
+            }
+
+            if(p > P[0])
+                rho = gsl_spline_eval(spline, p, acc);
+            else
+                break;
+
+            vs2 = (p_sav - p)/(rho_sav-rho);
+            y += calc_dy(rho_sav, p, r, dr, m, y, vs2);
+
+            rho_sav = rho;
+            p_sav = p;
+            r_sav = r;
+            m_sav = m;
+        }
+
+        i_over_mr2 = calc_normalized_moment_of_inertia(r, m);
+        if (pt*P_FACTOR_NU_TO_CGS != P[0])
+            icrust_over_mr2 = calc_normalized_crustal_moment_of_inertia(r, m, 
+                    i_over_mr2, epst, pt, rcore);
+        else
+            icrust_over_mr2 = 0.;
+
+        k2 = calc_tidal_love_number(r, m, y);
+        lambda_dimless = calc_dimensionless_tidal_deformability(r, m, k2);
+
+        r /= 100000.;
+        m /= MSUN_CGS;
+        rcore /= 100000.;
+        mcore /= MSUN_CGS;
+
+        if (gp_checker == 0 && icrust_over_mr2/i_over_mr2 < gp
+                && m > 1.3)
+        {
+            fprintf(f_pulsar, 
+                    "%g %g %g %g %g %g %g %g %g %g\n", 
+                    rhoc, pc, 
+                    r, m, rcore, mcore, 
+                    i_over_mr2, icrust_over_mr2/i_over_mr2, 
+                    k2, lambda_dimless);
+            gp_checker = 1;
+        }
+
+        if (gm_checker == 0 && icrust_over_mr2/i_over_mr2 < gm
+                && m > 1.3)
+        {
+            fprintf(f_pulsar, 
+                    "%g %g %g %g %g %g %g %g %g %g\n", 
+                    rhoc, pc, 
+                    r, m, rcore, mcore, 
+                    i_over_mr2, icrust_over_mr2/i_over_mr2, 
+                    k2, lambda_dimless);
+            gm_checker = 1;
+        }
+
+        if(gp_checker + gm_checker == 2)
+        {
+            return gp_checker + gm_checker;
+        }
+    }
+
+    gsl_spline_free (spline);
+    gsl_interp_accel_free (acc);
+
+    return gp_checker + gm_checker;
+}
