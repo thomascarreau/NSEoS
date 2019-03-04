@@ -27,7 +27,7 @@ struct core_fun calc_core_fun(struct parameters satdata,
 
     // electron(muon) chemical potential (including rest mass)
     np = nb_*(1.-del_)/2.;
-    mueltot = calc_egas_chemical_potential(np - nu_); 
+    mueltot = calc_egas_chemical_potential(np - nu_, 0.); 
     muutot = calc_ugas_chemical_potential(nu_); 
 
     result.f_beta = 2.*dehnmddel + RMN - RMP - mueltot;
@@ -265,7 +265,7 @@ double calc_core_ws_cell_energy_density(struct parameters satdata,
     double epsws;
 
     np = nb_*(1.-eq.del)/2.;
-    epseltot = calc_egas_energy_density(np-eq.nu);
+    epseltot = calc_egas_free_energy_density(np-eq.nu, 0.);
     epsutot = calc_ugas_energy_density(eq.nu);
     meta = calc_meta_model_nuclear_matter(satdata, TAYLOR_EXP_ORDER, 
             nb_, eq.del);
@@ -284,7 +284,7 @@ double calc_core_ws_cell_pressure(struct parameters satdata,
     double ws_cell_pressure;
 
     np = nb_*(1.-eq.del)/2.;
-    egas_pressure = calc_egas_pressure(np-eq.nu);
+    egas_pressure = calc_egas_pressure(np-eq.nu, 0.);
     ugas_pressure = calc_ugas_pressure(eq.nu);
 
     meta = calc_meta_model_nuclear_matter(satdata, TAYLOR_EXP_ORDER, 

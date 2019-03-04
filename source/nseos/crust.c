@@ -141,7 +141,7 @@ struct crust_fun_4d calc_crust_fun_4d(struct parameters satdata,
     deiondn0 = (eion_rp - eion_rm)/2./epsr;
     deiondnp = (eion_pp - eion_pm)/2./epsp;
 
-    muel = calc_egas_chemical_potential(np_);
+    muel = calc_egas_chemical_potential(np_, 0.);
 
     ngas = calc_meta_model_nuclear_matter(satdata, TAYLOR_EXP_ORDER, ng_, 1.);
 
@@ -194,7 +194,7 @@ struct crust_fun_4d calc_crust_fun_zz_fixed(struct parameters satdata,
     deiondn0 = (eion_rp - eion_rm)/2./epsr;
     deiondnp = (eion_pp - eion_pm)/2./epsp;
 
-    muel = calc_egas_chemical_potential(np_);
+    muel = calc_egas_chemical_potential(np_, 0.);
 
     ngas = calc_meta_model_nuclear_matter(satdata, TAYLOR_EXP_ORDER, ng_, 1.);
 
@@ -753,7 +753,7 @@ double calc_crust_ws_cell_energy_density(struct parameters satdata,
     vws = eq.aa*(1. - eq.ng/eq.n0)/(nb_ - eq.ng);
     np = eq.aa*(1.-eq.del)/2./vws;
 
-    epseltot = calc_egas_energy_density(np);
+    epseltot = calc_egas_free_energy_density(np, 0.);
 
     eion = calc_ion_en(satdata, sparams, eq.aa, eq.del, eq.n0, np);
 
@@ -801,7 +801,7 @@ double calc_crust_ws_cell_pressure(struct parameters satdata,
     double ws_cell_pressure;
 
     np = (nb_-eq.ng)*(1.-eq.del)/2./(1.-eq.ng/eq.n0);
-    egas_pressure = calc_egas_pressure(np);
+    egas_pressure = calc_egas_pressure(np, 0.);
     ion_pressure = calc_ion_pressure(satdata, sparams, 
             eq.aa, eq.del, eq.n0, np);
     ngas_pressure = calc_ngas_pressure(satdata, eq.ng);

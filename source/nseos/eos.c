@@ -166,7 +166,7 @@ int calc_equation_of_state(struct parameters satdata, double p,
             return lines;
         }
 
-        mueltot = calc_egas_chemical_potential(nb*(1.-ccomp.del)/2.);
+        mueltot = calc_egas_chemical_potential(nb*(1.-ccomp.del)/2., 0.);
         if (mueltot - MMU > 0.) // transition to npeu matter
             break;
 
