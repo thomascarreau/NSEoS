@@ -26,9 +26,6 @@ struct compo
 // from ETFSI calculation with a BSk functional;
 // see: https://academic.oup.com/mnras/article/481/3/2994/5090419
 double get_shell_energy_per_nucleon(float nb_, float zz_);
-// zero point quantum vibration
-double calc_zp_en(struct parameters satdata, struct sf_params sparams, 
-        double aa_, double ii_, double n0_, double np_);
 double calc_ion_en(struct parameters satdata, struct sf_params sparams,
         double aa_, double del_, double n0_, double np_);
 struct crust_fun_4d calc_crust_fun_4d(struct parameters satdata, 

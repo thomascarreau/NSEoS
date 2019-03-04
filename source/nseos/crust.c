@@ -72,28 +72,6 @@ double get_shell_energy_per_nucleon(float nb_, float zz_)
     return esh_nb;
 }
 
-double calc_zp_en(struct parameters satdata, struct sf_params sparams, 
-        double aa_, double ii_, double n0_, double np_)
-{
-    double hbaromega_p;
-    double zz;
-    double mi;
-    double vws;
-    double u1;
-
-    zz = aa_*(1.-ii_)/2.;
-    mi = zz*RMP + (aa_-zz)*RMN 
-        + CALC_NUCLEAR_EN(satdata, sparams, TAYLOR_EXP_ORDER, aa_, ii_, n0_);
-    vws = zz/np_;
-
-    hbaromega_p = sqrt(pow(HBARC,2.)*4.*PI*pow(zz,2.)*ALPHAFS*HBARC
-            /mi/vws);
-
-    u1 = 0.5113875; // bcc lattice; Table 2.4 of Haensel book
-
-    return 3./2.*hbaromega_p*u1;
-}
-
 double calc_ion_en(struct parameters satdata, struct sf_params sparams,
         double aa_, double del_, double n0_, double np_)
 {
