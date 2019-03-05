@@ -249,8 +249,6 @@ int be_f (const gsl_vector * x, void *data, gsl_vector * f)
         double ecoul = Ecoul/aa[i];
         // total
         double Be = ebulk + esurf + ecoul;
-        /* + get_shell_en_from_myers_table(aa[i], zz[i])/aa[i] */
-        /* + calc_pairing_en(aa[i], zz[i])/aa[i]; */
         gsl_vector_set (f, i, Be - be[i]);
     }
 

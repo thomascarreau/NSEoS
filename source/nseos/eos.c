@@ -21,7 +21,7 @@ int calc_zero_temperature_equation_of_state(
     struct sf_params sparams = fit_sf_params(satdata, p);
 
     double nb = 1e-10;
-    double tt = 1.e-9;
+    double tt = 0.;
     char phase[] = "sol";
     double pressure;
     double pressure_sav = 0.;

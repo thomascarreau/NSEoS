@@ -33,8 +33,21 @@ double calc_lattice_en(struct parameters satdata,
     rpt = 2.*np_/(1.-ii_)/n0_;
     zz = aa_*(1.-ii_)/2.;
 
-    return ALPHAFS*HBARC/rsat*zz*zz*pow(aa_,-1./3.)
-        *(-CM*pow(rpt,1./3.) + 3./10.*rpt);
+    return -CM*ALPHAFS*HBARC/rsat*zz*zz*pow(aa_,-1./3.)*pow(rpt,1./3.);
+}
+
+double calc_finite_size_contrib(struct parameters satdata, 
+        double aa_, double ii_, double n0_, double np_)
+{
+    double rsat;
+    double rpt;
+    double zz;
+
+    rsat = pow(3./4./PI/satdata.rhosat0,1./3.);
+    rpt = 2.*np_/(1.-ii_)/n0_;
+    zz = aa_*(1.-ii_)/2.;
+
+    return ALPHAFS*HBARC/rsat*zz*zz*pow(aa_,-1./3.)*3./10.*rpt;
 }
 
 double calc_zp_en(struct parameters satdata, struct sf_params sparams, 
@@ -62,39 +75,47 @@ double calc_harmonic_contrib(
         double tt_)
 {
     // see: Baiko et al. (2001) for details
-    double alpha1 = 0.932446;
-    double alpha2 = 0.334547;
-    double alpha3 = 0.265764;
-    double alpha6 = 4.757014e-3;
-    double alpha8 = 4.7770935e-3;
 
-    double a[9] = {1., 0.1839, 0.593586, 
-        5.4814e-3, 5.01813e-4, 0., 
-        3.9247e-7, 0., 5.8356e-11};
-    double b[8] = {261.66, 0., 7.07997, 0., 
-        0.0409484, 3.97355e-4, 
-        5.11148e-5, 2.19749e-6};
-
-    double theta = calc_zp_en(satdata, sparams, aa_, del_, n0_, np_)
-        /1.5/U1/tt_;
-
-    double sum_aa = 0.;
-    double sum_bb = alpha6*a[6]*pow(theta,9.) + alpha8*a[8]*pow(theta,11.);
-
-    for(int n = 0; n < 9; n++)
+    if (tt_ == 0)
     {
-        sum_aa += a[n]*pow(theta,n);
-        if (n < 8)
-        {
-            sum_bb += b[n]*pow(theta,n);
-        }
+        return 0.;
     }
+    else
+    {
+        double alpha1 = 0.932446;
+        double alpha2 = 0.334547;
+        double alpha3 = 0.265764;
+        double alpha6 = 4.757014e-3;
+        double alpha8 = 4.7770935e-3;
 
-    double sum_ln = log(1.-exp(-alpha1*theta))
-        + log(1.-exp(-alpha2*theta))
-        + log(1.-exp(-alpha3*theta));
+        double a[9] = {1., 0.1839, 0.593586, 
+            5.4814e-3, 5.01813e-4, 0., 
+            3.9247e-7, 0., 5.8356e-11};
+        double b[8] = {261.66, 0., 7.07997, 0., 
+            0.0409484, 3.97355e-4, 
+            5.11148e-5, 2.19749e-6};
 
-    return tt_*(sum_ln - sum_aa/sum_bb);
+        double theta = calc_zp_en(satdata, sparams, aa_, del_, n0_, np_)
+            /1.5/U1/tt_;
+
+        double sum_aa = 0.;
+        double sum_bb = alpha6*a[6]*pow(theta,9.) + alpha8*a[8]*pow(theta,11.);
+
+        for(int n = 0; n < 9; n++)
+        {
+            sum_aa += a[n]*pow(theta,n);
+            if (n < 8)
+            {
+                sum_bb += b[n]*pow(theta,n);
+            }
+        }
+
+        double sum_ln = log(1.-exp(-alpha1*theta))
+            + log(1.-exp(-alpha2*theta))
+            + log(1.-exp(-alpha3*theta));
+
+        return tt_*(sum_ln - sum_aa/sum_bb);
+    }
 }
 
 double calc_translational_free_en(
