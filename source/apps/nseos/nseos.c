@@ -26,7 +26,7 @@ int main(int argc, char* argv[])
     FILE *mycore = fopen(argv[3], "w+");
     FILE *myeos = fopen(argv[4], "w+");
 
-    int lines = calc_equation_of_state(satdata, p, 
+    int lines = calc_zero_temperature_equation_of_state(satdata, p, 
             &tqtt, &epst, &hd_checker, mycrust, mycore, myeos);
 
     fclose(mycrust);

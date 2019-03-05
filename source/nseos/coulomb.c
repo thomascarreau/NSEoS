@@ -115,7 +115,7 @@ double calc_translational_free_en(
 }
 
 double calc_total_coulomb_contrib(
-        double zz_, double tt_, double np_)
+        double zz_, double np_, double tt_)
 {
     // see: Potekhin and Chabrier (2000) for details
     double a1 = -0.9070;

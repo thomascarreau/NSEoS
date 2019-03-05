@@ -9,7 +9,8 @@ struct transition_qtt
     double pt;
 };
 
-int calc_equation_of_state(struct parameters satdata, double p, 
+int calc_zero_temperature_equation_of_state(
+        struct parameters satdata, double p, 
         struct transition_qtt *tqtt, double *epst, int *hd_checker, 
         FILE *crust, FILE *core, FILE *eos);
 

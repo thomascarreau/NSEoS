@@ -22,6 +22,6 @@ double calc_translational_free_en(
         double aa_, double del_, double n0_, double np_, 
         double tt_); // F_i^{non-int}
 double calc_total_coulomb_contrib(
-        double zz_, double tt_, double np_); // F_{ii,liq}
+        double zz_, double np_, double tt_); // F_{ii,liq}
 
 #endif // H_COULOMB_EN

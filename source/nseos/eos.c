@@ -8,7 +8,8 @@
 #include "modeling.h"
 #include "eos.h"
 
-int calc_equation_of_state(struct parameters satdata, double p, 
+int calc_zero_temperature_equation_of_state(
+        struct parameters satdata, double p, 
         struct transition_qtt *tqtt, double *epst, int *hd_checker,
         FILE *crust, FILE *core, FILE *eos)
 {
@@ -20,6 +21,8 @@ int calc_equation_of_state(struct parameters satdata, double p,
     struct sf_params sparams = fit_sf_params(satdata, p);
 
     double nb = 1e-10;
+    double tt = 1.e-9;
+    char phase[] = "sol";
     double pressure;
     double pressure_sav = 0.;
     struct hnm test_hd;
@@ -32,7 +35,8 @@ int calc_equation_of_state(struct parameters satdata, double p,
 
     while(1)
     {
-        comp = calc_ocrust3d_composition(nb, guess_oc, satdata, sparams);
+        comp = calc_ocrust3d_composition(nb, tt, 
+                phase, guess_oc, satdata, sparams);
         if (guess_oc[0] != guess_oc[0]) // exit if nan
         {
             *hd_checker = 1;
@@ -43,7 +47,8 @@ int calc_equation_of_state(struct parameters satdata, double p,
         if (muncl > 0.) // neutron drip -> transtion to inner crust
             break;
 
-        pressure = calc_crust_ws_cell_pressure(satdata, sparams, comp, nb);
+        pressure = calc_crust_ws_cell_pressure(satdata, sparams, comp, 
+                nb, tt, phase);
 
         if (*hd_checker == 0 && pressure < pressure_sav)
         {
@@ -53,7 +58,7 @@ int calc_equation_of_state(struct parameters satdata, double p,
             *hd_checker = 1;
         }
 
-        print_state_crust(satdata, sparams, comp, nb, crust, eos);
+        print_state_crust(satdata, sparams, comp, nb, tt, phase, crust, eos);
 
         pressure_sav = pressure;
 
@@ -76,7 +81,8 @@ int calc_equation_of_state(struct parameters satdata, double p,
 
     while(1)
     {
-        comp = calc_icrust4d_composition(nb, guess_ic, satdata, sparams);
+        comp = calc_icrust4d_composition(nb, tt, phase, 
+                guess_ic, satdata, sparams);
         if (guess_ic[0] != guess_ic[0]) // exit if nan
         {
             if (nb > 0.001 
@@ -96,8 +102,8 @@ int calc_equation_of_state(struct parameters satdata, double p,
         if (nb > 0.001)
         {
             // calculation of the energy density in the cell in the inner crust
-            epsws_ic = calc_crust_ws_cell_energy_density(satdata, sparams, 
-                    comp, nb);
+            epsws_ic = calc_crust_ws_cell_free_energy_density(
+                    satdata, sparams, comp, nb, tt, phase);
 
             ccomp = calc_npecore_composition(nb, &guess_npecore, satdata);
             if (guess_npecore != guess_npecore) // exit if nan
@@ -125,7 +131,8 @@ int calc_equation_of_state(struct parameters satdata, double p,
             }
         }
 
-        pressure = calc_crust_ws_cell_pressure(satdata, sparams, comp, nb);
+        pressure = calc_crust_ws_cell_pressure(satdata, sparams, 
+                comp, nb, tt, phase);
 
         if (*hd_checker == 0 && pressure < pressure_sav)
         {
@@ -135,7 +142,7 @@ int calc_equation_of_state(struct parameters satdata, double p,
             *hd_checker = 1;
         }
 
-        print_state_crust(satdata, sparams, comp, nb, crust, eos);
+        print_state_crust(satdata, sparams, comp, nb, tt, phase, crust, eos);
 
         pressure_sav = pressure;
 
@@ -271,10 +278,13 @@ void eval_transition_qtt(struct parameters satdata, double p,
     double guess_oc[3] = {60., 0.15, 0.9*satdata.rhosat0};
     double muncl = -1.; // sign of muncl is negative is the outer crust
     double nb = 1.e-6;
+    double tt = 0.;
+    char phase[] = "sol";
 
     while(1)
     {
-        comp = calc_ocrust3d_composition(nb, guess_oc, satdata, sparams);
+        comp = calc_ocrust3d_composition(nb, tt, phase, 
+                guess_oc, satdata, sparams);
         if (guess_oc[0] != guess_oc[0]) // exit if nan
             return;
 
@@ -294,7 +304,8 @@ void eval_transition_qtt(struct parameters satdata, double p,
 
     while(1)
     {
-        comp = calc_icrust4d_composition(nb, guess_ic, satdata, sparams);
+        comp = calc_icrust4d_composition(nb, tt, phase, 
+                guess_ic, satdata, sparams);
         if (guess_ic[0] != guess_ic[0]) // break if nan
         {
             if (epsws_core - epsws_ic < 1.e-3)
@@ -308,8 +319,8 @@ void eval_transition_qtt(struct parameters satdata, double p,
         }
 
         // calculation of the energy density in the cell in the inner crust
-        epsws_ic = calc_crust_ws_cell_energy_density(satdata, sparams, 
-                comp, nb);
+        epsws_ic = calc_crust_ws_cell_free_energy_density(satdata, sparams, 
+                comp, nb, tt, phase);
 
         ccomp = calc_npecore_composition(nb, &guess_npecore, satdata);
         if (guess_npecore != guess_npecore) // break if nan

@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <gsl/gsl_multiroots.h>
 
 #include "lepton.h"
@@ -72,17 +74,31 @@ double get_shell_energy_per_nucleon(float nb_, float zz_)
     return esh_nb;
 }
 
-double calc_ion_en(struct parameters satdata, struct sf_params sparams,
-        double aa_, double del_, double n0_, double np_)
+double calc_ion_free_en_sol(
+        struct parameters satdata, struct sf_params sparams,
+        double aa_, double del_, double n0_, double np_, double tt_)
 {
     return CALC_NUCLEAR_EN(satdata, sparams, TAYLOR_EXP_ORDER, aa_, del_, n0_)
-        /* + calc_zp_en(satdata, sparams, aa_, del_, n0_, np_) */
-        + calc_lattice_en(satdata, aa_, del_, n0_, np_);
+        + calc_lattice_en(satdata, aa_, del_, n0_, np_)
+        + calc_zp_en(satdata, sparams, aa_, del_, n0_, np_);
+        + calc_harmonic_contrib(satdata, sparams, aa_, del_, n0_, np_, tt_);
 }
 
-struct crust_fun_4d calc_crust_fun_4d(struct parameters satdata, 
-        struct sf_params sparams, 
-        double aa_, double del_, double n0_, double np_, double ng_)
+double calc_ion_free_en_liq(
+        struct parameters satdata, struct sf_params sparams,
+        double aa_, double del_, double n0_, double np_, double tt_)
+{
+    double zz = aa_*(1.-del_)/2.;
+
+    return CALC_NUCLEAR_EN(satdata, sparams, TAYLOR_EXP_ORDER, aa_, del_, n0_)
+        + calc_translational_free_en(satdata, sparams, aa_, del_, n0_, np_, tt_)
+        + calc_total_coulomb_contrib(zz, np_, tt_);
+}
+
+struct crust_fun_4d calc_crust_fun_4d(
+        struct parameters satdata, struct sf_params sparams, 
+        double aa_, double del_, double n0_, double np_, double ng_,
+        double tt_, char phase[])
 {
     struct crust_fun_4d result;
     double eion;
@@ -101,19 +117,58 @@ struct crust_fun_4d calc_crust_fun_4d(struct parameters satdata,
     double muel;
     struct hnm ngas;
 
-    eion = calc_ion_en(satdata, sparams, aa_, del_, n0_, np_);
     epsa = 0.001;
     epsb = 0.0001;
     epsr = 0.0001;
     epsp = np_/1000.;
-    eion_ap = calc_ion_en(satdata, sparams, aa_+epsa, del_, n0_, np_);
-    eion_am = calc_ion_en(satdata, sparams, aa_-epsa, del_, n0_, np_);
-    eion_bp = calc_ion_en(satdata, sparams, aa_, del_+epsb, n0_, np_);
-    eion_bm = calc_ion_en(satdata, sparams, aa_, del_-epsb, n0_, np_);
-    eion_rp = calc_ion_en(satdata, sparams, aa_, del_, n0_+epsr, np_);
-    eion_rm = calc_ion_en(satdata, sparams, aa_, del_, n0_-epsr, np_);
-    eion_pp = calc_ion_en(satdata, sparams, aa_, del_, n0_, np_+epsp);
-    eion_pm = calc_ion_en(satdata, sparams, aa_, del_, n0_, np_-epsp);
+
+    if (strcmp(phase, "sol") == 0)
+    {
+        eion = calc_ion_free_en_sol(satdata, sparams, aa_, del_, n0_, np_, tt_);
+        eion_ap = calc_ion_free_en_sol(satdata, sparams, 
+                aa_+epsa, del_, n0_, np_, tt_);
+        eion_am = calc_ion_free_en_sol(satdata, sparams, 
+                aa_-epsa, del_, n0_, np_, tt_);
+        eion_bp = calc_ion_free_en_sol(satdata, sparams, 
+                aa_, del_+epsb, n0_, np_, tt_);
+        eion_bm = calc_ion_free_en_sol(satdata, sparams, 
+                aa_, del_-epsb, n0_, np_, tt_);
+        eion_rp = calc_ion_free_en_sol(satdata, sparams, 
+                aa_, del_, n0_+epsr, np_, tt_);
+        eion_rm = calc_ion_free_en_sol(satdata, sparams, 
+                aa_, del_, n0_-epsr, np_, tt_);
+        eion_pp = calc_ion_free_en_sol(satdata, sparams, 
+                aa_, del_, n0_, np_+epsp, tt_);
+        eion_pm = calc_ion_free_en_sol(satdata, sparams, 
+                aa_, del_, n0_, np_-epsp, tt_);
+    }
+    else if (strcmp(phase, "liq") == 0)
+    {
+        eion = calc_ion_free_en_liq(satdata, sparams, aa_, del_, n0_, np_, tt_);
+        eion_ap = calc_ion_free_en_liq(satdata, sparams, 
+                aa_+epsa, del_, n0_, np_, tt_);
+        eion_am = calc_ion_free_en_liq(satdata, sparams, 
+                aa_-epsa, del_, n0_, np_, tt_);
+        eion_bp = calc_ion_free_en_liq(satdata, sparams, 
+                aa_, del_+epsb, n0_, np_, tt_);
+        eion_bm = calc_ion_free_en_liq(satdata, sparams, 
+                aa_, del_-epsb, n0_, np_, tt_);
+        eion_rp = calc_ion_free_en_liq(satdata, sparams, 
+                aa_, del_, n0_+epsr, np_, tt_);
+        eion_rm = calc_ion_free_en_liq(satdata, sparams, 
+                aa_, del_, n0_-epsr, np_, tt_);
+        eion_pp = calc_ion_free_en_liq(satdata, sparams, 
+                aa_, del_, n0_, np_+epsp, tt_);
+        eion_pm = calc_ion_free_en_liq(satdata, sparams, 
+                aa_, del_, n0_, np_-epsp, tt_);
+    }
+    else 
+    {
+        fprintf(stderr, 
+                "ERROR: phase must be either 'sol' or 'liq'!\n");
+        exit(1);
+    }
+
     deiondaa = (eion_ap - eion_am)/2./epsa; // 2 points derivatives
     deionddel = (eion_bp - eion_bm)/2./epsb;
     deiondn0 = (eion_rp - eion_rm)/2./epsr;
@@ -154,19 +209,27 @@ struct crust_fun_4d calc_crust_fun_zz_fixed(struct parameters satdata,
     double muel;
     struct hnm ngas;
 
-    eion = calc_ion_en(satdata, sparams, aa_, del_, n0_, np_);
+    eion = calc_ion_free_en_sol(satdata, sparams, aa_, del_, n0_, np_, 0.);
     epsa = 0.001;
     epsb = 0.0001;
     epsr = 0.0001;
     epsp = np_/1000.;
-    eion_ap = calc_ion_en(satdata, sparams, aa_+epsa, del_, n0_, np_);
-    eion_am = calc_ion_en(satdata, sparams, aa_-epsa, del_, n0_, np_);
-    eion_bp = calc_ion_en(satdata, sparams, aa_, del_+epsb, n0_, np_);
-    eion_bm = calc_ion_en(satdata, sparams, aa_, del_-epsb, n0_, np_);
-    eion_rp = calc_ion_en(satdata, sparams, aa_, del_, n0_+epsr, np_);
-    eion_rm = calc_ion_en(satdata, sparams, aa_, del_, n0_-epsr, np_);
-    eion_pp = calc_ion_en(satdata, sparams, aa_, del_, n0_, np_+epsp);
-    eion_pm = calc_ion_en(satdata, sparams, aa_, del_, n0_, np_-epsp);
+    eion_ap = calc_ion_free_en_sol(satdata, sparams, 
+            aa_+epsa, del_, n0_, np_, 0.);
+    eion_am = calc_ion_free_en_sol(satdata, sparams, 
+            aa_-epsa, del_, n0_, np_, 0.);
+    eion_bp = calc_ion_free_en_sol(satdata, sparams, 
+            aa_, del_+epsb, n0_, np_, 0.);
+    eion_bm = calc_ion_free_en_sol(satdata, sparams, 
+            aa_, del_-epsb, n0_, np_, 0.);
+    eion_rp = calc_ion_free_en_sol(satdata, sparams, 
+            aa_, del_, n0_+epsr, np_, 0.);
+    eion_rm = calc_ion_free_en_sol(satdata, sparams, 
+            aa_, del_, n0_-epsr, np_, 0.);
+    eion_pp = calc_ion_free_en_sol(satdata, sparams, 
+            aa_, del_, n0_, np_+epsp, 0.);
+    eion_pm = calc_ion_free_en_sol(satdata, sparams, 
+            aa_, del_, n0_, np_-epsp, 0.);
     deiondaa = (eion_ap - eion_am)/2./epsa; // 2 points derivatives
     deionddel = (eion_bp - eion_bm)/2./epsb;
     deiondn0 = (eion_rp - eion_rm)/2./epsr;
@@ -191,6 +254,9 @@ struct crust_fun_4d calc_crust_fun_zz_fixed(struct parameters satdata,
 int assign_ocrust_fun_3d(const gsl_vector * x, void *params, gsl_vector * f)
 {
     double np = ((struct rparams_crust *) params)->np;
+    double tt = ((struct rparams_crust *) params)->tt;
+    char phase[3];
+    strcpy(phase,((struct rparams_crust *) params)->phase);
     struct parameters satdata = ((struct rparams_crust *) params)->satdata;
     struct sf_params sparams = ((struct rparams_crust *) params)->sparams;
 
@@ -201,7 +267,8 @@ int assign_ocrust_fun_3d(const gsl_vector * x, void *params, gsl_vector * f)
     np = np*(1.-x1)/2.;
 
     struct crust_fun_4d functs;
-    functs = calc_crust_fun_4d(satdata, sparams, x0, x1, x2, np, 0.);
+    functs = calc_crust_fun_4d(satdata, sparams, 
+            x0, x1, x2, np, 0., tt, phase);
 
     const double y0 = functs.f_stability;
     const double y1 = functs.f_beta;
@@ -214,7 +281,8 @@ int assign_ocrust_fun_3d(const gsl_vector * x, void *params, gsl_vector * f)
     return GSL_SUCCESS;
 }
 
-struct compo calc_ocrust3d_composition(double nb_, double *guess,
+struct compo calc_ocrust3d_composition(double nb_, double tt_, 
+        char phase[],  double *guess,
         struct parameters satdata, struct sf_params sparams)
 {
     struct compo eq;
@@ -231,6 +299,8 @@ struct compo calc_ocrust3d_composition(double nb_, double *guess,
 
     struct rparams_crust p;
     p.np = nb_; // modification in assign_ocrust_fun_3d (DIRTY!)
+    p.tt = tt_;
+    strcpy(p.phase, phase);
     p.satdata = satdata;
     p.sparams = sparams;
 
@@ -329,6 +399,9 @@ struct compo calc_ocrust3d_composition(double nb_, double *guess,
 int assign_icrust_fun_4d(const gsl_vector * x, void *params, gsl_vector * f)
 {
     double np = ((struct rparams_crust *) params)->np;
+    double tt = ((struct rparams_crust *) params)->tt;
+    char phase[3];
+    strcpy(phase,((struct rparams_crust *) params)->phase);
     struct parameters satdata = ((struct rparams_crust *) params)->satdata;
     struct sf_params sparams = ((struct rparams_crust *) params)->sparams;
 
@@ -340,7 +413,7 @@ int assign_icrust_fun_4d(const gsl_vector * x, void *params, gsl_vector * f)
     np = (np-x3)*(1.-x1)/2./(1.-x3/x2);
 
     struct crust_fun_4d functs;
-    functs = calc_crust_fun_4d(satdata, sparams, x0, x1, x2, np, x3);
+    functs = calc_crust_fun_4d(satdata, sparams, x0, x1, x2, np, x3, tt, phase);
 
     const double y0 = functs.f_stability;
     const double y1 = functs.f_beta;
@@ -355,7 +428,8 @@ int assign_icrust_fun_4d(const gsl_vector * x, void *params, gsl_vector * f)
     return GSL_SUCCESS;
 }
 
-struct compo calc_icrust4d_composition(double nb_, double *guess,
+struct compo calc_icrust4d_composition(double nb_, double tt_, 
+        char phase[], double *guess,
         struct parameters satdata, struct sf_params sparams)
 {
     struct compo eq;
@@ -373,6 +447,8 @@ struct compo calc_icrust4d_composition(double nb_, double *guess,
 
     struct rparams_crust p;
     p.np = nb_; // modification in assign_icrust_fun_4d (DIRTY!)
+    p.tt = tt_;
+    strcpy(p.phase, phase);
     p.satdata = satdata;
     p.sparams = sparams;
 
@@ -648,7 +724,8 @@ struct compo calc_icrust_composition_w_shl(double nb_,
         eq = calc_icrust_composition_zz_fixed(nb_, zz, 
                 guess, satdata, sparams);
 
-        epsws = calc_crust_ws_cell_energy_density(satdata, sparams, eq, nb_)
+        epsws = calc_crust_ws_cell_free_energy_density(satdata, sparams, 
+                eq, nb_, 0., "sol")
             + get_shell_energy_per_nucleon(nb_, zz)*nb_;
 
         if (epsws < epsws_min)
@@ -682,10 +759,14 @@ double calc_muncl(struct parameters satdata, struct sf_params sparams,
 
     epsa = 0.001;
     epsb = 0.0001;
-    eion_ap = calc_ion_en(satdata, sparams, eq.aa+epsa, eq.del, eq.n0, np);
-    eion_am = calc_ion_en(satdata, sparams, eq.aa-epsa, eq.del, eq.n0, np);
-    eion_bp = calc_ion_en(satdata, sparams, eq.aa, eq.del+epsb, eq.n0, np);
-    eion_bm = calc_ion_en(satdata, sparams, eq.aa, eq.del-epsb, eq.n0, np);
+    eion_ap = calc_ion_free_en_sol(satdata, sparams, 
+            eq.aa+epsa, eq.del, eq.n0, np, 0.);
+    eion_am = calc_ion_free_en_sol(satdata, sparams, 
+            eq.aa-epsa, eq.del, eq.n0, np, 0.);
+    eion_bp = calc_ion_free_en_sol(satdata, sparams, 
+            eq.aa, eq.del+epsb, eq.n0, np, 0.);
+    eion_bm = calc_ion_free_en_sol(satdata, sparams, 
+            eq.aa, eq.del-epsb, eq.n0, np, 0.);
     deiondaa = (eion_ap - eion_am)/2./epsa;
     deionddel = (eion_bp - eion_bm)/2./epsb;
 
@@ -706,19 +787,25 @@ double calc_mupcl(struct parameters satdata, struct sf_params sparams,
 
     epsa = 0.001;
     epsb = 0.0001;
-    eion_ap = calc_ion_en(satdata, sparams, eq.aa+epsa, eq.del, eq.n0, np);
-    eion_am = calc_ion_en(satdata, sparams, eq.aa-epsa, eq.del, eq.n0, np);
-    eion_bp = calc_ion_en(satdata, sparams, eq.aa, eq.del+epsb, eq.n0, np);
-    eion_bm = calc_ion_en(satdata, sparams, eq.aa, eq.del-epsb, eq.n0, np);
+    eion_ap = calc_ion_free_en_sol(satdata, sparams, 
+            eq.aa+epsa, eq.del, eq.n0, np, 0.);
+    eion_am = calc_ion_free_en_sol(satdata, sparams, 
+            eq.aa-epsa, eq.del, eq.n0, np, 0.);
+    eion_bp = calc_ion_free_en_sol(satdata, sparams, 
+            eq.aa, eq.del+epsb, eq.n0, np, 0.);
+    eion_bm = calc_ion_free_en_sol(satdata, sparams, 
+            eq.aa, eq.del-epsb, eq.n0, np, 0.);
     deiondaa = (eion_ap - eion_am)/2./epsa;
     deionddel = (eion_bp - eion_bm)/2./epsb;
 
     return deiondaa - (1.+eq.del)/eq.aa * deionddel;
 }
 
-double calc_crust_ws_cell_energy_density(struct parameters satdata, 
-        struct sf_params sparams, 
-        struct compo eq, double nb_)
+double calc_crust_ws_cell_free_energy_density(
+        struct parameters satdata, struct sf_params sparams, 
+        struct compo eq, 
+        double nb_, double tt_,
+        char phase[])
 {
     double np;
     double vws;
@@ -731,9 +818,24 @@ double calc_crust_ws_cell_energy_density(struct parameters satdata,
     vws = eq.aa*(1. - eq.ng/eq.n0)/(nb_ - eq.ng);
     np = eq.aa*(1.-eq.del)/2./vws;
 
-    epseltot = calc_egas_free_energy_density(np, 0.);
+    epseltot = calc_egas_free_energy_density(np, tt_);
 
-    eion = calc_ion_en(satdata, sparams, eq.aa, eq.del, eq.n0, np);
+    if (strcmp(phase, "sol") == 0)
+    {
+        eion = calc_ion_free_en_sol(satdata, sparams, 
+                eq.aa, eq.del, eq.n0, np, tt_);
+    }
+    else if (strcmp(phase, "liq") == 0)
+    {
+        eion = calc_ion_free_en_liq(satdata, sparams, 
+                eq.aa, eq.del, eq.n0, np, tt_);
+    }
+    else
+    {
+        fprintf(stderr, 
+                "ERROR: phase must be either 'sol' or 'liq'!\n");
+        exit(1);
+    }
 
     ngas = calc_meta_model_nuclear_matter(satdata, TAYLOR_EXP_ORDER, 
             eq.ng, 1.);
@@ -754,15 +856,37 @@ double calc_ngas_pressure(struct parameters satdata, double ng_)
 }
 
 double calc_ion_pressure(struct parameters satdata, struct sf_params sparams, 
-        double aa_, double del_, double n0_, double np_)
+        double aa_, double del_, double n0_, double np_, 
+        double tt_, 
+        char phase[])
 {
     double epsp;
     double eion_pp, eion_pm;
     double deiondnp;
 
     epsp = np_/1000.;
-    eion_pp = calc_ion_en(satdata, sparams, aa_, del_, n0_, np_+epsp);
-    eion_pm = calc_ion_en(satdata, sparams, aa_, del_, n0_, np_-epsp);
+
+    if (strcmp(phase, "sol") == 0)
+    {
+        eion_pp = calc_ion_free_en_sol(satdata, sparams, 
+                aa_, del_, n0_, np_+epsp, tt_);
+        eion_pm = calc_ion_free_en_sol(satdata, sparams, 
+                aa_, del_, n0_, np_-epsp, tt_);
+    }
+    else if (strcmp(phase, "liq") == 0)
+    {
+        eion_pp = calc_ion_free_en_liq(satdata, sparams, 
+                aa_, del_, n0_, np_+epsp, tt_);
+        eion_pm = calc_ion_free_en_liq(satdata, sparams, 
+                aa_, del_, n0_, np_-epsp, tt_);
+    }
+    else
+    {
+        fprintf(stderr, 
+                "ERROR: phase must be either 'sol' or 'liq'!\n");
+        exit(1);
+    }
+
     deiondnp = (eion_pp - eion_pm)/2./epsp;
 
     return 2.*np_*np_/aa_/(1.-del_)*deiondnp;
@@ -770,7 +894,9 @@ double calc_ion_pressure(struct parameters satdata, struct sf_params sparams,
 
 double calc_crust_ws_cell_pressure(struct parameters satdata, 
         struct sf_params sparams, 
-        struct compo eq, double nb_)
+        struct compo eq, 
+        double nb_, double tt_, 
+        char phase[])
 {
     double np;
     double egas_pressure;
@@ -781,7 +907,7 @@ double calc_crust_ws_cell_pressure(struct parameters satdata,
     np = (nb_-eq.ng)*(1.-eq.del)/2./(1.-eq.ng/eq.n0);
     egas_pressure = calc_egas_pressure(np, 0.);
     ion_pressure = calc_ion_pressure(satdata, sparams, 
-            eq.aa, eq.del, eq.n0, np);
+            eq.aa, eq.del, eq.n0, np, tt_, phase);
     ngas_pressure = calc_ngas_pressure(satdata, eq.ng);
     ws_cell_pressure = egas_pressure + ion_pressure + ngas_pressure;
 
@@ -789,7 +915,7 @@ double calc_crust_ws_cell_pressure(struct parameters satdata,
 }
 
 void print_state_crust(struct parameters satdata, struct sf_params sparams, 
-        struct compo eq, double nb_, 
+        struct compo eq, double nb_, double tt_, char phase[], 
         FILE *compo, FILE *eos)
 {
     double vws, rws;
@@ -799,9 +925,11 @@ void print_state_crust(struct parameters satdata, struct sf_params sparams,
     vws = eq.aa/(nb_-eq.ng)*(1.-eq.ng/eq.n0);
     rws = pow(3.*vws/4./PI,1./3.);
 
-    rhob = calc_crust_ws_cell_energy_density(satdata, sparams, eq, nb_)
+    rhob = calc_crust_ws_cell_free_energy_density(satdata, sparams, 
+            eq, nb_, tt_, phase)
         *(ELEMC/1.e-19)/pow(SPEEDOFL/1.e8,2.)*1.e13;
-    pressws = calc_crust_ws_cell_pressure(satdata, sparams, eq, nb_);
+    pressws = calc_crust_ws_cell_pressure(satdata, sparams, 
+            eq, nb_, tt_, phase);
 
     fprintf (compo, "%g %g %g %g %g %g %g\n", nb_, 
             eq.aa, eq.del, eq.aa*(1.-eq.del)/2., eq.n0, eq.ng, rws);
