@@ -36,6 +36,19 @@ double calc_lattice_en(struct parameters satdata,
     return -CM*ALPHAFS*HBARC/rsat*zz*zz*pow(aa_,-1./3.)*pow(rpt,1./3.);
 }
 
+double calc_lattice_en_for_tm(double aa_, double ii_, double np_)
+{
+    double zz;
+    double vws;
+    double an;
+
+    zz = aa_*(1.-ii_)/2.;
+    vws = zz/np_;
+    an = pow(4.*PI/3./vws,-1./3.);
+
+    return -CM*zz*zz*ALPHAFS*HBARC/an;
+}
+
 double calc_finite_size_contrib(struct parameters satdata, 
         double aa_, double ii_, double n0_, double np_)
 {

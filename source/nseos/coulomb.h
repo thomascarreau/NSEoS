@@ -9,6 +9,7 @@ double calc_coulomb_en(struct parameters satdata, double aa_, double ii_);
 // Coulomb crystal
 double calc_lattice_en(struct parameters satdata, 
         double aa_, double ii_, double n0_, double np_); // E_L
+double calc_lattice_en_for_tm(double aa_, double ii_, double np_); // E_L
 double calc_finite_size_contrib(struct parameters satdata, 
         double aa_, double ii_, double n0_, double np_);
 double calc_zp_en(struct parameters satdata, struct sf_params sparams, 

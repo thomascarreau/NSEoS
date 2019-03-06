@@ -78,12 +78,23 @@ double calc_ion_free_en_sol(
         struct parameters satdata, struct sf_params sparams,
         double aa_, double del_, double n0_, double np_, double tt_)
 {
-    return 
-        CALC_NUCLEAR_EN(satdata, sparams, TAYLOR_EXP_ORDER, aa_, del_, n0_)
-        + calc_lattice_en(satdata, aa_, del_, n0_, np_)
-        + calc_finite_size_contrib(satdata, aa_, del_, n0_, np_)
-        + calc_zp_en(satdata, sparams, aa_, del_, n0_, np_)
-        + calc_harmonic_contrib(satdata, sparams, aa_, del_, n0_, np_, tt_);
+    if (tt_ == 0.)
+    {
+        return 
+            CALC_NUCLEAR_EN(satdata, sparams, TAYLOR_EXP_ORDER, aa_, del_, n0_)
+            + calc_lattice_en(satdata, aa_, del_, n0_, np_)
+            + calc_finite_size_contrib(satdata, aa_, del_, n0_, np_);
+            /* + calc_zp_en(satdata, sparams, aa_, del_, n0_, np_); */
+    }
+    else
+    {
+        return 
+            CALC_NUCLEAR_EN(satdata, sparams, TAYLOR_EXP_ORDER, aa_, del_, n0_)
+            + calc_lattice_en_for_tm(aa_, del_, np_)
+            /* + calc_finite_size_contrib(satdata, aa_, del_, n0_, np_) */
+            + calc_zp_en(satdata, sparams, aa_, del_, n0_, np_)
+            + calc_harmonic_contrib(satdata, sparams, aa_, del_, n0_, np_, tt_);
+    }
 }
 
 double calc_ion_free_en_liq(
@@ -92,7 +103,7 @@ double calc_ion_free_en_liq(
 {
     return 
         CALC_NUCLEAR_EN(satdata, sparams, TAYLOR_EXP_ORDER, aa_, del_, n0_)
-        + calc_finite_size_contrib(satdata, aa_, del_, n0_, np_)
+        /* + calc_finite_size_contrib(satdata, aa_, del_, n0_, np_) */
         + calc_translational_free_en(satdata, sparams, aa_, del_, n0_, np_, tt_)
         + calc_total_coulomb_contrib(aa_*(1.-del_)/2., np_, tt_);
 }
