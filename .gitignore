@@ -1,6 +1,5 @@
 source/input/satdata/*_d.in
 source/input/satdata/test.in
-source/input/satdata/ref.in
 
 source/nseos/build/*
 
@@ -9,12 +8,11 @@ source/apps/nseos/*.pdf
 source/apps/nseos/*.plt
 source/apps/nseos/*.sh
 source/apps/nseos/nseos
-source/apps/nseos/satMassProperties.py
 
-source/apps/bayesian_analysis/*
-
-source/apps/draft_PRL/*
-
-source/apps/draft_CC/*
+source/apps/ocrust_crystallization/*.out
+source/apps/ocrust_crystallization/*.pdf
+source/apps/ocrust_crystallization/*.plt
+source/apps/ocrust_crystallization/*.sh
+source/apps/ocrust_crystallization/ocrust_crystallization
 
 source/apps/testing/*

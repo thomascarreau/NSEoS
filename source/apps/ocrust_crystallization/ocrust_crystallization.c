@@ -14,6 +14,12 @@ double eval_melting_temperature(
 
 int main(int argc, char *argv[])
 {
+    if (argc != 2)
+    {
+        fprintf(stderr, "ERROR: syntax is './ocrust_crystallization set.in'");
+        return 1;
+    }
+
     float b = 10.*log(2.);
     struct parameters satdata = assign_param(argv[1], b);
     double p = 3.0;
@@ -35,7 +41,7 @@ int main(int argc, char *argv[])
 
 double approximate_melting_temperature(struct compo comp, double nb_)
 {
-    double gamma_m = 175.;
+    double gamma_m = 175.; // ion coupling parameter
     double zz = comp.aa*(1.-comp.del)/2.;
 
     return  zz*zz*ALPHAFS*HBARC/gamma_m*pow(4.*PI*nb_/3./comp.aa, 1./3.);
