@@ -40,6 +40,7 @@ int main(int argc, char *argv[])
     }
 
     fclose(ocrust);
+    fclose(eos);
 
     return 0;
 }
