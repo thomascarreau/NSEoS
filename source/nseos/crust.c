@@ -995,7 +995,15 @@ void print_state_crust(struct parameters satdata, struct sf_params sparams,
     pressws = calc_crust_ws_cell_pressure(satdata, sparams, 
             eq, nb_, tt_, phase);
 
-    fprintf(compo, "%g %g %g %g %g %g %g %g\n", nb_, tt_, 
-            eq.aa, eq.del, eq.aa*(1.-eq.del)/2., eq.n0, eq.ng, rws);
+    if (tt_ != 0.)
+    {
+        fprintf(compo, "%g %g %g %g %g %g %g %g\n", nb_, tt_, 
+                eq.aa, eq.del, eq.aa*(1.-eq.del)/2., eq.n0, eq.ng, rws);
+    }
+    else
+    {
+        fprintf(compo, "%g %g %g %g %g %g %g\n", nb_, 
+                eq.aa, eq.del, eq.aa*(1.-eq.del)/2., eq.n0, eq.ng, rws);
+    }
     fprintf(eos, "%g %g\n", rhob, pressws);
 }
