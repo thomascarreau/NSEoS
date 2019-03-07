@@ -73,6 +73,7 @@ struct compo calc_icrust_composition_zz_fixed(
 struct compo calc_icrust_composition_w_shl(double nb_,
         struct parameters satdata, struct sf_params sparams);
 
+// energetics
 double calc_muncl(struct parameters satdata, struct sf_params sparams, 
         struct compo eq, double nb_);
 double calc_mupcl(struct parameters satdata, struct sf_params sparams, 
@@ -92,6 +93,14 @@ double calc_crust_ws_cell_pressure(struct parameters satdata,
         struct compo eq, 
         double nb_, double tt_, 
         char phase[]);
+
+// crystallization of the crust
+double approximate_melting_temperature(struct compo comp, double nb_);
+double eval_melting_temperature(
+        struct parameters satdata, struct sf_params sparams, 
+        double nb_, struct compo *eq);
+
+// print functions
 void print_state_crust(struct parameters satdata, struct sf_params sparams, 
         struct compo eq, 
         double nb_, double tt_, char phase[], 

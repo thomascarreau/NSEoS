@@ -927,6 +927,57 @@ double calc_crust_ws_cell_pressure(struct parameters satdata,
     return ws_cell_pressure;
 }
 
+double approximate_melting_temperature(struct compo comp, double nb_)
+{
+    // see eq. (2.28) of "Neutron Stars 1: Equation of State and Structure"
+    double gamma_m = 175.; // ion coupling parameter
+    double zz = comp.aa*(1.-comp.del)/2.;
+
+    return  zz*zz*ALPHAFS*HBARC/gamma_m*pow(4.*PI*nb_/3./comp.aa, 1./3.);
+}
+
+double eval_melting_temperature(
+        struct parameters satdata, struct sf_params sparams,
+        double nb_, struct compo *eq)
+{
+        double guess[3] = {60., 0.10, 0.1595};
+        struct compo comp = calc_ocrust3d_composition(nb_, 0., 
+                "sol", guess, satdata, sparams);
+
+        double tt_init = approximate_melting_temperature(comp, nb_)*2.;
+
+        double fws_sol, fws_liq;
+
+        double tt = tt_init;
+
+        do
+        {
+            comp = calc_ocrust3d_composition(nb_, tt, 
+                    "liq", guess, satdata, sparams); 
+
+            fws_sol = calc_crust_ws_cell_free_energy_density(
+                    satdata, sparams, comp, nb_, tt, "sol");
+            fws_liq = calc_crust_ws_cell_free_energy_density(
+                    satdata, sparams, comp, nb_, tt, "liq");
+
+            tt -= 0.0001;
+
+            if (tt <= 0.)
+            {
+                fprintf(stderr, "ERROR: sign of T_m cannot be negative!\n");
+                return -1;
+            }
+        }
+        while(fws_liq < fws_sol);
+
+        eq->aa = comp.aa;
+        eq->del = comp.del;
+        eq->n0 = comp.n0;
+        eq->ng = comp.ng;
+
+        return tt;
+}
+
 void print_state_crust(struct parameters satdata, struct sf_params sparams, 
         struct compo eq, double nb_, double tt_, char phase[], 
         FILE *compo, FILE *eos)
@@ -944,7 +995,7 @@ void print_state_crust(struct parameters satdata, struct sf_params sparams,
     pressws = calc_crust_ws_cell_pressure(satdata, sparams, 
             eq, nb_, tt_, phase);
 
-    fprintf (compo, "%g %g %g %g %g %g %g\n", nb_, 
+    fprintf(compo, "%g %g %g %g %g %g %g %g\n", nb_, tt_, 
             eq.aa, eq.del, eq.aa*(1.-eq.del)/2., eq.n0, eq.ng, rws);
     fprintf(eos, "%g %g\n", rhob, pressws);
 }

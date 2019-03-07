@@ -8,8 +8,9 @@ int main(int argc, char* argv[])
 {
     if (argc != 6)
     {
-        fprintf(stderr, "ERROR: syntax is './nseos set.in \
-                crust.out core.out eos.out tov.out'\n");
+        fprintf(stderr, 
+                "ERROR: syntax is './nseos set.in "
+                "crust.out core.out eos.out tov.out'\n");
         return 1;
     }
 
