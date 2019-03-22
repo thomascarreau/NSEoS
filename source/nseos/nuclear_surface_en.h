@@ -22,8 +22,8 @@ double calc_etf_ana_surface_en(struct parameters satdata,
         double aa_, double ii_, double n0_);
 
 // LS corrected surface energy, see: Lattimer and Swesty (1991)
-// ; arXiv:1110.4043
-// =================
+// arXiv:1110.4043
+// ===============
 struct data
 {
     int *zz;

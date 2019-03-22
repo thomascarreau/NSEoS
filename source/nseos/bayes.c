@@ -42,9 +42,9 @@ void get_low_density_posterior(FILE *prior, FILE *posterior)
         for(int i = 3; i < 10; i++)
         {
             test_hnm_sm = calc_meta_model_nuclear_matter(
-                    satdata, TAYLOR_EXP_ORDER, nn[i], 0.);
+                    satdata, TAYLOR_EXP_ORDER, nn[i], 0., 0.);
             test_hnm_nm = calc_meta_model_nuclear_matter(
-                    satdata, TAYLOR_EXP_ORDER, nn[i], 1.);
+                    satdata, TAYLOR_EXP_ORDER, nn[i], 1., 0.);
 
             if(test_hnm_sm.enpernuc < e_sm_min[i] 
                     || test_hnm_sm.enpernuc > e_sm_max[i]
@@ -107,7 +107,7 @@ void get_high_density_posterior(FILE *prior,
             FILE *mycrust = fopen("crust.out", "w+");
             FILE *mycore = fopen("core.out", "w+");
             FILE *myeos = fopen("eos.out", "w+");
-            int lines = calc_equation_of_state(satdata, 3., 
+            int lines = calc_zero_temperature_equation_of_state(satdata, 3., 
                     &tqtt_hd, &epst_hd, &hd_checker, 
                     mycrust, mycore, myeos);
             fclose(mycrust);
@@ -193,7 +193,7 @@ void calc_observables(FILE *posterior, int p_switch,
             FILE *fcrust = fopen("crust.out", "w+");
             FILE *fcore = fopen("core.out", "w+");
             FILE *feos = fopen("eos.out", "w+");
-            int lines = calc_equation_of_state(satdata, 3., 
+            int lines = calc_zero_temperature_equation_of_state(satdata, 3., 
                     &tqtt, &epst, &hd_checker,
                     fcrust, fcore, feos);
             fclose(fcrust);
@@ -244,7 +244,8 @@ void calc_observables(FILE *posterior, int p_switch,
                 FILE *fcrust = fopen("crust.out", "w+");
                 FILE *fcore = fopen("core.out", "w+");
                 FILE *feos = fopen("eos.out", "w+");
-                int lines = calc_equation_of_state(satdata, p[i], 
+                int lines = calc_zero_temperature_equation_of_state(
+                        satdata, p[i], 
                         &tqtt, &epst, &hd_checker,
                         fcrust, fcore, feos);
                 fclose(fcrust);

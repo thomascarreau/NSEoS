@@ -25,6 +25,7 @@ int calc_zero_temperature_equation_of_state(
     char phase[] = "sol";
     double pressure;
     double pressure_sav = 0.;
+    double vs2;
     struct hnm test_hd;
 
     // ============================= OUTER CRUST =============================
@@ -43,7 +44,7 @@ int calc_zero_temperature_equation_of_state(
             return lines;
         }
 
-        muncl = calc_muncl(satdata, sparams, comp, nb);
+        muncl = calc_muncl(satdata, sparams, comp, nb, tt, phase);
         if (muncl > 0.) // neutron drip -> transtion to inner crust
             break;
 
@@ -105,7 +106,7 @@ int calc_zero_temperature_equation_of_state(
             epsws_ic = calc_crust_ws_cell_free_energy_density(
                     satdata, sparams, comp, nb, tt, phase);
 
-            ccomp = calc_npecore_composition(nb, &guess_npecore, satdata);
+            ccomp = calc_npecore_composition(nb, tt, &guess_npecore, satdata);
             if (guess_npecore != guess_npecore) // exit if nan
             {
                 if (epsws_core - epsws_ic < 1.e-3) // crust-core transition
@@ -122,7 +123,8 @@ int calc_zero_temperature_equation_of_state(
             }
 
             // calculation of the energy density in the cell in the core
-            epsws_core = calc_core_ws_cell_energy_density(satdata, ccomp, nb);
+            epsws_core = calc_core_ws_cell_free_energy_density(satdata, ccomp, 
+                    nb, tt);
 
             if (epsws_core - epsws_ic < 0.) // crust-core transition
             {
@@ -152,8 +154,8 @@ int calc_zero_temperature_equation_of_state(
     }
 
     tqtt->nt = nb;
-    tqtt->pt = calc_core_ws_cell_pressure(satdata, ccomp, nb);
-    *epst = calc_core_ws_cell_energy_density(satdata, ccomp, nb);
+    tqtt->pt = calc_core_ws_cell_pressure(satdata, ccomp, nb, tt);
+    *epst = calc_core_ws_cell_free_energy_density(satdata, ccomp, nb, tt);
 
     fprintf(stderr, "n_t = %g /fm^3\n", tqtt->nt);
     fprintf(stderr, "P_t = %g MeV/fm^3\n\n", tqtt->pt);
@@ -165,7 +167,7 @@ int calc_zero_temperature_equation_of_state(
 
     while(1)
     {
-        ccomp = calc_npecore_composition(nb, &guess_npecore, satdata);
+        ccomp = calc_npecore_composition(nb, tt, &guess_npecore, satdata);
         if (guess_npecore != guess_npecore) // exit if nan
         {
             if (nb < 3.*satdata.rhosat0)
@@ -177,10 +179,12 @@ int calc_zero_temperature_equation_of_state(
         if (mueltot - MMU > 0.) // transition to npeu matter
             break;
 
-        test_hd = calc_meta_model_nuclear_matter(satdata, TAYLOR_EXP_ORDER, 
-                nb, ccomp.del);
+        vs2 = calc_squared_nucleon_sound_velocity(satdata, TAYLOR_EXP_ORDER, 
+                nb, ccomp.del, tt);
+        test_hd = calc_meta_model_nuclear_matter(satdata, TAYLOR_EXP_ORDER,
+                nb, ccomp.del, tt);
 
-        if (test_hd.vs2 < 0. || test_hd.vs2 > 1.)
+        if (vs2 < 0. || vs2 > 1.)
         {
             fprintf(stderr, 
                     "HD CHECKER: vs/c<0 or >1 (npe core) ; nB = %g /fm^3\n\n",
@@ -190,7 +194,7 @@ int calc_zero_temperature_equation_of_state(
             return lines;
         }
 
-        pressure = calc_core_ws_cell_pressure(satdata, ccomp, nb);
+        pressure = calc_core_ws_cell_pressure(satdata, ccomp, nb, tt);
 
         if (*hd_checker == 0 && nb != tqtt->nt && pressure < pressure_sav)
         {
@@ -208,7 +212,7 @@ int calc_zero_temperature_equation_of_state(
             *hd_checker = 1;
         }
 
-        print_state_core(satdata, ccomp, nb, core, eos);
+        print_state_core(satdata, ccomp, nb, tt, core, eos);
 
         pressure_sav = pressure;
 
@@ -222,11 +226,11 @@ int calc_zero_temperature_equation_of_state(
     // ============================== npeu CORE ==============================
 
     double guess_npeucore[2] = {guess_npecore, 1.e-5};
-    double vs2 = 0.5;
+    vs2 = 0.5;
 
     while (vs2 > 0. && vs2 < 1.)
     {
-        ccomp = calc_npeucore_composition(nb, guess_npeucore, satdata);
+        ccomp = calc_npeucore_composition(nb, tt, guess_npeucore, satdata);
         if (guess_npeucore[0] != guess_npeucore[0]) // exit if nan
         {
             if (nb < 3.*satdata.rhosat0)
@@ -234,7 +238,7 @@ int calc_zero_temperature_equation_of_state(
             return lines;
         }
 
-        pressure = calc_core_ws_cell_pressure(satdata, ccomp, nb);
+        pressure = calc_core_ws_cell_pressure(satdata, ccomp, nb, tt);
 
         if (*hd_checker == 0 && pressure < pressure_sav)
         {
@@ -245,7 +249,7 @@ int calc_zero_temperature_equation_of_state(
         }
 
         test_hd = calc_meta_model_nuclear_matter(satdata, TAYLOR_EXP_ORDER, 
-                nb, ccomp.del);
+                nb, ccomp.del, tt);
 
         if (*hd_checker == 0 && test_hd.jsym < 0)
         {
@@ -255,11 +259,12 @@ int calc_zero_temperature_equation_of_state(
             *hd_checker = 1;
         }
 
-        print_state_core(satdata, ccomp, nb, core, eos);
+        print_state_core(satdata, ccomp, nb, tt, core, eos);
 
         pressure_sav = pressure;
 
-        vs2 = test_hd.vs2;
+        vs2 = calc_squared_nucleon_sound_velocity(satdata, TAYLOR_EXP_ORDER,
+                nb, ccomp.del, tt);
 
         nb += 0.005;
 
@@ -288,7 +293,7 @@ void eval_transition_qtt(struct parameters satdata, double p,
         if (guess_oc[0] != guess_oc[0]) // exit if nan
             return;
 
-        muncl = calc_muncl(satdata, sparams, comp, nb);
+        muncl = calc_muncl(satdata, sparams, comp, nb, tt, phase);
         if (muncl > 0.) // neutron drip -> transtion to inner crust
             break;
 
@@ -322,7 +327,7 @@ void eval_transition_qtt(struct parameters satdata, double p,
         epsws_ic = calc_crust_ws_cell_free_energy_density(satdata, sparams, 
                 comp, nb, tt, phase);
 
-        ccomp = calc_npecore_composition(nb, &guess_npecore, satdata);
+        ccomp = calc_npecore_composition(nb, tt, &guess_npecore, satdata);
         if (guess_npecore != guess_npecore) // break if nan
         {
             if (epsws_core - epsws_ic < 1.e-3)
@@ -336,7 +341,8 @@ void eval_transition_qtt(struct parameters satdata, double p,
         }
 
         // calculation of the energy density in the cell in the core
-        epsws_core = calc_core_ws_cell_energy_density(satdata, ccomp, nb);
+        epsws_core = calc_core_ws_cell_free_energy_density(satdata, ccomp, 
+                nb, tt);
 
         if (epsws_core < epsws_ic) // crust-core transition
         {
@@ -351,6 +357,6 @@ void eval_transition_qtt(struct parameters satdata, double p,
     fprintf(stderr, "==============================================\n\n");
 
     tqtt->nt = nb; 
-    tqtt->pt = calc_core_ws_cell_pressure(satdata, ccomp, nb);
-    *epst = calc_core_ws_cell_energy_density(satdata, ccomp, nb);
+    tqtt->pt = calc_core_ws_cell_pressure(satdata, ccomp, nb, tt);
+    *epst = calc_core_ws_cell_free_energy_density(satdata, ccomp, nb, tt);
 }

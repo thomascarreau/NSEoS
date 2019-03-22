@@ -110,7 +110,7 @@ double calc_etf_ana_surface_en(struct parameters satdata,
     delmsat = (RMN - rmsat)/rmsat;
 
     hnm12 = calc_meta_model_nuclear_matter(satdata, 4, 
-            satdata.rhosat0/2., ii_);
+            satdata.rhosat0/2., ii_, 0.);
 
     clsurf = 3.*ckin*pow(n0_,2./3.)
         *(eta_function(0,5./3.)*RMN/rmsat - 3./5.*delmsat) 
@@ -235,7 +235,7 @@ int be_f (const gsl_vector * x, void *data, gsl_vector * f)
         // bulk
         struct hnm meta;
         meta = calc_meta_model_nuclear_matter(satdata, TAYLOR_EXP_ORDER, 
-                n0, ii);
+                n0, ii, 0.);
         double ebulk = meta.enpernuc;
         // surface
         double r0 = pow(4.*PI*n0/3.,-1./3.);
