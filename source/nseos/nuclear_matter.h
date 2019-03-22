@@ -21,7 +21,6 @@ struct hnm
 // Meta-model, see: Margueron et al. (2018)
 //=========================================
 double calc_meta_model_low_density_correction(
-<<<<<<< HEAD
         struct parameters satdata, int max_order, int order, 
         double xx_);
 double calc_meta_model_low_density_correction_derivative(
@@ -36,17 +35,6 @@ struct hnm calc_meta_model_nuclear_matter(
 double calc_squared_nucleon_sound_velocity( // (vs/c)^2
         struct parameters satdata, int max_order, 
         double nn_, double ii_, double tt_);
-=======
-        struct parameters satdata, int max_order, 
-        int order, double xx_);
-double calc_meta_model_low_density_correction_derivative(
-        struct parameters satdata, int max_order, int order, double xx_);
-double calc_meta_model_low_density_correction_second_derivative(
-        struct parameters satdata, int max_order, int order, double xx_);
-struct hnm calc_meta_model_nuclear_matter(
-        struct parameters satdata, int max_order, 
-        double nn_, double ii_); // ELFc meta-modeling
->>>>>>> 068cb8747ff222483e94ddf25293c6f1e20af48e
 
 // Skyrme functional, see: Chabanat et al. (1997)
 // !! only for T = 0
