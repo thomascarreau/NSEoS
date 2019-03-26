@@ -36,7 +36,8 @@ struct crust_fun_4d calc_crust_fun_4d(
         double tt_, char phase[]);
 struct crust_fun_4d calc_crust_fun_zz_fixed(struct parameters satdata, 
         struct sf_params sparams, 
-        double aa_, double del_, double n0_, double np_, double ng_);
+        double aa_, double del_, double n0_, double np_, double ng_,
+        double tt_, char phase[]);
 
 struct rparams_crust
 {
@@ -66,9 +67,11 @@ struct compo calc_icrust4d_composition(double nb_, double tt_,
 int assign_icrust_fun_zz_fixed(
         const gsl_vector * x, void *params, gsl_vector * f);
 struct compo calc_icrust_composition_zz_fixed(
-        double nb_, int zz_, double *guess,
+        double nb_, double tt_, int zz_, 
+        char phase[], double *guess,
         struct parameters satdata, struct sf_params sparams);
-struct compo calc_icrust_composition_w_shl(double nb_,
+struct compo calc_icrust_composition_w_shl(
+        double nb_, double tt_, char phase[],
         struct parameters satdata, struct sf_params sparams);
 
 // energetics
