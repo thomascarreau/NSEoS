@@ -27,16 +27,42 @@ int main(int argc, char *argv[])
     double tm;
     struct compo comp;
 
+    // initial guess
+    comp.aa = 60.;
+    comp.del = 0.15;
+    comp.n0 = 0.1595;
+    comp.ng = 1.e-4;
+
     FILE *ocrust = fopen(argv[2],"w+");
     FILE *eos = fopen(argv[3],"w+");
 
-    while (nb < 2.5e-4) // up to neutron drip density
+    int nd_checker = 0;
+
+    while (nd_checker == 0) // up to neutron drip density
     {
-        tm = eval_melting_temperature(satdata, sparams, nb, &comp);
+        tm = eval_melting_temperature(satdata, sparams, nb, &comp, 0);
 
         print_state_crust(satdata, sparams, comp, nb, tm, "sol", ocrust, eos);
 
-        nb += nb/10.;
+        nb += nb/20.;
+
+        if (calc_muncl(satdata, sparams, comp, nb, tm, "sol") > 0.)
+        {
+            nd_checker = 1;
+        }
+    }
+
+    while (nb < 0.04)
+    {
+        tm = eval_melting_temperature(satdata, sparams, nb, &comp, 1);
+
+        if (tm != -1)
+        {
+            print_state_crust(satdata, sparams, 
+                    comp, nb, tm, "sol", ocrust, eos);
+        }
+
+        nb += nb/20.;
     }
 
     fclose(ocrust);

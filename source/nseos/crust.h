@@ -95,7 +95,7 @@ double calc_crust_ws_cell_pressure(struct parameters satdata,
 double approximate_melting_temperature(struct compo comp, double nb_);
 double eval_melting_temperature(
         struct parameters satdata, struct sf_params sparams, 
-        double nb_, struct compo *eq);
+        double nb_, struct compo *eq, int nd_checker);
 
 // print functions
 void print_state_crust(struct parameters satdata, struct sf_params sparams, 

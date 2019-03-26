@@ -910,22 +910,39 @@ double approximate_melting_temperature(struct compo comp, double nb_)
 
 double eval_melting_temperature(
         struct parameters satdata, struct sf_params sparams,
-        double nb_, struct compo *eq)
+        double nb_, struct compo *eq, int nd_checker)
 {
-    double guess[3] = {60., 0.10, 0.1595};
-    struct compo comp = calc_ocrust3d_composition(nb_, 0., 
-            "sol", guess, satdata, sparams);
+    struct compo comp;
+    double guess_oc[3] = {eq->aa, eq->del, eq->n0};
+    double guess_ic[4] = {eq->aa, eq->del, eq->n0, eq->ng};
 
-    double tt_init = approximate_melting_temperature(comp, nb_)*2.;
+    if (nd_checker == 0)
+    {
+        comp = calc_ocrust3d_composition(nb_, 0., 
+                "sol", guess_oc, satdata, sparams);
+    }
+    else if (nd_checker == 1)
+    {
+        comp = calc_icrust4d_composition(nb_, 0., 
+                "sol", guess_ic, satdata, sparams);
+    }
+    
+    double tt = approximate_melting_temperature(comp, nb_)*1.5;
 
     double fws_sol, fws_liq;
 
-    double tt = tt_init;
-
     do
     {
-        comp = calc_ocrust3d_composition(nb_, tt, 
-                "liq", guess, satdata, sparams); 
+        if (nd_checker == 0)
+        {
+            comp = calc_ocrust3d_composition(nb_, tt, 
+                    "liq", guess_oc, satdata, sparams); 
+        }
+        else
+        {
+            comp = calc_icrust4d_composition(nb_, tt, 
+                    "liq", guess_ic, satdata, sparams); 
+        }
 
         fws_sol = calc_crust_ws_cell_free_energy_density(
                 satdata, sparams, comp, nb_, tt, "sol");
@@ -936,7 +953,8 @@ double eval_melting_temperature(
 
         if (tt <= 0.)
         {
-            fprintf(stderr, "ERROR: sign of T_m cannot be negative!\n");
+            fprintf(stderr, "WARNING: sign of T_m cannot be negative! " 
+                    "Tm set to -1!\n");
             return -1;
         }
     }
