@@ -401,8 +401,7 @@ struct compo calc_ocrust3d_composition(double nb_, double tt_,
             gsl_multiroot_fsolver_set (s, &f, x);
             basym_new = gsl_vector_get (s->x, 1);
         }
-        while (gsl_vector_get (s->x, 2) < 0. 
-                || gsl_vector_get(s->x, 2) > nb_) {
+        while (gsl_vector_get (s->x, 2) < 0.) {
             rstep = rstep/4.;
             n0_new = n0_old + rstep;
             gsl_vector_set (x, 0, aa_new);
