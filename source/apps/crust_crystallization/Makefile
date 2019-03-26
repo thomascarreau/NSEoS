@@ -10,12 +10,12 @@ OBJS = $(BUILDDIR)/crust.o \
 	   $(BUILDDIR)/nuclear_surface_en.o \
 	   $(BUILDDIR)/nuclear_matter.o \
 	   $(BUILDDIR)/empirical.o 
-APP = ocrust_crystallization
+APP = crust_crystallization
 
 $(APP) : $(BUILDDIR) \
 	$(OBJS) \
-	ocrust_crystallization.c
-	$(CC) -o $(APP) ocrust_crystallization.c $(OBJS) -lgsl -lgslcblas -lm
+	crust_crystallization.c
+	$(CC) -o $(APP) crust_crystallization.c $(OBJS) -lgsl -lgslcblas -lm
 
 $(BUILDDIR):
 	$(MKDIR) $(BUILDDIR)
