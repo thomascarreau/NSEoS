@@ -64,7 +64,8 @@ double calc_finite_size_contrib(struct parameters satdata,
 }
 
 double calc_zp_en(struct parameters satdata, struct sf_params sparams, 
-        double aa_, double ii_, double n0_, double np_)
+        double aa_, double ii_, double n0_, double np_, double ng_,
+        double tt_)
 {
     double hbaromega_p;
     double zz;
@@ -72,8 +73,11 @@ double calc_zp_en(struct parameters satdata, struct sf_params sparams,
     double vws;
 
     zz = aa_*(1.-ii_)/2.;
-    mi = CALC_NUCLEAR_EN(satdata, sparams, TAYLOR_EXP_ORDER, aa_, ii_, n0_)
-        + zz*RMP + (aa_-zz)*RMN;
+    mi = 
+        CALC_NUCLEAR_EN(satdata, sparams, TAYLOR_EXP_ORDER, aa_, ii_, n0_)
+        + zz*RMP + (aa_*(1.-ng_/n0_)-zz)*RMN 
+        - aa_/n0_*ng_*calc_meta_model_nuclear_matter(
+                satdata, TAYLOR_EXP_ORDER, ng_, 1., tt_).fpernuc;
     vws = zz/np_;
 
     hbaromega_p = sqrt(pow(HBARC,2.)*4.*PI*pow(zz,2.)*ALPHAFS*HBARC
@@ -84,7 +88,7 @@ double calc_zp_en(struct parameters satdata, struct sf_params sparams,
 
 double calc_harmonic_contrib(
         struct parameters satdata, struct sf_params sparams, 
-        double aa_, double del_, double n0_, double np_, 
+        double aa_, double del_, double n0_, double np_, double ng_,
         double tt_)
 {
     // see: Baiko et al. (2001) for details
@@ -108,8 +112,8 @@ double calc_harmonic_contrib(
             0.0409484, 3.97355e-4, 
             5.11148e-5, 2.19749e-6};
 
-        double theta = calc_zp_en(satdata, sparams, aa_, del_, n0_, np_)
-            /1.5/U1/tt_;
+        double theta = calc_zp_en(satdata, sparams, 
+                aa_, del_, n0_, np_, ng_, tt_)/1.5/U1/tt_;
 
         double sum_aa = 0.;
         double sum_bb = alpha6*a[6]*pow(theta,9.) + alpha8*a[8]*pow(theta,11.);
@@ -133,7 +137,7 @@ double calc_harmonic_contrib(
 
 double calc_translational_free_en(
         struct parameters satdata, struct sf_params sparams, 
-        double aa_, double del_, double n0_, double np_, 
+        double aa_, double del_, double n0_, double np_, double ng_,
         double tt_)
 {
     // see: eq. (2.71) of "Neutron Stars 1: Equation of State and Structure"
@@ -141,7 +145,9 @@ double calc_translational_free_en(
     double vws = zz/np_;
     double mi = 
         CALC_NUCLEAR_EN(satdata, sparams, TAYLOR_EXP_ORDER, aa_, del_, n0_)
-        + zz*RMP + (aa_-zz)*RMN;
+        + zz*RMP + (aa_*(1.-ng_/n0_)-zz)*RMN 
+        - aa_/n0_*ng_*calc_meta_model_nuclear_matter(
+                satdata, TAYLOR_EXP_ORDER, ng_, 1., tt_).fpernuc;
     double lambdai = pow(2.*PI*HBARC*HBARC/mi/tt_,0.5);
     double gi = 1.;
 
