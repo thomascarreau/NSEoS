@@ -401,8 +401,7 @@ struct compo calc_ocrust3d_composition(double nb_, double tt_,
             gsl_multiroot_fsolver_set (s, &f, x);
             basym_new = gsl_vector_get (s->x, 1);
         }
-        while (gsl_vector_get (s->x, 2) < 0. 
-                || gsl_vector_get(s->x, 2) > nb_) {
+        while (gsl_vector_get (s->x, 2) < 0.) {
             rstep = rstep/4.;
             n0_new = n0_old + rstep;
             gsl_vector_set (x, 0, aa_new);
@@ -957,9 +956,11 @@ double eval_melting_temperature(
     {
         comp = calc_icrust4d_composition(nb_, 0., 
                 "sol", guess_ic, satdata, sparams);
+        /* comp = calc_icrust_composition_w_shl(nb_, 0., */ 
+        /*         "sol", satdata, sparams); */
     }
     
-    double tt = approximate_melting_temperature(comp, nb_)*1.5;
+    double tt = approximate_melting_temperature(comp, nb_)*1.2;
 
     double fws_sol, fws_liq;
 
@@ -974,6 +975,8 @@ double eval_melting_temperature(
         {
             comp = calc_icrust4d_composition(nb_, tt, 
                     "liq", guess_ic, satdata, sparams); 
+            /* comp = calc_icrust_composition_w_shl(nb_, tt, */ 
+            /*         "liq", satdata, sparams); */
         }
 
         fws_sol = calc_crust_ws_cell_free_energy_density(

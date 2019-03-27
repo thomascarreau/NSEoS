@@ -38,11 +38,15 @@ int main(int argc, char *argv[])
 
     int nd_checker = 0;
 
+    fprintf(stderr, "n_B [/fm^3]\tT_m [MeV]\n");
+
     while (nd_checker == 0) // up to neutron drip density
     {
         tm = eval_melting_temperature(satdata, sparams, nb, &comp, 0);
 
         print_state_crust(satdata, sparams, comp, nb, tm, "sol", ocrust, eos);
+
+        fprintf(stderr, "%g\t%g\n", nb, tm);
 
         nb += nb/20.;
 
@@ -51,6 +55,8 @@ int main(int argc, char *argv[])
             nd_checker = 1;
         }
     }
+
+    fprintf(stderr, "INFO: neutron drip reached!\n");
 
     while (nb < 0.04)
     {
@@ -62,7 +68,9 @@ int main(int argc, char *argv[])
                     comp, nb, tm, "sol", ocrust, eos);
         }
 
-        nb += nb/20.;
+        fprintf(stderr, "%g\t%g\n", nb, tm);
+
+        nb += nb/10.;
     }
 
     fclose(ocrust);

@@ -9,10 +9,10 @@ source/apps/nseos/*.plt
 source/apps/nseos/*.sh
 source/apps/nseos/nseos
 
-source/apps/ocrust_crystallization/*.out
-source/apps/ocrust_crystallization/*.pdf
-source/apps/ocrust_crystallization/*.plt
-source/apps/ocrust_crystallization/*.sh
-source/apps/ocrust_crystallization/ocrust_crystallization
+source/apps/crust_crystallization/*.out
+source/apps/crust_crystallization/*.pdf
+source/apps/crust_crystallization/*.plt
+source/apps/crust_crystallization/*.sh
+source/apps/crust_crystallization/crust_crystallization
 
 source/apps/testing/*
