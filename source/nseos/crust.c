@@ -441,6 +441,69 @@ struct compo calc_ocrust3d_composition(double nb_, double tt_,
     return eq;
 }
 
+struct compo calc_ocrust_composition_with_mass_table(double nb_, double tt_,
+        char phase[], 
+        char mass_table[])
+{
+    char path_of_mass_table[128] = "../../input/mass_tables/";
+    strcat(path_of_mass_table, mass_table);
+
+    FILE *table = fopen(path_of_mass_table, "r");
+
+    struct compo eq;
+
+    eq.n0 = -1.;
+    eq.ng = 0.;
+
+    int nn, zz;
+    float deps;
+
+    int aa;
+    double ii;
+    double np;
+    double vws;
+
+    double mi;
+    double fdenswsmin = 1.e99;
+    double fdensws;
+
+    while(fscanf(table, "%d %d %f", &zz, &nn, &deps) == 3)
+    {
+        if (nn > zz && nn % 2 == 0 && zz % 2 == 0)
+        {
+            aa = nn + zz;
+            ii = 1.-2.*(double)zz/(double)aa;
+            vws = aa/nb_;
+            np = zz/vws;
+
+            mi = calc_nuclear_mass_from_mass_excess(aa, zz, deps);
+
+            if (strcmp(phase, "sol") == 0)
+            {
+                fdensws = mi/vws 
+                    + calc_lattice_en_for_tm(aa, ii, np)/vws
+                    + calc_egas_free_energy_density(np, tt_);
+            }
+            else
+            {
+                fprintf(stderr, "ERROR: phase must be 'sol'!");
+                exit(EXIT_FAILURE);
+            }
+            
+            if (fdensws < fdenswsmin)
+            {
+                eq.aa = aa;
+                eq.del = ii;
+                fdenswsmin = fdensws;
+            }
+        }
+    }
+
+    fclose(table);
+
+    return eq;
+}
+
 int assign_icrust_fun_4d(const gsl_vector * x, void *params, gsl_vector * f)
 {
     double np = ((struct rparams_crust *) params)->np;

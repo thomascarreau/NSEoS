@@ -119,3 +119,14 @@ double calc_ls_meta_model_nuclear_en_micro(struct parameters satdata,
 
     return bulk_en + surf_en + coul_en + shell_en + pairing_en;
 }
+
+double calc_electron_binding_energy(int zz_)
+{
+    return 1.44381e-5*pow(zz_,2.39) + 1.55468e-12*pow(zz_,5.35);
+}
+
+double calc_nuclear_mass_from_mass_excess(int aa_, int zz_, double deps_)
+{
+    return deps_ + aa_*AMU 
+        - zz_*MEL + calc_electron_binding_energy(zz_);
+}

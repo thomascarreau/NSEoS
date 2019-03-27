@@ -45,4 +45,10 @@ double calc_ls_meta_model_nuclear_en_micro(struct parameters satdata,
         struct sf_params sparams, int max_order, 
         double aa_, double ii_, double n0_);
 
+//=============================
+//      mass table
+//=============================
+double calc_electron_binding_energy(int zz_);
+double calc_nuclear_mass_from_mass_excess(int aa_, int zz_, double deps_);
+
 #endif // H_NUCLEAR_EN
