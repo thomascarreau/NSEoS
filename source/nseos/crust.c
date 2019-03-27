@@ -79,6 +79,12 @@ double calc_ion_free_en(
         double aa_, double del_, double n0_, double np_, double ng_, 
         double tt_, char phase[])
 {
+    double zz = aa_*(1.-del_)/2.;
+    double mi = 
+        CALC_NUCLEAR_EN(satdata, sparams, TAYLOR_EXP_ORDER, aa_, del_, n0_)
+        + zz*RMP + (aa_*(1.-ng_/n0_)-zz)*RMN 
+        - aa_/n0_*ng_*calc_meta_model_nuclear_matter(
+                satdata, TAYLOR_EXP_ORDER, ng_, 1., tt_).fpernuc;
 
     if (strcmp(phase, "sol") == 0)
     {
@@ -89,18 +95,17 @@ double calc_ion_free_en(
                         aa_, del_, n0_)
                 + calc_lattice_en(satdata, aa_, del_, n0_, np_)
                 + calc_finite_size_contrib(satdata, aa_, del_, n0_, np_);
-            /* + calc_zp_en(satdata, sparams, aa_, del_, n0_, np_); */
+            /* + calc_zp_en(zz, np_, mi); */
         }
         else
         {
             return 
                 CALC_NUCLEAR_EN(satdata, sparams, TAYLOR_EXP_ORDER, 
                         aa_, del_, n0_)
-                + calc_lattice_en_for_tm(aa_, del_, np_)
+                + calc_lattice_en_for_tm(zz, np_)
                 + calc_finite_size_contrib(satdata, aa_, del_, n0_, np_)
-                + calc_zp_en(satdata, sparams, aa_, del_, n0_, np_, ng_, tt_)
-                + calc_harmonic_contrib(satdata, sparams, 
-                        aa_, del_, n0_, np_, ng_, tt_);
+                + calc_zp_en(zz, np_, mi)
+                + calc_harmonic_contrib(zz, np_, mi, tt_);
         }
     }
     else if (strcmp(phase, "liq") == 0)
@@ -108,9 +113,8 @@ double calc_ion_free_en(
         return 
             CALC_NUCLEAR_EN(satdata, sparams, TAYLOR_EXP_ORDER, aa_, del_, n0_)
             + calc_finite_size_contrib(satdata, aa_, del_, n0_, np_)
-            + calc_translational_free_en(satdata, sparams, 
-                    aa_, del_, n0_, np_, ng_, tt_)
-            + calc_total_coulomb_contrib(aa_*(1.-del_)/2., np_, tt_);
+            + calc_translational_free_en(zz, np_, mi, tt_)
+            + calc_total_coulomb_contrib(zz, np_, tt_);
     }
     else
     {
@@ -478,10 +482,19 @@ struct compo calc_ocrust_composition_with_mass_table(double nb_, double tt_,
 
             mi = calc_nuclear_mass_from_mass_excess(aa, zz, deps);
 
-            if (strcmp(phase, "sol") == 0)
+            if (strcmp(phase, "sol") == 0 || tt_ == 0.)
             {
                 fdensws = mi/vws 
-                    + calc_lattice_en_for_tm(aa, ii, np)/vws
+                    + calc_lattice_en_for_tm((double)zz, np)/vws
+                    + calc_zp_en((double)zz, np, mi)/vws
+                    + calc_harmonic_contrib((double)zz, np, mi, tt_)/vws
+                    + calc_egas_free_energy_density(np, tt_);
+            }
+            else if (strcmp(phase, "liq") == 0)
+            {
+                fdensws = mi/vws 
+                    + calc_translational_free_en((double)zz, np, mi, tt_)/vws
+                    + calc_total_coulomb_contrib((double)zz, np, tt_)/vws
                     + calc_egas_free_energy_density(np, tt_);
             }
             else
