@@ -499,7 +499,8 @@ struct compo calc_ocrust_composition_with_mass_table(double nb_, double tt_,
             }
             else
             {
-                fprintf(stderr, "ERROR: phase must be 'sol'!");
+                fprintf(stderr, 
+                        "ERROR: phase must be either 'sol' or 'liq'!\n");
                 exit(EXIT_FAILURE);
             }
             
