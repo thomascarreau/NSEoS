@@ -58,15 +58,24 @@ int main(int argc, char *argv[])
 
     fprintf(stderr, "INFO: neutron drip reached!\n");
 
+    if (nb < 2.7e-4)
+    {
+        // to avoid the 'out of table' issue when sh. corr. are added
+        nb = 2.8e-4;
+    }
+
     while (nb < 0.04)
     {
         tm = eval_melting_temperature(satdata, sparams, nb, &comp, 1);
 
-        if (tm != -1)
+        if (tm == -1 || tm != tm)
         {
-            print_state_crust(satdata, sparams, 
-                    comp, nb, tm, "sol", ocrust, eos);
+            fprintf(stderr, "ERROR: sign of T_m is negative or T_m = NaN!\n");
+            break;
         }
+
+        print_state_crust(satdata, sparams, 
+                comp, nb, tm, "sol", ocrust, eos);
 
         fprintf(stderr, "%g\t%g\n", nb, tm);
 

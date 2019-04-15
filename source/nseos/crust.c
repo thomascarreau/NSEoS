@@ -1037,7 +1037,7 @@ double eval_melting_temperature(
         /*         "sol", satdata, sparams); */
     }
     
-    double tt = approximate_melting_temperature(comp, nb_)*1.2;
+    double tt = approximate_melting_temperature(comp, nb_);
 
     double fws_sol, fws_liq;
 
@@ -1061,7 +1061,7 @@ double eval_melting_temperature(
         fws_liq = calc_crust_ws_cell_free_energy_density(
                 satdata, sparams, comp, nb_, tt, "liq");
 
-        tt -= 0.0001;
+        tt -= 0.0002;
 
         if (tt <= 0.)
         {
