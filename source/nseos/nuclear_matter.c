@@ -95,7 +95,7 @@ struct hnm calc_meta_model_nuclear_matter(
             max_order, 2, xx);
 
     rmns = RMN/(1.+ (satdata.barm + ii_*satdata.bardel)*(1.+3.*xx));
-    rmps = RMP/(1.+ (satdata.barm - ii_*satdata.bardel)*(1.+3.*xx));
+    rmps = RMN/(1.+ (satdata.barm - ii_*satdata.bardel)*(1.+3.*xx));
 
     if(max_order == 3)
     {
@@ -284,7 +284,7 @@ struct hnm calc_meta_model_nuclear_matter(
             + 3./5.*nn_n*efn*(1.-5*PI2/12.*cpow(tt_/efn,2.))*rmns/RMN
             *((satdata.barm+ii_*satdata.bardel)/satdata.rhosat0
                     + satdata.bardel*(1.+3.*xx)*diidnn_n)
-            + 3./5.*nn_p*efp*(1.-5*PI2/12.*cpow(tt_/efp,2.))*rmps/RMP
+            + 3./5.*nn_p*efp*(1.-5*PI2/12.*cpow(tt_/efp,2.))*rmps/RMN
             *((satdata.barm-ii_*satdata.bardel)/satdata.rhosat0
                     - satdata.bardel*(1.+3.*xx)*diidnn_n);
         up = epotpernuc 
@@ -293,7 +293,7 @@ struct hnm calc_meta_model_nuclear_matter(
             + 3./5.*nn_n*efn*(1.-5*PI2/12.*cpow(tt_/efn,2.))*rmns/RMN
             *((satdata.barm+ii_*satdata.bardel)/satdata.rhosat0
                     + satdata.bardel*(1.+3.*xx)*diidnn_p)
-            + 3./5.*nn_p*efp*(1.-5*PI2/12.*cpow(tt_/efp,2.))*rmps/RMP
+            + 3./5.*nn_p*efp*(1.-5*PI2/12.*cpow(tt_/efp,2.))*rmps/RMN
             *((satdata.barm-ii_*satdata.bardel)/satdata.rhosat0
                     - satdata.bardel*(1.+3.*xx)*diidnn_p);
 
