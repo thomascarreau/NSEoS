@@ -226,6 +226,12 @@ struct core_compo calc_npeucore_composition(double nb_, double tt_,
         }
         while (gsl_vector_get (s->x, 1) < 1.e-10 || gsl_vector_get (s->x, 1) 
                 > nb_*(1.-gsl_vector_get(s->x, 0))/2.) {
+            if (nb_ > 0.3 && gsl_vector_get (s->x, 1) < 0.)
+            {
+                // to avoid 'matrix is singular issue' (it lowers mmax though)
+                count = 100;
+                break;
+            }
             ustep = ustep/4.;
             nu_new = nu_old + ustep;
             gsl_vector_set (x, 0, del_new);

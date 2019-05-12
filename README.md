@@ -62,8 +62,6 @@ number, and dimensionless tidal deformability).
 
 * TM1: `tm1.in`
 
-* DD-ME1: `ddme1.in`
-
 * DD-ME2: `ddme2.in`
 
 You can add new sets in `NSEoS/source/input/satdata`.

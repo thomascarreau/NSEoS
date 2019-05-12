@@ -219,7 +219,7 @@ struct hnm calc_meta_model_nuclear_matter(
                     + a22/2.*(2.*u2 + 4.*xx*u2p + xx*xx*u2pp));
     }
 
-    if (nn_ == 0) // to avoid singularities
+    if (nn_ == 0.) // to avoid singularities
     {
         result.enpernuc = 0.;
         result.spernuc = 0.;

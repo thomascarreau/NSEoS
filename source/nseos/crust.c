@@ -598,6 +598,12 @@ struct compo calc_icrust4d_composition(double nb_, double tt_,
         iter++;
 
         status = gsl_multiroot_fsolver_iterate(s);
+        
+        if (gsl_vector_get (s->f, 0) != gsl_vector_get (s->f, 0)
+                && gsl_vector_get (s->f, 1) != gsl_vector_get (s->f, 1)
+                && gsl_vector_get (s->f, 2) != gsl_vector_get (s->f, 2)
+                && gsl_vector_get (s->f, 3) != gsl_vector_get (s->f, 3))
+            iter = 1000; // to avoid 'matrix is singular' error
 
         aa_new = gsl_vector_get (s->x, 0);
         basym_new = gsl_vector_get (s->x, 1);
@@ -644,8 +650,13 @@ struct compo calc_icrust4d_composition(double nb_, double tt_,
             gsl_multiroot_fsolver_set (s, &f, x);
             n0_new = gsl_vector_get (s->x, 2);
         }
-        while (gsl_vector_get (s->x, 3) < 1.e-10 
+        while (gsl_vector_get (s->x, 3) < 1.e-10
                 || gsl_vector_get (s->x, 3) > nb_) {
+            if (nb_ < 3.e-4) // to avoid 'matrix is singular' error
+            {
+                iter = 1000;
+                break;
+            }
             gstep = gstep/4.;
             ng_new = ng_old + gstep;
             gsl_vector_set (x, 0, aa_new);

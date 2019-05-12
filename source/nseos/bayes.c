@@ -83,10 +83,10 @@ void get_high_density_posterior(FILE *prior,
 
         for(int j = 0; j < 10; j++)
         {
-            satdata.qsat0 = 2000.*gsl_rng_uniform (r) - 1000.;
-            satdata.zsat0 = 6000.*gsl_rng_uniform (r) - 3000.;
-            satdata.qsym0 = 4000.*gsl_rng_uniform (r) - 2000.;
-            satdata.zsym0 = 10000.*gsl_rng_uniform (r) - 5000.;
+            satdata.qsat0 = (1488. + 369.)*gsl_rng_uniform (r) - 369.;
+            satdata.zsat0 = (185. + 4478.)*gsl_rng_uniform (r) - 4478.;
+            satdata.qsym0 = (400. + 1178.)*gsl_rng_uniform (r) - 1178.;
+            satdata.zsym0 = (1298. + 1369.)*gsl_rng_uniform (r) - 1369.;
 
             // CAUSALITY, STABILITY, SYM EN ===================================
             struct transition_qtt tqtt_hd;
@@ -120,7 +120,7 @@ void get_high_density_posterior(FILE *prior,
 
                 eval_transition_qtt(satdata, 3., &tqtt_ld, &epst_ld);
 
-                if (tqtt_ld.nt > 0.0005)
+                if (tqtt_ld.nt > 0.01)
                 {
                     myeos = fopen("eos.out", "r");
                     struct tov_solution tovs14;
@@ -128,10 +128,10 @@ void get_high_density_posterior(FILE *prior,
                     double mmax  = solve_tov_equation(
                             lines, tqtt_ld.pt, epst_ld, myeos, 
                             &tovs14, 1.4, mytov);
-                    if (mmax < 2.0)
+                    if (mmax < 1.97)
                     {
                         hd_checker = 1;
-                        fprintf(stderr, "Mmax = %g < 2 Msun\n", mmax);
+                        fprintf(stderr, "Mmax = %g < 1.97 Msun\n", mmax);
                     }
                     else
                     {
