@@ -23,7 +23,7 @@ void eval_barm_and_bardel(float effm, float isosplit,
     {
         kv = (sqrt(((*barm) + 1.)*((*barm) + 1.)*isosplit*isosplit + 1.)
                 + (*barm) * isosplit - 1.)/isosplit; 
-        // see: ref [103] of arXiv:1708:06894
+        // see: ref [113] of arXiv:1708:06894
     }
 
     *bardel = *barm - kv;
