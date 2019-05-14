@@ -44,7 +44,13 @@ number, and dimensionless tidal deformability).
 
 * BSk17: `bsk17.in`
 
+* BSk22: `bsk22.in`
+
 * BSk24: `bsk24.in`
+
+* BSk25: `bsk25.in`
+
+* BSk26: `bsk26.in`
 
 * NRAPR: `nrapr.in`
 
