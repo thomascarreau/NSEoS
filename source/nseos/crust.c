@@ -599,11 +599,11 @@ struct compo calc_icrust4d_composition(double nb_, double tt_,
 
         status = gsl_multiroot_fsolver_iterate(s);
         
-        if (gsl_vector_get (s->f, 0) != gsl_vector_get (s->f, 0)
-                && gsl_vector_get (s->f, 1) != gsl_vector_get (s->f, 1)
-                && gsl_vector_get (s->f, 2) != gsl_vector_get (s->f, 2)
-                && gsl_vector_get (s->f, 3) != gsl_vector_get (s->f, 3))
-            iter = 1000; // to avoid 'matrix is singular' error
+        /* if (gsl_vector_get (s->f, 0) != gsl_vector_get (s->f, 0) */
+        /*         && gsl_vector_get (s->f, 1) != gsl_vector_get (s->f, 1) */
+        /*         && gsl_vector_get (s->f, 2) != gsl_vector_get (s->f, 2) */
+        /*         && gsl_vector_get (s->f, 3) != gsl_vector_get (s->f, 3)) */
+        /*     iter = 1000; // to avoid 'matrix is singular' error */
 
         aa_new = gsl_vector_get (s->x, 0);
         basym_new = gsl_vector_get (s->x, 1);
@@ -652,11 +652,11 @@ struct compo calc_icrust4d_composition(double nb_, double tt_,
         }
         while (gsl_vector_get (s->x, 3) < 1.e-10
                 || gsl_vector_get (s->x, 3) > nb_) {
-            if (nb_ < 3.e-4) // to avoid 'matrix is singular' error
-            {
-                iter = 1000;
-                break;
-            }
+            /* if (nb_ < 3.e-4) // to avoid 'matrix is singular' error */
+            /* { */
+            /*     iter = 1000; */
+            /*     break; */
+            /* } */
             gstep = gstep/4.;
             ng_new = ng_old + gstep;
             gsl_vector_set (x, 0, aa_new);
@@ -1023,8 +1023,9 @@ double approximate_melting_temperature(struct compo comp, double nb_)
     // see eq. (2.28) of "Neutron Stars 1: Equation of State and Structure"
     double gamma_m = 175.; // ion coupling parameter
     double zz = comp.aa*(1.-comp.del)/2.;
+    double vws = comp.aa/(nb_-comp.ng)*(1.-comp.ng/comp.n0);
 
-    return  zz*zz*ALPHAFS*HBARC/gamma_m*pow(4.*PI*nb_/3./comp.aa, 1./3.);
+    return  zz*zz*ALPHAFS*HBARC/gamma_m*pow(4.*PI/3./vws, 1./3.);
 }
 
 double eval_melting_temperature(
@@ -1048,7 +1049,7 @@ double eval_melting_temperature(
         /*         "sol", satdata, sparams); */
     }
     
-    double tt = approximate_melting_temperature(comp, nb_);
+    double tt = approximate_melting_temperature(comp, nb_)*1.2;
 
     double fws_sol, fws_liq;
 

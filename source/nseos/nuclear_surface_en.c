@@ -224,6 +224,9 @@ int be_f (const gsl_vector * x, void *data, gsl_vector * f)
     prms.p = p;
     prms.sigma0 = gsl_vector_get (x, 0);
     prms.b = gsl_vector_get (x, 1);
+    prms.sigma0c = gsl_vector_get (x, 2);
+    prms.alpha = 5.5;
+    prms.beta = gsl_vector_get (x, 3);
 
     size_t i;
 
@@ -243,7 +246,9 @@ int be_f (const gsl_vector * x, void *data, gsl_vector * f)
         double sigma = prms.sigma0*(pow(2.,prms.p+1.) + prms.b)
             /(pow(ypnuc,-prms.p) 
                     + prms.b + pow(1.-ypnuc,-prms.p));
-        double esurf = 4.*PI*r0*r0*sigma*pow(aa[i],-1./3.);
+        double esurf = 4.*PI*r0*r0*sigma*pow(aa[i],-1./3.)
+            + 8.*PI*r0*sigma*prms.sigma0c/prms.sigma0
+            *prms.alpha*(prms.beta - ypnuc)*pow(aa[i],-2./3.);
         // coulomb
         double Ecoul = calc_coulomb_en(satdata, aa[i], ii);
         double ecoul = Ecoul/aa[i];
@@ -264,7 +269,7 @@ struct sf_params fit_sf_params(struct parameters satdata, double p)
     int status, info;
     size_t i;
     const size_t n = N;
-    const size_t nb_of_params = 2;
+    const size_t nb_of_params = 4;
 
     gsl_matrix *J = gsl_matrix_alloc(n, nb_of_params);
     gsl_matrix *covar = gsl_matrix_alloc (nb_of_params, nb_of_params);
@@ -272,7 +277,7 @@ struct sf_params fit_sf_params(struct parameters satdata, double p)
     double be[n], weights[n];
     struct data d = { zz, aa, be, satdata, p };
     gsl_multifit_function_fdf f;
-    double x_init[2] = { 1.08, 23.0 };
+    double x_init[4] = { 1.1, 10., 0.6, 1.0 };
     gsl_vector_view x = gsl_vector_view_array (x_init, nb_of_params);
     gsl_vector_view w = gsl_vector_view_array(weights, n);
     gsl_vector *res_f;
@@ -290,8 +295,9 @@ struct sf_params fit_sf_params(struct parameters satdata, double p)
 
     /* This is the data to be fitted */
     FILE *data = NULL;
-    /* data = fopen("../../input/masses/AME2012.data", "r"); */
-    data = fopen("../../input/masses/spherical_nuclei.data", "r");
+    /* data = fopen("../../input/masses/AME2012.data", "r"); // N=2353 */
+    data = fopen("../../input/masses/spherical_nuclei.data", "r"); // N=9
+    /* data = fopen("../../input/masses/HFB24.data", "r"); // N=8392 */
     if (data != NULL)
     {
         for (i = 0; i < n; i++)
@@ -308,7 +314,6 @@ struct sf_params fit_sf_params(struct parameters satdata, double p)
     s = gsl_multifit_fdfsolver_alloc (T, n, nb_of_params);
 
     /* initialize solver with starting point and weights */
-    /* gsl_multifit_fdfsolver_wset (s, &f, &x.vector, &w.vector); */
     gsl_multifit_fdfsolver_wset (s, &f, &x.vector, &w.vector);
 
     /* compute initial residual norm */
@@ -344,8 +349,10 @@ struct sf_params fit_sf_params(struct parameters satdata, double p)
 
         fprintf(stderr, "chisq/dof = %g\n",  pow(chi, 2.0) / dof);
 
-        fprintf (stderr, "sigma0 = %.5f +/- %.5f\n", FIT(0), c*ERR(0));
-        fprintf (stderr, "b      = %.5f +/- %.5f\n", FIT(1), c*ERR(1));
+        fprintf (stderr, "sigma0  = %.5f +/- %.5f\n", FIT(0), c*ERR(0));
+        fprintf (stderr, "b       = %.5f +/- %.5f\n", FIT(1), c*ERR(1));
+        fprintf (stderr, "sigma0c = %.5f +/- %.5f\n", FIT(2), c*ERR(2));
+        fprintf (stderr, "beta    = %.5f +/- %.5f\n", FIT(3), c*ERR(3));
     }
 
     fprintf (stderr, "status = %s\n\n", gsl_strerror (status));
@@ -354,6 +361,9 @@ struct sf_params fit_sf_params(struct parameters satdata, double p)
     prms.p = p;
     prms.sigma0 = gsl_vector_get(s->x, 0);
     prms.b = gsl_vector_get(s->x, 1);
+    prms.sigma0c = gsl_vector_get(s->x, 2);
+    prms.alpha = 5.5;
+    prms.beta = gsl_vector_get(s->x, 3);
     prms.chi2 = pow(chi, 2.0);
 
     gsl_multifit_fdfsolver_free (s);
@@ -376,7 +386,9 @@ double calc_ls_surface_en(struct sf_params sparams,
     sigma = sparams.sigma0*(pow(2.,sparams.p+1.) + sparams.b)
         /(pow(ypnuc,-sparams.p) 
             + sparams.b + pow(1.-ypnuc,-sparams.p));
-    surf_energy = 4.*PI*r0*r0*sigma*pow(aa_,2./3.);
+    surf_energy = 4.*PI*r0*r0*sigma*pow(aa_,2./3.)
+        + 8.*PI*r0*sigma*sparams.sigma0c/sparams.sigma0
+        *sparams.alpha*(sparams.beta - ypnuc)*pow(aa_,1./3.);
 
     return surf_energy;
 }

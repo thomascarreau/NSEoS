@@ -39,6 +39,9 @@ struct sf_params
     double p;
     double sigma0;
     double b;
+    double sigma0c;
+    double alpha;
+    double beta;
     double chi2;
 };
 double calc_ls_surface_en(struct sf_params params, 
