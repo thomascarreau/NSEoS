@@ -2,8 +2,8 @@ NSEoS
 =====
 
 NSEoS (Neutron Star Equation of State) is a library that aims to provide the 
-useful tools to calculate the composition of the crust and the equation of 
-state of neutrons stars according to different nuclear models.
+useful tools to calculate composition, equation of state, and observables of
+neutron stars according to different nuclear models.
 
 Requirements
 ------------
