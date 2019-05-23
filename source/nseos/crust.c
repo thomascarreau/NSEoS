@@ -201,7 +201,7 @@ struct crust_fun_4d calc_crust_fun_4d(
     }
 
     result.f_stability = dfiondaa - fion/aa_;
-    result.f_beta = (dfionddel + np_/(1.-del_)*dfiondnp)*2./aa_ - muel 
+    result.f_beta = (dfionddel - np_/(1.-del_)*dfiondnp)*2./aa_ - muel 
         - RMP + RMN;
     result.f_muneq = fion/aa_ + (1.-del_)/aa_*dfionddel 
         - (mu - RMN) + ng_/n0_*(mu - RMN - ngas.fpernuc);
