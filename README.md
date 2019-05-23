@@ -109,9 +109,8 @@ melting temperature (mass density and pressure).
 We use the [meta-modeling technique](https://arxiv.org/abs/1708.06894) to 
 mimic existing nuclear models with very good accuracy. The input parameters are 
 the successive density derivatives of nuclear matter energy (`lasat0`, 
-`lasat0`, `ksat0`, `qsat0`, `zsat0`, `jsym0`, `lsym0`, `ksym0`, `qsym0` and 
-`zsym0`) and effective masses (`effm` and `isosplit`) at saturation 
-density (`rhosat0`).
+`ksat0`, `qsat0`, `zsat0`, `jsym0`, `lsym0`, `ksym0`, `qsym0`, and `zsym0`) and 
+effective masses (`effm` and `isosplit`) at saturation density (`rhosat0`).
 
 If you wish to add new models in `NSEoS/source/input/satdata`, here is the 
 format:
