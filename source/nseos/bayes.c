@@ -59,7 +59,7 @@ void get_low_density_posterior(FILE *prior, FILE *posterior)
 }
 
 void get_high_density_posterior(FILE *prior, 
-        FILE *posterior, FILE *observables)
+        FILE *posterior, FILE *observables, size_t posterior_size)
 {
     struct parameters satdata;
     float m, dm;
@@ -78,7 +78,7 @@ void get_high_density_posterior(FILE *prior,
     size_t count = 0;
 
     while(read_table_of_sets(prior, &satdata, &m, &dm) == 0 
-            && count <= 1000)
+            && count <= posterior_size)
     {
         set_no++;
         fprintf(stderr, "- Set no %zu -\n", set_no);
