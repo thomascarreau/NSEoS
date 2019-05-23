@@ -74,8 +74,15 @@ void get_high_density_posterior(FILE *prior,
     T = gsl_rng_default;
     r = gsl_rng_alloc (T); 
 
-    while(read_table_of_sets(prior, &satdata, &m, &dm) == 0)
+    size_t set_no = 0;
+    size_t count = 0;
+
+    while(read_table_of_sets(prior, &satdata, &m, &dm) == 0 
+            && count <= 1000)
     {
+        set_no++;
+        fprintf(stderr, "- Set no %zu -\n", set_no);
+
         qsat_ld = satdata.qsat0;
         zsat_ld = satdata.zsat0;
         qsym_ld = satdata.qsym0;
@@ -150,7 +157,10 @@ void get_high_density_posterior(FILE *prior,
                                 tovs14.i_over_mr2, 
                                 tovs14.icrust_over_mr2/tovs14.i_over_mr2,
                                 tovs14.lambda_dimless);
+
+                        count++;
                     }
+
                     fclose(myeos);
                     fclose(mytov);
                 }
