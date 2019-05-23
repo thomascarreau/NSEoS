@@ -311,16 +311,19 @@ void eval_transition_qtt(struct parameters satdata, double p,
     {
         comp = calc_icrust4d_composition(nb, tt, phase, 
                 guess_ic, satdata, sparams);
-        if (guess_ic[0] != guess_ic[0]) // break if nan
+        if (guess_ic[0] != guess_ic[0]) // exit if nan
         {
-            if (epsws_core - epsws_ic < 1.e-3)
+            if (nb > 0.001 
+                    && epsws_core - epsws_ic < 1.e-3) // crust-core transition
             {
                 fprintf(stderr, "e_core - e_crust = %g\n", 
                         epsws_core - epsws_ic);
                 break;
             }
             else
+            {
                 return;
+            }
         }
 
         // calculation of the energy density in the cell in the inner crust
@@ -330,14 +333,17 @@ void eval_transition_qtt(struct parameters satdata, double p,
         ccomp = calc_npecore_composition(nb, tt, &guess_npecore, satdata);
         if (guess_npecore != guess_npecore) // break if nan
         {
-            if (epsws_core - epsws_ic < 1.e-3)
+            if (nb > 0.001
+                    && epsws_core - epsws_ic < 1.e-3)
             {
                 fprintf(stderr, "e_core - e_crust = %g\n", 
                         epsws_core - epsws_ic);
                 break;
             }
             else
+            {
                 return;
+            }
         }
 
         // calculation of the energy density in the cell in the core

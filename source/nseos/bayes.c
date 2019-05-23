@@ -135,6 +135,8 @@ void get_high_density_posterior(FILE *prior,
                     double mmax  = solve_tov_equation(
                             lines, tqtt_ld.pt, epst_ld, myeos, 
                             &tovs14, 1.4, mytov);
+                    fclose(myeos);
+                    fclose(mytov);
                     if (mmax < 1.97)
                     {
                         hd_checker = 1;
@@ -159,10 +161,12 @@ void get_high_density_posterior(FILE *prior,
                                 tovs14.lambda_dimless);
 
                         count++;
+                        if (count == posterior_size) 
+                        {
+                            gsl_rng_free (r);
+                            return;
+                        }
                     }
-
-                    fclose(myeos);
-                    fclose(mytov);
                 }
             }
         }
