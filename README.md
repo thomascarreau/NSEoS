@@ -29,16 +29,16 @@ Contents
 
 You can find two example apps in `NSEoS/source/apps/`:
 
-* `nseos`, a code that calculate the composition, the equation of state, and 
+* `nseos`, to calculate the composition, the equation of state, and 
     other observables of cold isolated neutron stars for a given nuclear model.
 
-* `crust_crystallization`, a code that calculate the crust composition and the 
+* `crust_crystallization`, to calculate the crust composition and the 
     equation of state at the melting temperature for a given nuclear model.
 
 Feel free to write new apps using the functions of the library and to contact 
 carreau@lpccaen.in2p3.fr if you wish to contribute.
 
-##### `nseos`
+##### nseos
 
 In `NSEoS/source/apps/nseos`:
 
@@ -55,7 +55,7 @@ central pressure, radius, mass, core radius, core mass, normalized moment of
 inertia, fraction of moment of inertia residing in the crust, tidal love 
 number, and dimensionless tidal deformability).
 
-##### `crust_crystallization`
+##### crust_crystallization
 
 In `NSEoS/source/apps/crust_crystallization`:
 
