@@ -100,9 +100,9 @@ melting temperature (mass density and pressure).
 
 ##### RMF models
 
-* DDME$\delta$: `ddmedelta.in`
-
 * DDME2: `ddme2.in`
+
+* DDMEd: `ddmedelta.in`
 
 * PKDD: `pkdd.in`
 
