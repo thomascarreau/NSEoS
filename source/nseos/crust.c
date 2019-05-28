@@ -375,6 +375,11 @@ struct compo calc_ocrust3d_composition(double nb_, double tt_,
 
         status = gsl_multiroot_fsolver_iterate(s);
 
+        /* if (gsl_vector_get (s->f, 0) != gsl_vector_get (s->f, 0) */
+        /*         && gsl_vector_get (s->f, 1) != gsl_vector_get (s->f, 1) */
+        /*         && gsl_vector_get (s->f, 2) != gsl_vector_get (s->f, 2)) */
+        /*     iter = 1000; // to avoid 'matrix is singular' error */
+
         aa_new = gsl_vector_get (s->x, 0);
         basym_new = gsl_vector_get (s->x, 1);
         n0_new = gsl_vector_get (s->x, 2);

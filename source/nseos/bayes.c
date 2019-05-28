@@ -59,7 +59,8 @@ void get_low_density_posterior(FILE *prior, FILE *posterior)
 }
 
 void get_high_density_posterior(FILE *prior, 
-        FILE *posterior, FILE *observables, size_t posterior_size)
+        FILE *posterior_par, FILE *posterior_spar, FILE *posterior_obs, 
+        size_t posterior_size)
 {
     struct parameters satdata;
     float m, dm;
@@ -76,6 +77,8 @@ void get_high_density_posterior(FILE *prior,
 
     size_t set_no = 0;
     size_t count = 0;
+    char eos[128];
+    char tov[128];
 
     while(read_table_of_sets(prior, &satdata, &m, &dm) == 0 
             && count <= posterior_size)
@@ -101,7 +104,8 @@ void get_high_density_posterior(FILE *prior,
             int hd_checker = 0;
             FILE *mycrust = fopen("crust.out", "w+");
             FILE *mycore = fopen("core.out", "w+");
-            FILE *myeos = fopen("eos.out", "w+");
+            snprintf(eos, sizeof(eos), "eos/eos%zu.out", count);
+            FILE *myeos = fopen(eos, "w+");
             int lines = calc_zero_temperature_equation_of_state(satdata, 3., 
                     &tqtt_hd, &epst_hd, &hd_checker, 
                     mycrust, mycore, myeos);
@@ -129,9 +133,10 @@ void get_high_density_posterior(FILE *prior,
 
                 if (tqtt_ld.nt > 0.01)
                 {
-                    myeos = fopen("eos.out", "r");
+                    myeos = fopen(eos, "r");
                     struct tov_solution tovs14;
-                    FILE *mytov = fopen("tov.out", "w+");
+                    snprintf(tov, sizeof(tov), "tov/tov%zu.out", count);
+                    FILE *mytov = fopen(tov, "w+");
                     double mmax  = solve_tov_equation(
                             lines, tqtt_ld.pt, epst_ld, myeos, 
                             &tovs14, 1.4, mytov);
@@ -144,14 +149,29 @@ void get_high_density_posterior(FILE *prior,
                     }
                     else
                     {
-                        fprintf(posterior, 
+                        fprintf(posterior_par, 
                                 "%g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g\n",
                                 satdata.rhosat0, satdata.lasat0, satdata.ksat0, 
                                 qsat_ld, qsat_hd, zsat_ld, zsat_hd, 
                                 satdata.jsym0, satdata.lsym0, satdata.ksym0, 
                                 qsym_ld, qsym_hd, zsym_ld, zsym_hd, 
                                 m, dm, satdata.b);
-                        fprintf(observables, 
+                        struct sf_params sparams_ld = 
+                            fit_sf_params(satdata, 3.);
+                        satdata.qsat0 = qsat_hd;
+                        satdata.zsat0 = zsat_hd;
+                        satdata.qsym0 = qsym_hd;
+                        satdata.zsym0 = zsym_hd;
+                        struct sf_params sparams_hd = 
+                            fit_sf_params(satdata, 3.);
+                        fprintf(posterior_spar,
+                                "%g %g %g %g %g %g %g %g %g %g\n",
+                                sparams_ld.sigma0, sparams_hd.sigma0,
+                                sparams_ld.b, sparams_hd.b,
+                                sparams_ld.sigma0c, sparams_hd.sigma0c,
+                                sparams_ld.beta, sparams_hd.beta,
+                                sparams_ld.chi2, sparams_hd.chi2);
+                        fprintf(posterior_obs, 
                                 "%g %g %g %g %g %g %g %g %g %g %g\n", 
                                 mmax, tovs14.rhoc, tovs14.pc, tovs14.r, 
                                 tqtt_ld.nt, tqtt_ld.pt, 

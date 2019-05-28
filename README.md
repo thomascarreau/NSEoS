@@ -70,7 +70,7 @@ melting temperature (mass density and pressure).
 
 #### Nuclear models
 
-##### Skyrme
+##### Skyrme-type interactions
 
 * BSk14: `bsk14.in`
 
@@ -98,11 +98,17 @@ melting temperature (mass density and pressure).
 
 * SLy4: `sly4.in`
 
-##### Relativistic
+##### RMF models
+
+* DDME$\delta$: `ddmedelta.in`
+
+* DDME2: `ddme2.in`
+
+* PKDD: `pkdd.in`
 
 * TM1: `tm1.in`
 
-* DD-ME2: `ddme2.in`
+* TW99: `tw99.in`
 
 ##### More
 
