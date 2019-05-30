@@ -63,11 +63,13 @@ double calc_dimensionless_tidal_deformability(double r_, double m_,
     return 2.*k2_/3.*pow(beta,-5.);
 }
 
-// see: PRC82,025810(2010)
+// see:
 double calc_normalized_moment_of_inertia(double r_, double m_)
 {
-    double rs = 2.*G_CGS*m_;
-    double i_over_mr2 = 0.21/(1.-rs/r_/SPEEDOFL_CGS/SPEEDOFL_CGS);
+    double compactness = G_CGS*m_/r_/SPEEDOFL_CGS/SPEEDOFL_CGS;
+    /* double i_over_mr2 = 0.21/(1.-2.*compactness); // PRC82,025810(2010) */
+    double i_over_mr2 = 0.237*(1.+2.844*compactness 
+            + 18.91*pow(compactness,4.)); // Phys. Rep. 621, 2016, 127
     return i_over_mr2;
 }
 
