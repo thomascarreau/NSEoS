@@ -63,7 +63,6 @@ double calc_dimensionless_tidal_deformability(double r_, double m_,
     return 2.*k2_/3.*pow(beta,-5.);
 }
 
-// see:
 double calc_normalized_moment_of_inertia(double r_, double m_)
 {
     double compactness = G_CGS*m_/r_/SPEEDOFL_CGS/SPEEDOFL_CGS;
