@@ -254,7 +254,9 @@ double solve_tov_equation(int lines, double pt, double epst, FILE *eos,
         {
             icrust_over_mr2 = i_over_mr2 
                 - calc_moment_of_inertia(rcore, wcore)/m/r/r;
-
+            /* icrust_over_mr2 = */ 
+            /*     calc_normalized_crustal_moment_of_inertia_approx( */
+            /*         r, m, i_over_mr2, epst, pt, rcore); */
         }
         else
             icrust_over_mr2 = 0.;
