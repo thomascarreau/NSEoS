@@ -5,12 +5,14 @@ source/nseos/build/*
 
 source/apps/nseos/*.out
 source/apps/nseos/*.pdf
+source/apps/nseos/*.py
 source/apps/nseos/*.plt
 source/apps/nseos/*.sh
 source/apps/nseos/nseos
 
 source/apps/crust_crystallization/*.out
 source/apps/crust_crystallization/*.pdf
+source/apps/crust_crystallization/*.py
 source/apps/crust_crystallization/*.plt
 source/apps/crust_crystallization/*.sh
 source/apps/crust_crystallization/crust_crystallization
