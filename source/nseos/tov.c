@@ -22,6 +22,15 @@ double calc_dp(double rho_, double p_, double r_, double dr_, double m_)
         /(1.-2.*G_CGS*m_/r_/SPEEDOFL_CGS/SPEEDOFL_CGS)*dr_;
 }
 
+double calc_dw(double rho_, double p_, double r_, double dr_, double m_,
+        double w_)
+{
+    return (4.*PI*G_CGS/SPEEDOFL_CGS/SPEEDOFL_CGS
+            *(rho_*SPEEDOFL_CGS*SPEEDOFL_CGS + p_)*(4. + w_)*r_
+            /(SPEEDOFL_CGS*SPEEDOFL_CGS - 2.*G_CGS*m_/r_)
+            - w_/r_*(3. + w_))*dr_;
+}
+
 double calc_dy(double rho_, double p_, double r_, double dr_, double m_, 
         double y_, double vs2_)
 {
@@ -37,6 +46,35 @@ double calc_dy(double rho_, double p_, double r_, double dr_, double m_,
 
     return (-y_*y_/r_ - (y_ - 6.)/(r_-2.*G_CGS*m_/SPEEDOFL_CGS/SPEEDOFL_CGS) 
             - r_*q)*dr_;
+}
+
+double calc_moment_of_inertia(double r_, double w_)
+{
+    return SPEEDOFL_CGS*SPEEDOFL_CGS/G_CGS
+        *w_*pow(r_,3.)/(6.+2.*w_); // see: Phys. Rep. 621, 2016, 127
+}
+
+double calc_normalized_moment_of_inertia_approx(double r_, double m_)
+{
+    double beta = G_CGS*m_/r_/SPEEDOFL_CGS/SPEEDOFL_CGS;
+    /* double i_over_mr2 = 0.21/(1.-2.*beta); // PRC82,025810(2010) */
+    double i_over_mr2 = 0.237*(1. + 2.844*beta
+            + 18.91*pow(beta,4.)); // Phys. Rep. 621, 2016, 127
+
+    return i_over_mr2;
+}
+
+double calc_normalized_crustal_moment_of_inertia_approx(
+        double r_, double m_, double i_over_mr2, 
+        double epst, double pt, double rcore)
+{
+    double rs = 2.*G_CGS*m_;
+    double icrust_over_mr2 = 16.*PI/3.*pow(rcore,6.)*pt*P_FACTOR_NU_TO_CGS/rs
+        *(1. - rs/r_/SPEEDOFL_CGS/SPEEDOFL_CGS*i_over_mr2)
+        *(1. + 48./5.*(rcore/rs*SPEEDOFL_CGS*SPEEDOFL_CGS - 1.)*(pt/epst))
+        /m_/r_/r_;
+
+    return icrust_over_mr2;
 }
 
 double calc_tidal_love_number(double r_, double m_, double y_)
@@ -56,31 +94,9 @@ double calc_tidal_love_number(double r_, double m_, double y_)
 double calc_dimensionless_tidal_deformability(double r_, double m_, 
         double k2_)
 {
-    double beta;
-
-    beta = G_CGS*m_/r_/SPEEDOFL_CGS/SPEEDOFL_CGS; // compactness
+    double beta = G_CGS*m_/r_/SPEEDOFL_CGS/SPEEDOFL_CGS; // compactness
 
     return 2.*k2_/3.*pow(beta,-5.);
-}
-
-double calc_normalized_moment_of_inertia(double r_, double m_)
-{
-    double compactness = G_CGS*m_/r_/SPEEDOFL_CGS/SPEEDOFL_CGS;
-    /* double i_over_mr2 = 0.21/(1.-2.*compactness); // PRC82,025810(2010) */
-    double i_over_mr2 = 0.237*(1.+2.844*compactness 
-            + 18.91*pow(compactness,4.)); // Phys. Rep. 621, 2016, 127
-    return i_over_mr2;
-}
-
-double calc_normalized_crustal_moment_of_inertia(double r_, double m_, 
-        double i_over_mr2, double epst, double pt, double rcore)
-{
-    double rs = 2.*G_CGS*m_;
-    double icrust_over_mr2 = 16.*PI/3.*pow(rcore,6.)*pt*P_FACTOR_NU_TO_CGS/rs
-        *(1. - rs/r_/SPEEDOFL_CGS/SPEEDOFL_CGS*i_over_mr2)
-        *(1. + 48./5.*(rcore/rs*SPEEDOFL_CGS*SPEEDOFL_CGS - 1.)*(pt/epst))
-        /m_/r_/r_;
-    return icrust_over_mr2;
 }
 
 double get_observable_for_a_given_mass(double m, double mm, double mp, 
@@ -139,9 +155,10 @@ double solve_tov_equation(int lines, double pt, double epst, FILE *eos,
     double rhoc, pc;
     double rho, p, vs2;
     double m, r;
+    double w;
     double y;
-    double rho_sav, p_sav, m_sav, r_sav;
-    double mcore, rcore;
+    double rho_sav, p_sav, m_sav, r_sav, w_sav;
+    double mcore, rcore, wcore;
     double i_over_mr2, icrust_over_mr2;
     double k2, lambda_dimless;
 
@@ -185,9 +202,11 @@ double solve_tov_equation(int lines, double pt, double epst, FILE *eos,
 
         m = 0.;
         r = 10.;
+        w = 0.;
         y = 2.;
         m_sav = m;
         r_sav = r;
+        w_sav = w;
 
         gsl_spline_init (spline, P, Rho, l);
 
@@ -196,6 +215,7 @@ double solve_tov_equation(int lines, double pt, double epst, FILE *eos,
             r += dr;
             m += calc_dm(rho, r, dr);
             p += calc_dp(rho, p, r, dr, m);
+            w += calc_dw(rho, p, r, dr, m, w);
 
             if (pt*P_FACTOR_NU_TO_CGS != P[0])
             {
@@ -204,12 +224,14 @@ double solve_tov_equation(int lines, double pt, double epst, FILE *eos,
                 {
                     mcore = (m_sav + m)/2.;
                     rcore = (r_sav + r)/2.;
+                    wcore = (w_sav + w)/2.;
                 }
             }
             else
             {
                 mcore = m;
                 rcore = r;
+                wcore = w;
             }
 
             if(p > P[0])
@@ -224,12 +246,16 @@ double solve_tov_equation(int lines, double pt, double epst, FILE *eos,
             p_sav = p;
             r_sav = r;
             m_sav = m;
+            w_sav = w;
         }
 
-        i_over_mr2 = calc_normalized_moment_of_inertia(r, m);
+        i_over_mr2 = calc_moment_of_inertia(r, w)/m/r/r;
         if (pt*P_FACTOR_NU_TO_CGS != P[0])
-            icrust_over_mr2 = calc_normalized_crustal_moment_of_inertia(r, m, 
-                    i_over_mr2, epst, pt, rcore);
+        {
+            icrust_over_mr2 = i_over_mr2 
+                - calc_moment_of_inertia(rcore, wcore)/m/r/r;
+
+        }
         else
             icrust_over_mr2 = 0.;
 
@@ -412,10 +438,13 @@ int eval_observables_from_glitch_activity(
             m_sav = m;
         }
 
-        i_over_mr2 = calc_normalized_moment_of_inertia(r, m);
+        i_over_mr2 = calc_normalized_moment_of_inertia_approx(r, m);
         if (pt*P_FACTOR_NU_TO_CGS != P[0])
-            icrust_over_mr2 = calc_normalized_crustal_moment_of_inertia(r, m, 
-                    i_over_mr2, epst, pt, rcore);
+        {
+            icrust_over_mr2 = calc_normalized_crustal_moment_of_inertia_approx(
+                    r, m, i_over_mr2, 
+                    epst, pt, rcore);
+        }
         else
             icrust_over_mr2 = 0.;
 
