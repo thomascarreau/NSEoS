@@ -104,6 +104,8 @@ melting temperature (mass density and pressure).
 
 * DDMEd: `ddmed.in`
 
+* NL3: `nl3.in`
+
 * PKDD: `pkdd.in`
 
 * TM1: `tm1.in`
