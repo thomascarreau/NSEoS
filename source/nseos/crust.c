@@ -105,7 +105,8 @@ double calc_ion_free_en(
                 + calc_lattice_en_for_tm(zz, np_)
                 + calc_finite_size_contrib(satdata, aa_, del_, n0_, np_)
                 + calc_zp_en(zz, np_, mi)
-                + calc_harmonic_contrib(zz, np_, mi, tt_);
+                + calc_harmonic_contrib(zz, np_, mi, tt_)
+                + calc_anharmonic_contrib(zz, np_, tt_);
         }
     }
     else if (strcmp(phase, "liq") == 0)

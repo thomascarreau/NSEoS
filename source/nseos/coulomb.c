@@ -117,6 +117,26 @@ double calc_harmonic_contrib(double zz_, double np_, double mi_, double tt_)
     }
 }
 
+double calc_anharmonic_contrib(double zz_, double np_, 
+        double tt_)
+{
+    // see: eq. (2.117) of "Neutron Stars 1: Equation of State and Structure"
+    double a[3] = {10.9, 247.0, 1.765e5};
+
+    double sum = 0.;
+
+    double vws = zz_/np_;
+    double an = pow(4./3.*PI/vws,-1./3.);
+    double gamma = zz_*zz_*ALPHAFS*HBARC/tt_/an;
+
+    for(int p = 1; p < 4; p++)
+    {
+        sum += a[p-1]/p/pow(gamma, p);
+    }
+    
+    return -tt_*sum;
+}
+
 double calc_translational_free_en(double zz_, double np_, double mi_, 
         double tt_)
 {
@@ -141,8 +161,8 @@ double calc_total_coulomb_contrib(
     double b4 = 4.62e-3;
 
     double vws = zz_/np_;
-    double a = pow(4./3.*PI/vws,-1./3.);
-    double gamma = zz_*zz_*ALPHAFS*HBARC/tt_/a;
+    double an = pow(4./3.*PI/vws,-1./3.);
+    double gamma = zz_*zz_*ALPHAFS*HBARC/tt_/an;
 
     return tt_*(a1*(pow(gamma*(a2+gamma),0.5) 
                 - a2*log(pow(gamma/a2,0.5) + pow(1.+gamma/a2,0.5)))

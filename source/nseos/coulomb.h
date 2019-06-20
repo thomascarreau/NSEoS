@@ -15,6 +15,8 @@ double calc_finite_size_contrib(struct parameters satdata,
 double calc_zp_en(double zz_, double np_, double mi_); // E_{zp}
 double calc_harmonic_contrib(double zz_, double np_, double mi_, 
         double tt_); // F_{harm}
+double calc_anharmonic_contrib(double zz_, double np_, 
+        double tt_); // F_{anharm}
 
 // Coulomb liquid of ions
 double calc_translational_free_en(double zz_, double np_, double mi_, 
