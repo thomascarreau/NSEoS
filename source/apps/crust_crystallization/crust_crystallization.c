@@ -12,8 +12,8 @@ int main(int argc, char *argv[])
     if (argc != 4)
     {
         fprintf(stderr, 
-                "ERROR: syntax is './ocrust_crystallization "
-                "set.in ocrust.out eos.out'\n");
+                "ERROR: syntax is './crust_crystallization "
+                "set.in crust.out eos.out'\n");
         return 1;
     }
 
