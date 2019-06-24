@@ -33,7 +33,7 @@ int main(int argc, char *argv[])
     comp.n0 = 0.1595;
     comp.ng = 1.e-4;
 
-    FILE *ocrust = fopen(argv[2],"w+");
+    FILE *crust = fopen(argv[2],"w+");
     FILE *eos = fopen(argv[3],"w+");
 
     int nd_checker = 0;
@@ -44,7 +44,7 @@ int main(int argc, char *argv[])
     {
         tm = eval_melting_temperature(satdata, sparams, nb, &comp, 0);
 
-        print_state_crust(satdata, sparams, comp, nb, tm, "sol", ocrust, eos);
+        print_state_crust(satdata, sparams, comp, nb, tm, "sol", crust, eos);
 
         fprintf(stderr, "%g\t%g\n", nb, tm);
 
@@ -75,14 +75,14 @@ int main(int argc, char *argv[])
         }
 
         print_state_crust(satdata, sparams, 
-                comp, nb, tm, "sol", ocrust, eos);
+                comp, nb, tm, "sol", crust, eos);
 
         fprintf(stderr, "%g\t%g\n", nb, tm);
 
         nb += nb/10.;
     }
 
-    fclose(ocrust);
+    fclose(crust);
     fclose(eos);
 
     return 0;
