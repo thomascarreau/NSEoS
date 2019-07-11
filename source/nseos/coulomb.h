@@ -4,7 +4,11 @@
 #include "empirical.h"
 #include "nuclear_surface_en.h"
 
-double calc_coulomb_en(struct parameters satdata, double aa_, double ii_);
+double calc_coulomb_en(struct parameters satdata, 
+        double aa_, double ii_, double n0_);
+
+// Pasta
+double calc_fd(double u_, int d_);
 
 // Coulomb crystal
 double calc_lattice_en(struct parameters satdata, 

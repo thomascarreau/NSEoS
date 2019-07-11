@@ -9,17 +9,26 @@
 #define CM (0.895929255682) // bcc lattice; Table 2.4 of Haensel book
 #define U1 (0.5113875) // bcc lattice; Table 2.4 of Haensel book
 
-double calc_coulomb_en(struct parameters satdata, double aa_, double ii_)
+double calc_coulomb_en(struct parameters satdata, 
+        double aa_, double ii_, double n0_)
 {
     double rsat;
     double ac;
     double zz;
 
-    rsat = pow(3./4./PI/satdata.rhosat0,1./3.);
+    rsat = pow(3./4./PI/n0_,1./3.);
     ac = 3./5.*ALPHAFS*HBARC/rsat;
     zz = aa_*(1.-ii_)/2.;
 
     return ac*zz*zz*pow(aa_,-1./3.);
+}
+
+double calc_fd(double u_, int d_)
+{
+    if (d_ == 2) 
+        return 0.25*(log(1./u_) - 1. + u_);
+    else 
+        return 1./(d_+2.)*(2./(d_-2.)*(1. - d_*pow(u_,1. - 2./d_)/2.) + u_);
 }
 
 double calc_lattice_en(struct parameters satdata, 

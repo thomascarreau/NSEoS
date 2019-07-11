@@ -51,4 +51,19 @@ double calc_ls_meta_model_nuclear_en_micro(struct parameters satdata,
 double calc_electron_binding_energy(int zz_);
 double calc_nuclear_mass_from_mass_excess(int aa_, int zz_, double deps_);
 
+//=============================
+//      pasta
+//=============================
+struct pars
+{
+    double a, b, c;
+};
+double function_rn(double x, void *params);
+double evaluate_rn(double nb_, double ii_, double n0_, double ng_,
+        int d_, struct sf_params sparams, char phase[]);
+double calc_surface_plus_coulomb_energy_density(double nb_, 
+        double ii_, double n0_, double ng_, 
+        int d_, struct sf_params sparams, char phase[]);
+
+
 #endif // H_NUCLEAR_EN
