@@ -15,7 +15,7 @@ double calc_ldm_meta_model_nuclear_en(struct parameters satdata, int max_order,
     meta = calc_meta_model_nuclear_matter(satdata, max_order, n0_, ii_, 0.);
     bulk_en = meta.enpernuc*aa_;
     surf_en = calc_ldm_surface_en(satdata, aa_);
-    coul_en = calc_coulomb_en(satdata, aa_, ii_, n0_);
+    coul_en = calc_coulomb_en(aa_, ii_, n0_);
 
     return bulk_en + surf_en + coul_en;
 }
@@ -32,7 +32,7 @@ double calc_etf_ana_meta_model_nuclear_en(struct parameters satdata,
     meta = calc_meta_model_nuclear_matter(satdata, max_order, n0_, ii_, 0.);
     bulk_en = meta.enpernuc*aa_;
     surf_en = calc_etf_ana_surface_en(satdata, aa_, ii_, n0_);
-    coul_en = calc_coulomb_en(satdata, aa_, ii_, n0_);
+    coul_en = calc_coulomb_en(aa_, ii_, n0_);
 
     return bulk_en + surf_en + coul_en;
 }
@@ -49,7 +49,7 @@ double calc_ls_meta_model_nuclear_en(struct parameters satdata,
     meta = calc_meta_model_nuclear_matter(satdata, max_order, n0_, ii_, 0.);
     bulk_en = meta.enpernuc*aa_;
     surf_en = calc_ls_surface_en(sparams, aa_, ii_, n0_);
-    coul_en = calc_coulomb_en(satdata, aa_, ii_, n0_);
+    coul_en = calc_coulomb_en(aa_, ii_, n0_);
 
     return bulk_en + surf_en + coul_en;
 }
@@ -115,7 +115,7 @@ double calc_ls_meta_model_nuclear_en_micro(struct parameters satdata,
     meta = calc_meta_model_nuclear_matter(satdata, max_order, n0_, ii_, 0.);
     bulk_en = meta.enpernuc*aa_;
     surf_en = calc_ls_surface_en(sparams, aa_, ii_, n0_);
-    coul_en = calc_coulomb_en(satdata, aa_, ii_, n0_);
+    coul_en = calc_coulomb_en(aa_, ii_, n0_);
     shell_en = get_shell_en_from_myers_table((int)aa_, (int)aa_*(1.-ii_)/2.);
     pairing_en = calc_pairing_en((int)aa_, (int)aa_*(1.-ii_)/2.);
 

@@ -93,8 +93,8 @@ double calc_ion_free_en(
             return 
                 CALC_NUCLEAR_EN(satdata, sparams, TAYLOR_EXP_ORDER, 
                         aa_, del_, n0_)
-                + calc_lattice_en(satdata, aa_, del_, n0_, np_)
-                + calc_finite_size_contrib(satdata, aa_, del_, n0_, np_);
+                + calc_lattice_en(aa_, del_, n0_, np_)
+                + calc_finite_size_contrib(aa_, del_, n0_, np_);
             /* + calc_zp_en(zz, np_, mi); */
         }
         else
@@ -103,7 +103,7 @@ double calc_ion_free_en(
                 CALC_NUCLEAR_EN(satdata, sparams, TAYLOR_EXP_ORDER, 
                         aa_, del_, n0_)
                 + calc_lattice_en_for_tm(zz, np_)
-                + calc_finite_size_contrib(satdata, aa_, del_, n0_, np_)
+                + calc_finite_size_contrib(aa_, del_, n0_, np_)
                 + calc_zp_en(zz, np_, mi)
                 + calc_harmonic_contrib(zz, np_, mi, tt_)
                 + calc_anharmonic_contrib(zz, np_, tt_);
@@ -113,7 +113,7 @@ double calc_ion_free_en(
     {
         return 
             CALC_NUCLEAR_EN(satdata, sparams, TAYLOR_EXP_ORDER, aa_, del_, n0_)
-            + calc_finite_size_contrib(satdata, aa_, del_, n0_, np_)
+            + calc_finite_size_contrib(aa_, del_, n0_, np_)
             + calc_translational_free_en(zz, np_, mi, tt_)
             + calc_total_coulomb_contrib(zz, np_, tt_);
     }
