@@ -374,22 +374,32 @@ struct sf_params fit_sf_params(struct parameters satdata, double p)
     return prms;
 }
 
-double calc_ls_surface_en(struct sf_params sparams, 
-        double aa_, double ii_, double n0_)
+double calc_ls_surface_free_en(
+        struct parameters satdata, struct sf_params sparams, 
+        double aa_, double ii_, double n0_, double tt_)
 {
-    double surf_energy;
     double r0;
-    double sigma;
     double ypnuc;
+    double tc;
+    double h; // temperature dependence of the surface tension
+    double sigma;
+    double surf_free_energy;
 
     r0 = pow(4.*PI*n0_/3.,-1./3.);
     ypnuc = (1. - ii_)/2.;
+
+    tc = 87.76*sqrt(satdata.ksat0/375.)*pow(0.155/satdata.rhosat0,1./3.)
+        *ypnuc*(1.-ypnuc); // eq. (2.31) in Nuclear Physics A 535 (1991) 331
+
+    if (tt_ > tc) h = 0.;
+    else h = pow(1. - pow(tt_/tc, 2.), 2.);
+
     sigma = sparams.sigma0*(pow(2.,sparams.p+1.) + sparams.b)
         /(pow(ypnuc,-sparams.p) 
-            + sparams.b + pow(1.-ypnuc,-sparams.p));
-    surf_energy = 4.*PI*r0*r0*sigma*pow(aa_,2./3.)
+            + sparams.b + pow(1.-ypnuc,-sparams.p))*h;
+    surf_free_energy = 4.*PI*r0*r0*sigma*pow(aa_,2./3.)
         + 8.*PI*r0*sigma*sparams.sigma0c/sparams.sigma0
         *sparams.alpha*(sparams.beta - ypnuc)*pow(aa_,1./3.);
 
-    return surf_energy;
+    return surf_free_energy;
 }

@@ -44,7 +44,8 @@ struct sf_params
     double beta;
     double chi2;
 };
-double calc_ls_surface_en(struct sf_params params, 
-        double aa_, double ii_, double n0_);
+double calc_ls_surface_free_en(
+        struct parameters satdata, struct sf_params params, 
+        double aa_, double ii_, double n0_, double tt_);
 
 #endif // H_NUCLEAR_SURFACE_EN

@@ -81,7 +81,7 @@ double calc_ion_free_en(
 {
     double zz = aa_*(1.-del_)/2.;
     double mi = 
-        CALC_NUCLEAR_EN(satdata, sparams, TAYLOR_EXP_ORDER, aa_, del_, n0_)
+        CALC_NUCLEAR_EN(satdata, sparams, TAYLOR_EXP_ORDER, aa_, del_, n0_, tt_)
         + zz*RMP + (aa_*(1.-ng_/n0_)-zz)*RMN 
         - aa_/n0_*ng_*calc_meta_model_nuclear_matter(
                 satdata, TAYLOR_EXP_ORDER, ng_, 1., tt_).fpernuc;
@@ -92,7 +92,7 @@ double calc_ion_free_en(
         {
             return 
                 CALC_NUCLEAR_EN(satdata, sparams, TAYLOR_EXP_ORDER, 
-                        aa_, del_, n0_)
+                        aa_, del_, n0_, 0.)
                 + calc_lattice_en(aa_, del_, n0_, np_)
                 + calc_finite_size_contrib(aa_, del_, n0_, np_);
             /* + calc_zp_en(zz, np_, mi); */
@@ -101,7 +101,7 @@ double calc_ion_free_en(
         {
             return 
                 CALC_NUCLEAR_EN(satdata, sparams, TAYLOR_EXP_ORDER, 
-                        aa_, del_, n0_)
+                        aa_, del_, n0_, tt_)
                 + calc_lattice_en_for_tm(zz, np_)
                 + calc_finite_size_contrib(aa_, del_, n0_, np_)
                 + calc_zp_en(zz, np_, mi)
@@ -112,7 +112,8 @@ double calc_ion_free_en(
     else if (strcmp(phase, "liq") == 0)
     {
         return 
-            CALC_NUCLEAR_EN(satdata, sparams, TAYLOR_EXP_ORDER, aa_, del_, n0_)
+            CALC_NUCLEAR_EN(satdata, sparams, TAYLOR_EXP_ORDER, 
+                    aa_, del_, n0_, tt_)
             + calc_finite_size_contrib(aa_, del_, n0_, np_)
             + calc_translational_free_en(zz, np_, mi, tt_)
             + calc_total_coulomb_contrib(zz, np_, tt_);

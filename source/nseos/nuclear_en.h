@@ -27,9 +27,9 @@ double calc_etf_ana_meta_model_nuclear_en(struct parameters satdata,
 //=============================
 // bulk: ELFc(N) meta-modeling
 // surface: LS corrected surface energy
-double calc_ls_meta_model_nuclear_en(struct parameters satdata, 
+double calc_ls_meta_model_nuclear_free_en(struct parameters satdata, 
         struct sf_params sparams, int max_order, 
-        double aa_, double ii_, double n0_);
+        double aa_, double ii_, double n0_, double tt_);
 
 // micro components
 double get_shell_en_from_myers_table(int aa_, int zz_);
