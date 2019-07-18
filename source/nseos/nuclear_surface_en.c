@@ -298,6 +298,7 @@ struct sf_params fit_sf_params(struct parameters satdata, double p)
     data = fopen("../../input/masses/spherical_nuclei.data", "r"); // N=9
     /* data = fopen("../../input/masses/AME2012.data", "r"); // N=2353 */
     /* data = fopen("../../input/masses/HFB24.data", "r"); // N=8392 */
+    /* data = fopen("../../input/masses/BSk24.data", "r"); // N=4252 */
     if (data != NULL)
     {
         for (i = 0; i < n; i++)
