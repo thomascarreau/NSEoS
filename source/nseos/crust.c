@@ -1053,7 +1053,7 @@ double eval_melting_temperature(
     double guess_oc[3] = {eq->aa, eq->del, eq->n0};
     double guess_ic[4] = {eq->aa, eq->del, eq->n0, eq->ng};
 
-    /* double guess_20[3] = {80., eq->n0, eq->ng}; */
+    /* double guess_zz20[3] = {80., eq->n0, eq->ng}; */
 
     if (nd_checker == 0)
     {
