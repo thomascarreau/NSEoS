@@ -857,7 +857,7 @@ struct compo calc_icrust_composition_zz_fixed(double nb_, double tt_, int zz_,
 }
 
 struct compo calc_icrust_composition_w_shl(
-        double nb_, double tt_, char phase[],
+        double nb_, double tt_, char phase[], double *guess_zz20,
         struct parameters satdata, struct sf_params sparams)
 {
     struct compo eq, eq_opt;
@@ -865,12 +865,22 @@ struct compo calc_icrust_composition_w_shl(
 
     fdensws_min = 1e99; 
 
-    double guess[3] = {70., 0.14, nb_/10.};
+    double guess[3];
+    guess[0] = guess_zz20[0];
+    guess[1] = guess_zz20[1];
+    guess[2] = guess_zz20[2];
 
     for(int zz = 20; zz < 61; zz += 2)
     {
         eq = calc_icrust_composition_zz_fixed(nb_, tt_, zz, phase, 
                 guess, satdata, sparams);
+
+        if (zz == 20)
+        {
+            guess_zz20[0] = eq.aa;
+            guess_zz20[1] = eq.n0;
+            guess_zz20[2] = eq.ng;
+        }
 
         fdensws = calc_crust_ws_cell_free_energy_density(satdata, sparams, 
                 eq, nb_, tt_, phase)
@@ -882,12 +892,12 @@ struct compo calc_icrust_composition_w_shl(
             fdensws_min = fdensws;
         }
 
-        if (guess[0] != guess[0])
-        {
-            guess[0] = 70.;
-            guess[1] = 0.14;
-            guess[2] = nb_/10.;
-        }
+        /* if (guess[0] != guess[0]) // old */
+        /* { */
+        /*     guess[0] = guess_zz20[0]; */
+        /*     guess[1] = guess_zz20[1]; */
+        /*     guess[2] = guess_zz20[2]; */
+        /* } */
     }
 
     return eq_opt;
@@ -1043,6 +1053,8 @@ double eval_melting_temperature(
     double guess_oc[3] = {eq->aa, eq->del, eq->n0};
     double guess_ic[4] = {eq->aa, eq->del, eq->n0, eq->ng};
 
+    /* double guess_20[3] = {80., eq->n0, eq->ng}; */
+
     if (nd_checker == 0)
     {
         comp = calc_ocrust3d_composition(nb_, 0., 
@@ -1053,7 +1065,7 @@ double eval_melting_temperature(
         comp = calc_icrust4d_composition(nb_, 0., 
                 "sol", guess_ic, satdata, sparams);
         /* comp = calc_icrust_composition_w_shl(nb_, 0., */ 
-        /*         "sol", satdata, sparams); */
+        /*         "sol", guess_zz20, satdata, sparams); */
     }
     
     double tt = approximate_melting_temperature(comp, nb_)*1.2;
@@ -1072,7 +1084,7 @@ double eval_melting_temperature(
             comp = calc_icrust4d_composition(nb_, tt, 
                     "liq", guess_ic, satdata, sparams); 
             /* comp = calc_icrust_composition_w_shl(nb_, tt, */ 
-            /*         "liq", satdata, sparams); */
+            /*         "liq", guess_zz20, satdata, sparams); */
         }
 
         fws_sol = calc_crust_ws_cell_free_energy_density(

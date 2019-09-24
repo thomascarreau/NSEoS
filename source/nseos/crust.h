@@ -77,7 +77,7 @@ struct compo calc_icrust_composition_zz_fixed(
         char phase[], double *guess,
         struct parameters satdata, struct sf_params sparams);
 struct compo calc_icrust_composition_w_shl(
-        double nb_, double tt_, char phase[],
+        double nb_, double tt_, char phase[], double *guess_zz20,
         struct parameters satdata, struct sf_params sparams);
 
 // energetics
