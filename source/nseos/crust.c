@@ -870,6 +870,10 @@ struct compo calc_icrust_composition_w_shl(
     guess[1] = guess_zz20[1];
     guess[2] = guess_zz20[2];
 
+    double x = 1.;
+    double tt0 = 1.;
+    double beta = 1./tt0*tan(PI/2.*(1.-x));
+
     for(int zz = 20; zz < 61; zz += 2)
     {
         eq = calc_icrust_composition_zz_fixed(nb_, tt_, zz, phase, 
@@ -884,7 +888,8 @@ struct compo calc_icrust_composition_w_shl(
 
         fdensws = calc_crust_ws_cell_free_energy_density(satdata, sparams, 
                 eq, nb_, tt_, phase)
-            + get_shell_energy_per_nucleon(nb_, zz)*nb_;
+            + get_shell_energy_per_nucleon(nb_, zz)*nb_
+            *(1.-2./PI*atan(beta*tt_));
 
         if (fdensws < fdensws_min)
         {
