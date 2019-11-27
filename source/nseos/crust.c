@@ -817,13 +817,6 @@ struct compo calc_icrust_composition_w_shl(double nb_, double tt_, char phase[],
       eq_opt      = eq;
       fdensws_min = fdensws;
     }
-
-    /* if (guess[0] != guess[0]) // old */
-    /* { */
-    /*     guess[0] = guess_zz20[0]; */
-    /*     guess[1] = guess_zz20[1]; */
-    /*     guess[2] = guess_zz20[2]; */
-    /* } */
   }
 
   return eq_opt;

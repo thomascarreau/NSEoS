@@ -5,7 +5,7 @@
 #include "empirical.h"
 #include "modeling.h"
 
-// (effm,isosplit) <-> (barm,bardel)
+// (effm,isosplit) -> (barm,bardel)
 void eval_barm_and_bardel(
     float effm, float isosplit, float *barm, float *bardel) {
   float kv;

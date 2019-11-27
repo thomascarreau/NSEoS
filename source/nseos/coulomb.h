@@ -4,6 +4,7 @@
 #include "empirical.h"
 #include "nuclear_surface_en.h"
 
+// Coulomb energy for a spherical nucleus
 double calc_coulomb_en(double aa_, double ii_, double n0_);
 
 // Pasta

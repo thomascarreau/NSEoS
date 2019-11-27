@@ -1,7 +1,8 @@
+#include <math.h>
+
 #include <gsl/gsl_blas.h>
 #include <gsl/gsl_integration.h>
 #include <gsl/gsl_multifit_nlin.h>
-#include <math.h>
 
 #include "coulomb.h"
 #include "modeling.h"
@@ -83,9 +84,9 @@ double calc_etf_ana_surface_en(
 
   alphanum = -(satdata.ksat0 + 9. * satdata.lasat0 -
                ckin * pow(satdata.rhosat0, 2. / 3.) * (1. + 4. * satdata.barm));
-  alphadenom =
-      9. * (satdata.lasat0 - ckin * pow(satdata.rhosat0, 2. / 3.) *
-                                 ((1. + satdata.barm) / 3. - satdata.barm));
+  alphadenom = 9. * (satdata.lasat0 -
+                        ckin * pow(satdata.rhosat0, 2. / 3.) *
+                            ((1. + satdata.barm) / 3. - satdata.barm));
   alpha = (alphanum / alphadenom);
 
   c0num = satdata.lasat0 * satdata.ksat0 -
@@ -97,12 +98,12 @@ double calc_etf_ana_surface_en(
   c0denom = satdata.rhosat0 * (satdata.ksat0 + 9. * satdata.lasat0 -
                                   ckin * pow(satdata.rhosat0, 2. / 3.) *
                                       (1. + 4. * satdata.barm));
-  c0      = c0num / c0denom;
+  c0 = c0num / c0denom;
 
-  c3num =
-      9. * pow((satdata.lasat0 - ckin * pow(satdata.rhosat0, 2. / 3.) *
-                                     ((1. + satdata.barm) / 3. - satdata.barm)),
-               2.);
+  c3num = 9. * pow((satdata.lasat0 -
+                       ckin * pow(satdata.rhosat0, 2. / 3.) *
+                           ((1. + satdata.barm) / 3. - satdata.barm)),
+                   2.);
   c3denom = pow(satdata.rhosat0, alpha) * c0denom;
   c3      = c3num / c3denom;
 
@@ -153,16 +154,18 @@ double calc_etf_ana_surface_en(
   for (i = 0; i <= imax; i = i + 1) {
     sum1 = sum1 + pow(-1, i) * pow(delmsat, i + 2) / (i + 3) / (i + 4);
     sum2 = sum2 + pow(-1, i) * pow(delmsat, i) / (i + 3) / (i + 4);
-    sum3 = sum3 + pow(-1, i) * pow(delmsat, i + 2) / (i + 3) / (i + 4) *
-                      (eta_function(0, i + 2) + 1.);
-    sum4 = sum4 + pow(-1, i) * pow(delmsat, i) / (i + 3) / (i + 4) *
-                      (eta_function(0, i + 3) + 1.);
-    sum5 =
-        sum5 + pow(-1, i) * pow(delmsat, i + 2) / (i + 3) / (i + 4) *
-                   (eta_function(1, i + 2) + eta_function(0, i + 2) - PI2 / 3.);
-    sum6 =
-        sum6 + pow(-1, i) * pow(delmsat, i) / (i + 3) / (i + 4) *
-                   (eta_function(1, i + 3) + eta_function(0, i + 3) - PI2 / 3.);
+    sum3 = sum3 +
+           pow(-1, i) * pow(delmsat, i + 2) / (i + 3) / (i + 4) *
+               (eta_function(0, i + 2) + 1.);
+    sum4 = sum4 +
+           pow(-1, i) * pow(delmsat, i) / (i + 3) / (i + 4) *
+               (eta_function(0, i + 3) + 1.);
+    sum5 = sum5 +
+           pow(-1, i) * pow(delmsat, i + 2) / (i + 3) / (i + 4) *
+               (eta_function(1, i + 2) + eta_function(0, i + 2) - PI2 / 3.);
+    sum6 = sum6 +
+           pow(-1, i) * pow(delmsat, i) / (i + 3) / (i + 4) *
+               (eta_function(1, i + 3) + eta_function(0, i + 3) - PI2 / 3.);
     sum7 = sum1 + pow(-1, i) * pow(satdata.barm, i + 2) / (i + 3) / (i + 4);
     sum8 = sum2 + pow(-1, i) * pow(satdata.barm, i) / (i + 3) / (i + 4);
   }
@@ -192,11 +195,11 @@ double calc_etf_ana_surface_en(
 
   aslab = pow((cnlsurf0 / clsurf0), 1. / 2.);
 
-  ais = pow((cnlsurf / clsurf), 1. / 2.); // in fm
-  agaus2 =
-      ais * ais + pow((PI / (1. - hnm12.ksym / 18. / hnm12.jsym)), 1. / 2.) *
-                      satdata.rhosat0 / n0_ * 3. * hnm12.jsym *
-                      (ii_ - ii_ * ii_) / clsurf * aslab * drhs;
+  ais    = pow((cnlsurf / clsurf), 1. / 2.); // in fm
+  agaus2 = ais * ais +
+           pow((PI / (1. - hnm12.ksym / 18. / hnm12.jsym)), 1. / 2.) *
+               satdata.rhosat0 / n0_ * 3. * hnm12.jsym * (ii_ - ii_ * ii_) /
+               clsurf * aslab * drhs;
   agaus  = sqrt(agaus2);
   adif   = agaus;
   aratio = adif / r0;
@@ -230,7 +233,7 @@ double calc_etf_ana_surface_en(
   return esurf;
 }
 
-#define N (2353)
+#define N (2353) // (wc -l AME2012.data)
 
 int be_f(const gsl_vector *x, void *data, gsl_vector *f) {
   int *             zz      = ((struct data *)data)->zz;
@@ -249,12 +252,13 @@ int be_f(const gsl_vector *x, void *data, gsl_vector *f) {
 
   size_t i;
 
-  for (i = 0; i < N; i++) // (wc -l spherical_nuclei.data)
+  for (i = 0; i < N; i++)
   {
     double ii = 1. - 2. * zz[i] / aa[i];
     double n0 =
-        satdata.rhosat0 * (1. - 3. * satdata.lsym0 * ii * ii /
-                                    (satdata.ksat0 + satdata.ksym0 * ii * ii));
+        satdata.rhosat0 * (1. -
+                              3. * satdata.lsym0 * ii * ii /
+                                  (satdata.ksat0 + satdata.ksym0 * ii * ii));
     // bulk
     struct hnm meta;
     meta =
@@ -268,7 +272,7 @@ int be_f(const gsl_vector *x, void *data, gsl_vector *f) {
     double esurf = 4. * PI * r0 * r0 * sigma * pow(aa[i], -1. / 3.) +
                    8. * PI * r0 * sigma * prms.sigma0c / prms.sigma0 *
                        prms.alpha * (prms.beta - ypnuc) * pow(aa[i], -2. / 3.);
-    // coulomb
+    // Coulomb
     double Ecoul = calc_coulomb_en(aa[i], ii, n0);
     double ecoul = Ecoul / aa[i];
     // total
@@ -311,10 +315,9 @@ struct sf_params fit_sf_params(struct parameters satdata, double p) {
   f.p      = nb_of_params;
   f.params = &d;
 
-  /* This is the data to be fitted */
+  // This is the data to be fitted
   FILE *data = NULL;
-  /* data       = fopen("../../input/masses/spherical_nuclei.data", "r"); // N=9
-   */
+  /* data       = fopen("../../input/masses/spherical_nuclei.data", "r"); // N=9 */
   data = fopen("../../input/masses/AME2012.data", "r"); // N=2353
   /* data = fopen("../../input/masses/HFB24.data", "r"); // N=8392 */
   /* data = fopen("../../input/masses/BSk24.data", "r"); // N=9896 */
@@ -331,20 +334,20 @@ struct sf_params fit_sf_params(struct parameters satdata, double p) {
 
   s = gsl_multifit_fdfsolver_alloc(T, n, nb_of_params);
 
-  /* initialize solver with starting point and weights */
+  // initialize solver with starting point and weights
   gsl_multifit_fdfsolver_wset(s, &f, &x.vector, &w.vector);
 
-  /* compute initial residual norm */
+  // compute initial residual norm
   res_f = gsl_multifit_fdfsolver_residual(s);
   chi0  = gsl_blas_dnrm2(res_f);
 
-  /* solve the system with a maximum of 20 iterations */
+  // solve the system with a maximum of 20 iterations
   status = gsl_multifit_fdfsolver_driver(s, 20, xtol, gtol, ftol, &info);
 
   gsl_multifit_fdfsolver_jac(s, J);
   gsl_multifit_covar(J, 0.0, covar);
 
-  /* compute final residual norm */
+  // compute final residual norm
   chi = gsl_blas_dnrm2(res_f);
 
 #define FIT(i) gsl_vector_get(s->x, i)

@@ -6,15 +6,15 @@
 #include "phyconst.h"
 
 struct hnm {
-  double enpernuc; // energy per nucleon
-  double spernuc;  // entropy per nucleon
-  double mun;      // neutron chemical potential
-  double mup;      // proton chemical potential
-  double fpernuc;  // free energy per nucleon
-  double p;        // pressure
-  double jsym;
-  double lsym;
-  double ksym;
+  double enpernuc;  // energy per nucleon
+  double spernuc;   // entropy per nucleon
+  double mun;       // neutron chemical potential
+  double mup;       // proton chemical potential
+  double fpernuc;   // free energy per nucleon
+  double p;         // pressure
+  double jsym;      // symmetry energy
+  double lsym;      // first derivative of symmetry energy
+  double ksym;      // second derivative of symmetry energy
 };
 
 // Meta-model, see: Margueron et al. (2018)

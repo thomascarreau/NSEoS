@@ -1,5 +1,6 @@
-#include <gsl/gsl_spline.h>
 #include <math.h>
+
+#include <gsl/gsl_spline.h>
 
 #include "mathconst.h"
 #include "phyconst.h"
@@ -59,7 +60,6 @@ double calc_moment_of_inertia(double r_, double w_) {
 
 double calc_normalized_moment_of_inertia_approx(double r_, double m_) {
   double beta = G_CGS * m_ / r_ / SPEEDOFL_CGS / SPEEDOFL_CGS;
-  /* double i_over_mr2 = 0.21/(1.-2.*beta); // PRC82,025810(2010) */
   double i_over_mr2 =
       0.237 *
       (1. + 2.844 * beta + 18.91 * pow(beta, 4.)); // Phys. Rep. 621, 2016, 127
