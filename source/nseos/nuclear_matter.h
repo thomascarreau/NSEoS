@@ -32,7 +32,7 @@ double     calc_squared_nucleon_sound_velocity( // (vs/c)^2
         double tt_);
 
 // Skyrme functional, see: Chabanat et al. (1997)
-// !! only for T = 0
+// !! only for T=0 !!
 //===============================================
 double     calc_asymmetry_factor(double m_, double ii_);
 double     calc_asymmetry_factor_derivative(double m_, double ii_);

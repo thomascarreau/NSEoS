@@ -389,6 +389,8 @@ struct hnm calc_skyrme_nuclear_matter(
                       coeff.t1 * (2. * coeff.x1 + 1.)) *
                   f83);
 
+  result.spernuc = 0.;
+
   denpernucdn =
       2. / 5. * HBARC * HBARC / 2. / RMN * cpow(1.5 * PI2, 2. / 3.) *
           cpow(nn_, -1. / 3.) * f53 +
@@ -418,6 +420,11 @@ struct hnm calc_skyrme_nuclear_matter(
 
   result.mun =
       result.enpernuc + nn_ * (denpernucdn + (1. - ii_) / nn_ * denpernucdi);
+
+  result.mup =
+      result.enpernuc + nn_ * (denpernucdn - (1. + ii_) / nn_ * denpernucdi);
+
+  result.fpernuc = result.enpernuc;   // T=0
 
   result.p = nn_ * nn_ * denpernucdn;
 
