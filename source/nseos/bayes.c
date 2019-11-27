@@ -1,5 +1,6 @@
-#include <gsl/gsl_rng.h>
 #include <math.h>
+
+#include <gsl/gsl_rng.h>
 
 #include "bayes.h"
 #include "eos.h"
