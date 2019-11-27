@@ -89,14 +89,13 @@ void get_high_density_posterior(FILE *prior, FILE *posterior_par,
 
       // CAUSALITY, STABILITY, SYM EN ===================================
       struct transition_qtt tqtt_hd;
-      double                epst_hd;
       int                   hd_checker = 0;
       FILE *                mycrust    = fopen("crust.out", "w+");
       FILE *                mycore     = fopen("core.out", "w+");
       snprintf(eos, sizeof(eos), "eos/eos%zu.out", count);
       FILE *myeos = fopen(eos, "w+");
       int   lines = calc_zero_temperature_equation_of_state(
-          satdata, 3., &tqtt_hd, &epst_hd, &hd_checker, mycrust, mycore, myeos);
+          satdata, 3., &tqtt_hd, &hd_checker, mycrust, mycore, myeos);
       fclose(mycrust);
       fclose(mycore);
       fclose(myeos);
@@ -114,17 +113,16 @@ void get_high_density_posterior(FILE *prior, FILE *posterior_par,
         satdata.zsym0 = zsym_ld;
         struct transition_qtt tqtt_ld;
         tqtt_ld.nt = 0.0005;
-        double epst_ld;
 
-        eval_transition_qtt(satdata, 3., &tqtt_ld, &epst_ld);
+        eval_transition_qtt(satdata, 3., &tqtt_ld);
 
         if (tqtt_ld.nt > 0.01) {
           myeos = fopen(eos, "r");
           struct tov_solution tovs14;
           snprintf(tov, sizeof(tov), "tov/tov%zu.out", count);
           FILE * mytov = fopen(tov, "w+");
-          double mmax  = solve_tov_equation(
-              lines, tqtt_ld.pt, epst_ld, myeos, &tovs14, 1.4, mytov);
+          double mmax =
+              solve_tov_equation(lines, tqtt_ld.pt, myeos, &tovs14, 1.4, mytov);
           fclose(myeos);
           fclose(mytov);
           if (mmax < 1.97) {
@@ -180,14 +178,13 @@ void calc_observables(
   {
     while (read_table_of_sets(posterior, &satdata, &m, &dm) == 0) {
       struct transition_qtt tqtt;
-      double                epst;
 
       int   hd_checker = 0;
       FILE *fcrust     = fopen("crust.out", "w+");
       FILE *fcore      = fopen("core.out", "w+");
       FILE *feos       = fopen("eos.out", "w+");
       int   lines      = calc_zero_temperature_equation_of_state(
-          satdata, 3., &tqtt, &epst, &hd_checker, fcrust, fcore, feos);
+          satdata, 3., &tqtt, &hd_checker, fcrust, fcore, feos);
       fclose(fcrust);
       fclose(fcore);
       fclose(feos);
@@ -195,7 +192,7 @@ void calc_observables(
       feos = fopen("eos.out", "r");
       struct tov_solution tovs14;
       ftov = fopen("tov.out", "w+");
-      mmax = solve_tov_equation(lines, tqtt.pt, epst, feos, &tovs14, 1.4, ftov);
+      mmax = solve_tov_equation(lines, tqtt.pt, feos, &tovs14, 1.4, ftov);
       fclose(feos);
       fclose(ftov);
 
@@ -221,14 +218,13 @@ void calc_observables(
     while (read_table_of_sets(posterior, &satdata, &m, &dm) == 0) {
       for (int i = 0; i < 3; i++) {
         struct transition_qtt tqtt;
-        double                epst;
 
         int   hd_checker = 0;
         FILE *fcrust     = fopen("crust.out", "w+");
         FILE *fcore      = fopen("core.out", "w+");
         FILE *feos       = fopen("eos.out", "w+");
         int   lines      = calc_zero_temperature_equation_of_state(
-            satdata, p[i], &tqtt, &epst, &hd_checker, fcrust, fcore, feos);
+            satdata, p[i], &tqtt, &hd_checker, fcrust, fcore, feos);
         fclose(fcrust);
         fclose(fcore);
         fclose(feos);
@@ -236,8 +232,7 @@ void calc_observables(
         feos = fopen("eos.out", "r");
         struct tov_solution tovs14;
         ftov = fopen("tov.out", "w+");
-        mmax =
-            solve_tov_equation(lines, tqtt.pt, epst, feos, &tovs14, 1.4, ftov);
+        mmax = solve_tov_equation(lines, tqtt.pt, feos, &tovs14, 1.4, ftov);
         fclose(feos);
         fclose(ftov);
 

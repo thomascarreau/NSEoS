@@ -73,8 +73,9 @@ double calc_normalized_crustal_moment_of_inertia_approx(double r_, double m_,
   double icrust_over_mr2 =
       16. * PI / 3. * pow(rcore, 6.) * pt * P_FACTOR_NU_TO_CGS / rs *
       (1. - rs / r_ / SPEEDOFL_CGS / SPEEDOFL_CGS * i_over_mr2) *
-      (1. + 48. / 5. * (rcore / rs * SPEEDOFL_CGS * SPEEDOFL_CGS - 1.) *
-                (pt / epst)) /
+      (1. +
+          48. / 5. * (rcore / rs * SPEEDOFL_CGS * SPEEDOFL_CGS - 1.) *
+              (pt / epst)) /
       m_ / r_ / r_;
 
   return icrust_over_mr2;
@@ -86,9 +87,9 @@ double calc_tidal_love_number(double r_, double m_, double y_) {
 
   beta  = G_CGS * m_ / r_ / SPEEDOFL_CGS / SPEEDOFL_CGS; // compactness
   denom = 6. * beta * (2. - y_ + beta * (5. * y_ - 8.)) // see: arXiv:1512.07820
-          + 4. * pow(beta, 3.) *
-                (13. - 11. * y_ + beta * (3. * y_ - 2.) +
-                    2. * beta * beta * (1. + y_)) +
+          +
+          4. * pow(beta, 3.) * (13. - 11. * y_ + beta * (3. * y_ - 2.) +
+                                   2. * beta * beta * (1. + y_)) +
           3. * pow(1. - 2. * beta, 2.) * (2. - y_ + 2. * beta * (y_ - 1.)) *
               log(1. - 2. * beta);
 
@@ -108,7 +109,7 @@ double get_observable_for_a_given_mass(
   return (op - om) / (mp - mm) * (m - mm) + om; // stupid linear interpolation
 }
 
-double solve_tov_equation(int lines, double pt, double epst, FILE *eos,
+double solve_tov_equation(int lines, double pt, FILE *eos,
     struct tov_solution *tovs_m, double fixed_m, FILE *tov) {
   double Rho[lines], P[lines];
   double Rho_tmp, P_tmp;
@@ -240,9 +241,6 @@ double solve_tov_equation(int lines, double pt, double epst, FILE *eos,
     if (pt * P_FACTOR_NU_TO_CGS != P[0]) {
       icrust_over_mr2 =
           i_over_mr2 - calc_moment_of_inertia(rcore, wcore) / m / r / r;
-      /* icrust_over_mr2 = */
-      /*     calc_normalized_crustal_moment_of_inertia_approx( */
-      /*         r, m, i_over_mr2, epst, pt, rcore); */
     } else
       icrust_over_mr2 = 0.;
 

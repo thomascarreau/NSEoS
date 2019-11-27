@@ -33,7 +33,7 @@ struct tov_solution {
 
 double get_observable_for_a_given_mass(
     double m, double mm, double mp, double om, double op);
-double solve_tov_equation(int lines, double pt, double epst, FILE *eos,
+double solve_tov_equation(int lines, double pt, FILE *eos,
     struct tov_solution *tovs_m, double fixed_m, FILE *tov);
 
 int eval_observables_from_glitch_activity(int lines, double pt, double epst,

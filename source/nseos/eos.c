@@ -9,8 +9,8 @@
 #include "phyconst.h"
 
 int calc_zero_temperature_equation_of_state(struct parameters satdata, double p,
-    struct transition_qtt *tqtt, double *epst, int *hd_checker, FILE *crust,
-    FILE *core, FILE *eos) {
+    struct transition_qtt *tqtt, int *hd_checker, FILE *crust, FILE *core,
+    FILE *eos) {
   int lines = 0;
 
   print_parameters(satdata);
@@ -137,7 +137,6 @@ int calc_zero_temperature_equation_of_state(struct parameters satdata, double p,
 
   tqtt->nt = nb;
   tqtt->pt = calc_core_ws_cell_pressure(satdata, ccomp, nb, tt);
-  *epst    = calc_core_ws_cell_free_energy_density(satdata, ccomp, nb, tt);
 
   fprintf(stderr, "n_t = %g /fm^3\n", tqtt->nt);
   fprintf(stderr, "P_t = %g MeV/fm^3\n\n", tqtt->pt);
@@ -244,8 +243,8 @@ int calc_zero_temperature_equation_of_state(struct parameters satdata, double p,
   return lines;
 }
 
-void eval_transition_qtt(struct parameters satdata, double p,
-    struct transition_qtt *tqtt, double *epst) {
+void eval_transition_qtt(
+    struct parameters satdata, double p, struct transition_qtt *tqtt) {
   struct sf_params sparams = fit_sf_params(satdata, p);
   struct compo     comp;
   // initial guess for the ocrust
@@ -319,5 +318,4 @@ void eval_transition_qtt(struct parameters satdata, double p,
 
   tqtt->nt = nb;
   tqtt->pt = calc_core_ws_cell_pressure(satdata, ccomp, nb, tt);
-  *epst    = calc_core_ws_cell_free_energy_density(satdata, ccomp, nb, tt);
 }

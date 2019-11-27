@@ -17,7 +17,6 @@ int main(int argc, char *argv[]) {
   struct parameters     satdata = assign_param(argv[1], b);
   double                p       = 3.0;
   struct transition_qtt tqtt;
-  double                epst;
   int                   hd_checker = 0;
 
   FILE *mycrust = fopen(argv[2], "w+");
@@ -25,7 +24,7 @@ int main(int argc, char *argv[]) {
   FILE *myeos   = fopen(argv[4], "w+");
 
   int lines = calc_zero_temperature_equation_of_state(
-      satdata, p, &tqtt, &epst, &hd_checker, mycrust, mycore, myeos);
+      satdata, p, &tqtt, &hd_checker, mycrust, mycore, myeos);
 
   fclose(mycrust);
   fclose(mycore);
@@ -40,7 +39,7 @@ int main(int argc, char *argv[]) {
   FILE *mytov = fopen(argv[5], "w+");
 
   double mmax =
-      solve_tov_equation(lines, tqtt.pt, epst, myeos, &tovs14, fixed_m, mytov);
+      solve_tov_equation(lines, tqtt.pt, myeos, &tovs14, fixed_m, mytov);
 
   fclose(myeos);
   fclose(mytov);

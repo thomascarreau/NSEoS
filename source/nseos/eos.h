@@ -9,10 +9,10 @@ struct transition_qtt {
 };
 
 int calc_zero_temperature_equation_of_state(struct parameters satdata, double p,
-    struct transition_qtt *tqtt, double *epst, int *hd_checker, FILE *crust,
-    FILE *core, FILE *eos);
+    struct transition_qtt *tqtt, int *hd_checker, FILE *crust, FILE *core,
+    FILE *eos);
 
-void eval_transition_qtt(struct parameters satdata, double p,
-    struct transition_qtt *tqtt, double *epst);
+void eval_transition_qtt(
+    struct parameters satdata, double p, struct transition_qtt *tqtt);
 
 #endif // H_EOS
