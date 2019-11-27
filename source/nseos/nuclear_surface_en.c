@@ -111,8 +111,8 @@ double calc_etf_ana_surface_en(
   rmsat   = RMN / (1. + satdata.barm * (1. + 3. * xsat));
   delmsat = (RMN - rmsat) / rmsat;
 
-  hnm12 =
-      calc_meta_model_nuclear_matter(satdata, 4, satdata.rhosat0 / 2., ii_, 0.);
+  hnm12 = calc_meta_model_nuclear_matter(
+      satdata, TAYLOR_EXP_ORDER, satdata.rhosat0 / 2., ii_, 0.);
 
   clsurf = 3. * ckin * pow(n0_, 2. / 3.) *
                (eta_function(0, 5. / 3.) * RMN / rmsat - 3. / 5. * delmsat) -
@@ -252,8 +252,7 @@ int be_f(const gsl_vector *x, void *data, gsl_vector *f) {
 
   size_t i;
 
-  for (i = 0; i < N; i++)
-  {
+  for (i = 0; i < N; i++) {
     double ii = 1. - 2. * zz[i] / aa[i];
     double n0 =
         satdata.rhosat0 * (1. -
@@ -317,7 +316,8 @@ struct sf_params fit_sf_params(struct parameters satdata, double p) {
 
   // This is the data to be fitted
   FILE *data = NULL;
-  /* data       = fopen("../../input/masses/spherical_nuclei.data", "r"); // N=9 */
+  /* data       = fopen("../../input/masses/spherical_nuclei.data", "r"); // N=9
+   */
   data = fopen("../../input/masses/AME2012.data", "r"); // N=2353
   /* data = fopen("../../input/masses/HFB24.data", "r"); // N=8392 */
   /* data = fopen("../../input/masses/BSk24.data", "r"); // N=9896 */
