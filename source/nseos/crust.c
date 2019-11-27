@@ -1,7 +1,8 @@
-#include <gsl/gsl_multiroots.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#include <gsl/gsl_multiroots.h>
 
 #include "crust.h"
 #include "lepton.h"

@@ -441,3 +441,140 @@ int eval_observables_from_glitch_activity(int lines, double pt, double epst,
 
   return gp_checker + gm_checker;
 }
+
+int equation_for_m2(const gsl_vector *x, void *params, gsl_vector *f) {
+  double m1     = ((struct rparams_tov *)params)->m1;
+  double mchirp = ((struct rparams_tov *)params)->mchirp;
+
+  const double x0 = gsl_vector_get(x, 0);
+  const double y0 = mchirp - pow(m1 * x0, 3. / 5.) / pow(m1 + x0, 1. / 5.);
+
+  gsl_vector_set(f, 0, y0);
+
+  return GSL_SUCCESS;
+}
+
+double m2_for_m1_mchirp(const double mchirp, const double m1, double *guess) {
+  double m2;
+
+  const gsl_multiroot_fsolver_type *T;
+  gsl_multiroot_fsolver *           s;
+
+  int    status;
+  size_t iter = 0;
+
+  double m2_old, m2_new, mstep;
+
+  struct rparams_tov p;
+  p.m1     = m1;
+  p.mchirp = mchirp;
+
+  double       m2_init = *guess;
+  const size_t n       = 1;
+  gsl_vector * x       = gsl_vector_alloc(n);
+  gsl_vector_set(x, 0, m2_init);
+
+  gsl_multiroot_function f = {&equation_for_m2, n, &p};
+
+  T = gsl_multiroot_fsolver_dnewton;
+  s = gsl_multiroot_fsolver_alloc(T, 1);
+  gsl_multiroot_fsolver_set(s, &f, x);
+
+  do {
+    m2_old = gsl_vector_get(s->x, 0);
+
+    iter++;
+
+    status = gsl_multiroot_fsolver_iterate(s);
+
+    m2_new = gsl_vector_get(s->x, 0);
+    mstep  = m2_new - m2_old;
+
+    if (status)
+      break;
+
+    // dirty backstepping
+    int count = 0;
+    while (gsl_vector_get(s->x, 0) < 0.) {
+      mstep  = mstep / 4.;
+      m2_new = m2_old + mstep;
+      gsl_vector_set(x, 0, m2_new);
+      gsl_multiroot_fsolver_set(s, &f, x);
+      m2_new = gsl_vector_get(s->x, 0);
+      count += 1;
+      if (count > 100) {
+        m2     = NAN;
+        *guess = m2;
+        gsl_multiroot_fsolver_free(s);
+        gsl_vector_free(x);
+        return m2;
+      }
+    }
+
+    status = gsl_multiroot_test_residual(s->f, 9e-9);
+  }
+
+  while (status == GSL_CONTINUE && iter < 100);
+
+  m2 = gsl_vector_get(s->x, 0);
+
+  *guess = m2;
+
+  gsl_multiroot_fsolver_free(s);
+  gsl_vector_free(x);
+
+  return m2;
+}
+
+void dimensionless_lambda1_lambda2_for_m1_mchirp(const int lines,
+    const char *eos, const double mchirp, const double m1, double *m2,
+    struct Lambda *Lambdai) {
+  double guess = m1 - 0.1;
+
+  *m2 = m2_for_m1_mchirp(mchirp, m1, &guess);
+
+  double pt = -1; // we do not care about crust properties here
+  struct tov_solution TOVSolutionM1, TOVSolutionM2;
+
+  FILE *tov   = fopen("tov.out", "w+");
+  FILE *myeos = fopen(eos, "r");
+  solve_tov_equation(lines, pt, myeos, &TOVSolutionM1, m1, tov);
+  fclose(myeos);
+  myeos = fopen(eos, "r");
+  solve_tov_equation(lines, pt, myeos, &TOVSolutionM2, *m2, tov);
+  fclose(myeos);
+  fclose(tov);
+
+  Lambdai->s1 = TOVSolutionM1.lambda_dimless;
+  Lambdai->s2 = TOVSolutionM2.lambda_dimless;
+}
+
+void dimensionless_lambda1_lambda2_relation(const int lines, const char *eos,
+    const double mchirp, const char *outfile) {
+  double pt = -1; // we do not care about crust properties here
+  struct tov_solution tovs;
+
+  FILE * tov   = fopen("tov.out", "w+");
+  FILE * myeos = fopen(eos, "r");
+  double mmax  = solve_tov_equation(lines, pt, myeos, &tovs, 1.4, tov);
+  fclose(myeos);
+  fclose(tov);
+
+  double m1 = mmax;
+  double m2;
+
+  struct Lambda Lambdai;
+
+  FILE *output_file = fopen(outfile, "w+");
+
+  while (m1 > 1.0) {
+    dimensionless_lambda1_lambda2_for_m1_mchirp(
+        lines, eos, mchirp, m1, &m2, &Lambdai);
+
+    fprintf(output_file, "%6f %6f %6f %6f\n", m1, m2, Lambdai.s1, Lambdai.s2);
+
+    m1 -= 0.02;
+  }
+
+  fclose(output_file);
+}
