@@ -43,8 +43,6 @@ int main(int argc, char *argv[]) {
 
     print_state_crust(satdata, sparams, comp, nb, tm, "sol", crust, eos);
 
-    fprintf(stderr, "%g\t%g\n", nb, tm);
-
     nb += nb / 20.;
 
     if (calc_muncl(satdata, sparams, comp, nb, tm, "sol") > 0.) {
@@ -68,8 +66,6 @@ int main(int argc, char *argv[]) {
     }
 
     print_state_crust(satdata, sparams, comp, nb, tm, "sol", crust, eos);
-
-    fprintf(stderr, "%g\t%g\n", nb, tm);
 
     nb += nb / 10.;
   }
