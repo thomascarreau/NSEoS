@@ -29,7 +29,7 @@ int calc_zero_temperature_equation_of_state(struct parameters satdata, double p,
   // ============================= OUTER CRUST =============================
 
   struct compo comp;
-  double       muncl = -1.; // sign of muncl is negative is the outer crust
+  double       mun   = -1.; // sign of mun is negative is the outer crust
   double guess_oc[3] = {60., 0.15, 0.1595}; // initial guess for the ocrust
 
   while (1) {
@@ -40,8 +40,9 @@ int calc_zero_temperature_equation_of_state(struct parameters satdata, double p,
       return lines;
     }
 
-    muncl = calc_muncl(satdata, sparams, comp, nb, tt, phase);
-    if (muncl > 0.) // neutron drip -> transtion to inner crust
+    mun = calc_crust_ws_cell_neutron_chemical_potential(
+        satdata, sparams, comp, nb, tt, phase);
+    if (mun > RMN) // neutron drip -> transtion to inner crust
       break;
 
     pressure =
@@ -249,7 +250,7 @@ void eval_transition_qtt(
   struct compo     comp;
   // initial guess for the ocrust
   double guess_oc[3] = {60., 0.15, 0.9 * satdata.rhosat0};
-  double muncl       = -1.; // sign of muncl is negative is the outer crust
+  double mun         = -1.; // sign of mun is negative is the outer crust
   double nb          = 1.e-6;
   double tt          = 0.;
   char   phase[]     = "sol";
@@ -259,8 +260,9 @@ void eval_transition_qtt(
     if (guess_oc[0] != guess_oc[0]) // exit if nan
       return;
 
-    muncl = calc_muncl(satdata, sparams, comp, nb, tt, phase);
-    if (muncl > 0.) // neutron drip -> transtion to inner crust
+    mun = calc_crust_ws_cell_neutron_chemical_potential(
+        satdata, sparams, comp, nb, tt, phase);
+    if (mun > RMN) // neutron drip -> transtion to inner crust
       break;
 
     nb += nb / 50.;

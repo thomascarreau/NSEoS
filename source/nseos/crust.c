@@ -259,10 +259,10 @@ struct crust_fun_4d calc_crust_fun_zz_fixed(struct parameters satdata,
 
   result.f_beta = 0.;
 
-  result.f_stability = dfiondaa - fion / aa_ -
-                       (1. - del_) / 2. *
-                           (muel + 2 * np_ / aa_ / (1. - del_) * dfiondnp -
-                               2. / aa_ * dfionddel + RMP - RMN);
+  result.f_stability =
+      dfiondaa - fion / aa_ -
+      (1. - del_) / 2. * (muel + 2 * np_ / aa_ / (1. - del_) * dfiondnp -
+                             2. / aa_ * dfionddel + RMP - RMN);
   result.f_muneq = dfiondaa + (1. - del_) / aa_ * dfionddel - (mu - RMN) +
                    ng_ / n0_ * (mu - RMN - ngas.fpernuc);
   result.f_presseq =
@@ -823,58 +823,27 @@ struct compo calc_icrust_composition_w_shl(double nb_, double tt_, char phase[],
   return eq_opt;
 }
 
-double calc_muncl(struct parameters satdata, struct sf_params sparams,
-    struct compo eq, double nb_, double tt_, char phase[]) {
-  double np;
-  double epsa, epsb;
-  double fion_ap, fion_am;
-  double fion_bp, fion_bm;
-  double dfiondaa;
-  double dfionddel;
+double calc_crust_ws_cell_neutron_chemical_potential(struct parameters satdata,
+    struct sf_params sparams, struct compo eq, double nb_, double tt_,
+    char phase[]) {
+  double fdensws = calc_crust_ws_cell_free_energy_density(
+      satdata, sparams, eq, nb_, tt_, phase);
+  double presws =
+      calc_crust_ws_cell_pressure(satdata, sparams, eq, nb_, tt_, phase);
 
-  np = nb_ * (1. - eq.del) / 2.;
-
-  epsa    = 0.001;
-  epsb    = 0.0001;
-  fion_ap = calc_ion_free_en(
-      satdata, sparams, eq.aa + epsa, eq.del, eq.n0, np, eq.ng, tt_, phase);
-  fion_am = calc_ion_free_en(
-      satdata, sparams, eq.aa - epsa, eq.del, eq.n0, np, eq.ng, tt_, phase);
-  fion_bp = calc_ion_free_en(
-      satdata, sparams, eq.aa, eq.del + epsb, eq.n0, np, eq.ng, tt_, phase);
-  fion_bm = calc_ion_free_en(
-      satdata, sparams, eq.aa, eq.del - epsb, eq.n0, np, eq.ng, tt_, phase);
-  dfiondaa  = (fion_ap - fion_am) / 2. / epsa;
-  dfionddel = (fion_bp - fion_bm) / 2. / epsb;
-
-  return dfiondaa + (1. - eq.del) / eq.aa * dfionddel;
+  return (fdensws + presws) / nb_;
 }
 
-double calc_mupcl(struct parameters satdata, struct sf_params sparams,
-    struct compo eq, double nb_, double tt_, char phase[]) {
-  double np;
-  double epsa, epsb;
-  double fion_ap, fion_am;
-  double fion_bp, fion_bm;
-  double dfiondaa;
-  double dfionddel;
+double calc_crust_ws_cell_proton_chemical_potential(struct parameters satdata,
+    struct sf_params sparams, struct compo eq, double nb_, double tt_,
+    char phase[]) {
+  double mun = calc_crust_ws_cell_neutron_chemical_potential(
+      satdata, sparams, eq, nb_, tt_, phase);
+  double np      = (nb_ - eq.ng) * (1. - eq.del) / 2. / (1. - eq.ng / eq.n0);
+  double fdensel = calc_egas_free_energy_density(np, tt_);
+  double presel  = calc_egas_pressure(np, tt_);
 
-  np = nb_ * (1. - eq.del) / 2.;
-
-  epsa    = 0.001;
-  epsb    = 0.0001;
-  fion_ap = calc_ion_free_en(
-      satdata, sparams, eq.aa + epsa, eq.del, eq.n0, np, eq.ng, tt_, phase);
-  fion_am = calc_ion_free_en(
-      satdata, sparams, eq.aa - epsa, eq.del, eq.n0, np, eq.ng, tt_, phase);
-  fion_bp = calc_ion_free_en(
-      satdata, sparams, eq.aa, eq.del + epsb, eq.n0, np, eq.ng, tt_, phase);
-  fion_bm = calc_ion_free_en(
-      satdata, sparams, eq.aa, eq.del - epsb, eq.n0, np, eq.ng, tt_, phase);
-  dfiondaa  = (fion_ap - fion_am) / 2. / epsa;
-  dfionddel = (fion_bp - fion_bm) / 2. / epsb;
-
-  return dfiondaa - (1. + eq.del) / eq.aa * dfionddel;
+  return mun - (fdensel + presel) / np;
 }
 
 double calc_crust_ws_cell_free_energy_density(struct parameters satdata,

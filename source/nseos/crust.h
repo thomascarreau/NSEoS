@@ -70,10 +70,12 @@ struct compo calc_icrust_composition_w_shl(double nb_, double tt_, char phase[],
     double *guess_zz20, struct parameters satdata, struct sf_params sparams);
 
 // energetics
-double calc_muncl(struct parameters satdata, struct sf_params sparams,
-    struct compo eq, double nb_, double tt_, char phase[]);
-double calc_mupcl(struct parameters satdata, struct sf_params sparams,
-    struct compo eq, double nb_, double tt_, char phase[]);
+double calc_crust_ws_cell_neutron_chemical_potential(struct parameters satdata,
+    struct sf_params sparams, struct compo eq, double nb_, double tt_,
+    char phase[]);
+double calc_crust_ws_cell_proton_chemical_potential(struct parameters satdata,
+    struct sf_params sparams, struct compo eq, double nb_, double tt_,
+    char phase[]);
 double calc_crust_ws_cell_free_energy_density(struct parameters satdata,
     struct sf_params sparams, struct compo eq, double nb_, double tt_,
     char phase[]);
