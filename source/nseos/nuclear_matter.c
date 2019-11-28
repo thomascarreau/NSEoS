@@ -1,7 +1,7 @@
+#include <complex.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
-#include <complex.h>
 
 #include "nuclear_matter.h"
 
@@ -107,13 +107,12 @@ struct hnm calc_meta_model_nuclear_matter(struct parameters satdata,
         a00 * u0p + a10 * u1 + a10 * xx * u1p + a20 * u2 * xx +
         0.5 * a20 * xx * xx * u2p +
         a30 / 6. * (3. * xx * xx * u3 + xx * xx * xx * u3p) +
-        ii_ * ii_ *
-            (a02 * u0p + a12 * u1 + a12 * xx * u1p + a22 * xx * u2 +
-                0.5 * a22 * xx * xx * u2p +
-                a32 / 6. * (3. * xx * xx * u3 + xx * xx * xx * u3p));
-    depotpernucdi = 2. * ii_ *
-                    (a02 * u0 + a12 * xx * u1 + 0.5 * a22 * xx * xx * u2 +
-                        1. / 6. * a32 * xx * xx * xx * u3);
+        ii_ * ii_ * (a02 * u0p + a12 * u1 + a12 * xx * u1p + a22 * xx * u2 +
+                        0.5 * a22 * xx * xx * u2p +
+                        a32 / 6. * (3. * xx * xx * u3 + xx * xx * xx * u3p));
+    depotpernucdi =
+        2. * ii_ * (a02 * u0 + a12 * xx * u1 + 0.5 * a22 * xx * xx * u2 +
+                       1. / 6. * a32 * xx * xx * xx * u3);
 
     result.jsym = 5. / 9. * t0fg * pow(1. + 3. * xx, 2. / 3.) *
                       (1. + satdata.barm * (1. + 3. * xx)) +
@@ -172,10 +171,10 @@ struct hnm calc_meta_model_nuclear_matter(struct parameters satdata,
                 0.5 * a22 * xx * xx * u2p +
                 a32 / 6. * (3. * xx * xx * u3 + xx * xx * xx * u3p) +
                 a42 / 24. * (4. * xx * xx * xx * u4 + xx * xx * xx * xx * u4p));
-    depotpernucdi = 2. * ii_ *
-                    (a02 * u0 + a12 * xx * u1 + 0.5 * a22 * xx * xx * u2 +
-                        1. / 6. * a32 * xx * xx * xx * u3 +
-                        1. / 24. * a42 * xx * xx * xx * xx * u4);
+    depotpernucdi =
+        2. * ii_ * (a02 * u0 + a12 * xx * u1 + 0.5 * a22 * xx * xx * u2 +
+                       1. / 6. * a32 * xx * xx * xx * u3 +
+                       1. / 24. * a42 * xx * xx * xx * xx * u4);
 
     result.jsym = 5. / 9. * t0fg * pow(1. + 3. * xx, 2. / 3.) *
                       (1. + satdata.barm * (1. + 3. * xx)) +
@@ -204,18 +203,16 @@ struct hnm calc_meta_model_nuclear_matter(struct parameters satdata,
                 a22 / 2. * (2. * u2 + 4. * xx * u2p + xx * xx * u2pp) +
                 a32 / 6. *
                     (6. * xx * u3 + 6. * xx * xx * u3p + xx * xx * xx * u3pp) +
-                a42 / 24. *
-                    (12. * xx * xx * u4 + 8. * xx * xx * xx * u4p +
-                        xx * xx * xx * xx * u4pp));
+                a42 / 24. * (12. * xx * xx * u4 + 8. * xx * xx * xx * u4p +
+                                xx * xx * xx * xx * u4pp));
   } else {
     epotpernuc =
         a00 * u0 + a10 * xx * u1 + 0.5 * a20 * xx * xx * u2 +
         (a02 * u0 + a12 * xx * u1 + 0.5 * a22 * xx * xx * u2) * ii_ * ii_;
     depotpernucdx = a00 * u0p + a10 * u1 + a10 * xx * u1p + a20 * u2 * xx +
                     0.5 * a20 * xx * xx * u2p +
-                    ii_ * ii_ *
-                        (a02 * u0p + a12 * u1 + a12 * xx * u1p + a22 * xx * u2 +
-                            0.5 * a22 * xx * xx * u2p);
+                    ii_ * ii_ * (a02 * u0p + a12 * u1 + a12 * xx * u1p +
+                                    a22 * xx * u2 + 0.5 * a22 * xx * xx * u2p);
     depotpernucdi =
         2. * ii_ * (a02 * u0 + a12 * xx * u1 + 0.5 * a22 * xx * xx * u2);
 
@@ -276,9 +273,8 @@ struct hnm calc_meta_model_nuclear_matter(struct parameters satdata,
     un = epotpernuc +
          nn_ * (1. / 3. / satdata.rhosat0 * depotpernucdx +
                    diidnn_n * depotpernucdi) +
-         3. / 5. * nn_n *
-             (cpow(HBARC * kfn, 2.) / 2. / RMN -
-                 5. * PI2 / 12. * tt_ * tt_ / efn * rmns / RMN) *
+         3. / 5. * nn_n * (cpow(HBARC * kfn, 2.) / 2. / RMN -
+                              5. * PI2 / 12. * tt_ * tt_ / efn * rmns / RMN) *
              ((satdata.barm + ii_ * satdata.bardel) / satdata.rhosat0 +
                  satdata.bardel * (1. + 3. * xx) * diidnn_n);
 
@@ -356,101 +352,93 @@ double calc_asymmetry_factor(double m_, double ii_) {
   return 0.5 * (cpow(1. + ii_, m_) + cpow(1. - ii_, m_));
 }
 
-double calc_asymmetry_factor_derivative(double m_, double ii_) {
-  return 0.5 * m_ * (cpow(1. + ii_, m_ - 1.) - cpow(1. - ii_, m_ - 1.));
-}
-
 struct hnm calc_skyrme_nuclear_matter(
     struct skyrme_parameters coeff, double nn_, double ii_) {
-  double     f53, f2, f83;
-  double     f53p, f2p, f83p;
-  double     denpernucdn;
-  double     denpernucdi;
   struct hnm result;
 
-  f53  = calc_asymmetry_factor(5. / 3., ii_);
-  f2   = calc_asymmetry_factor(2., ii_);
-  f83  = calc_asymmetry_factor(8. / 3., ii_);
-  f53p = calc_asymmetry_factor_derivative(5. / 3., ii_);
-  f2p  = calc_asymmetry_factor_derivative(2., ii_);
-  f83p = calc_asymmetry_factor_derivative(8. / 3., ii_);
+  double f23, f53, f83;
+  double denpernucdi;
+  double kf;
+  double endens;
 
-  result.enpernuc =
-      3. / 5. * HBARC * HBARC / 2. / RMN * cpow(1.5 * PI2, 2. / 3.) *
-          cpow(nn_, 2. / 3.) * f53 +
-      1. / 8. * coeff.t0 * nn_ *
-          (2. * (coeff.x0 + 2.) - (2. * coeff.x0 + 1.) * f2) +
-      1. / 48. * coeff.t3 * cpow(nn_, coeff.sigma + 1.) *
-          (2. * (coeff.x3 + 2.) - (2. * coeff.x3 + 1.) * f2) +
-      3. / 40. * cpow(1.5 * PI2, 2. / 3.) * cpow(nn_, 5. / 3.) *
-          ((coeff.t1 * (coeff.x1 + 2.) + coeff.t2 * (coeff.x2 + 2.)) * f53 +
-              0.5 *
-                  (coeff.t2 * (2. * coeff.x2 + 1.) -
-                      coeff.t1 * (2. * coeff.x1 + 1.)) *
-                  f83);
+  f23 = calc_asymmetry_factor(2. / 3., ii_);
+  f53 = calc_asymmetry_factor(5. / 3., ii_);
+  f83 = calc_asymmetry_factor(8. / 3., ii_);
+
+  kf = pow(3. * PI2 * nn_ / 2., 1. / 3.);
+  endens =
+      3. * HBARC * HBARC / 20. *
+          (cpow(1. + ii_, 5. / 3.) / RMN + cpow(1 - ii_, 5. / 3.) / RMP) * nn_ *
+          kf * kf +
+      1. / 8. * coeff.t0 * (3. - (1. + 2. * coeff.x0) * ii_ * ii_) * nn_ * nn_ +
+      3. / 40. * coeff.t1 * ((2. + coeff.x1) * f53 - (0.5 + coeff.x1) * f83) *
+          nn_ * nn_ * kf * kf +
+      3. / 40. * coeff.t2 * ((2. + coeff.x2) * f53 + (0.5 + coeff.x2) * f83) *
+          nn_ * nn_ * kf * kf +
+      1. / 48. * coeff.t3 * (3. - (1. + 2. * coeff.x3) * ii_ * ii_) *
+          pow(nn_, coeff.alpha + 2.) +
+      3. / 40. * coeff.t4 * ((2. + coeff.x4) * f53 - (0.5 + coeff.x4) * f83) *
+          pow(nn_, coeff.beta + 2.) * kf * kf +
+      3. / 40. * coeff.t5 * ((2. + coeff.x5) * f53 + (0.5 + coeff.x5) * f83) *
+          pow(nn_, coeff.gamma + 2.) * kf * kf;
+
+  result.enpernuc = endens / nn_;
 
   result.spernuc = 0.;
 
-  denpernucdn =
-      2. / 5. * HBARC * HBARC / 2. / RMN * cpow(1.5 * PI2, 2. / 3.) *
-          cpow(nn_, -1. / 3.) * f53 +
-      1. / 8. * coeff.t0 * (2. * (coeff.x0 + 2.) - (2. * coeff.x0 + 1.) * f2) +
-      1. / 48. * (coeff.sigma + 1.) * coeff.t3 * cpow(nn_, coeff.sigma) *
-          (2. * (coeff.x3 + 2.) - (2. * coeff.x3 + 1.) * f2) +
-      1. / 8. * cpow(1.5 * PI2, 2. / 3.) * cpow(nn_, 2. / 3.) *
-          ((coeff.t1 * (coeff.x1 + 2.) + coeff.t2 * (coeff.x2 + 2.)) * f53 +
-              0.5 *
-                  (coeff.t2 * (2. * coeff.x2 + 1.) -
-                      coeff.t1 * (2. * coeff.x1 + 1.)) *
-                  f83);
+  result.fpernuc = result.enpernuc; // T=0
+
+  result.p =
+      HBARC * HBARC / 10. *
+          (cpow(1. + ii_, 5. / 3.) / RMN + cpow(1. - ii_, 5. / 3.) / RMP) *
+          nn_ * kf * kf +
+      1. / 8. * coeff.t0 * (3. - (1. + 2. * coeff.x0) * ii_ * ii_) * nn_ * nn_ +
+      1. / 8. * coeff.t1 * ((2. + coeff.x1) * f53 - (0.5 + coeff.x1) * f83) *
+          nn_ * nn_ * kf * kf +
+      1. / 8. * coeff.t2 * ((2. + coeff.x2) * f53 + (0.5 + coeff.x2) * f83) *
+          nn_ * nn_ * kf * kf +
+      (coeff.alpha + 1.) / 48. * coeff.t3 *
+          (3. - (1. + 2. * coeff.x3) * ii_ * ii_) * pow(nn_, coeff.alpha + 2.) +
+      (3. * coeff.beta + 5.) / 40. * coeff.t4 *
+          ((2. + coeff.x4) * f53 - (0.5 + coeff.x4) * f83) *
+          pow(nn_, coeff.beta + 2.) * kf * kf +
+      (3. * coeff.gamma + 5.) / 40. * coeff.t5 *
+          ((2. + coeff.x5) * f53 + (0.5 + coeff.x5) * f83) *
+          pow(nn_, coeff.gamma + 2.) * kf * kf;
 
   denpernucdi =
-      3. / 5. * HBARC * HBARC / 2. / RMN * cpow(1.5 * PI2, 2. / 3.) *
-          cpow(nn_, 2. / 3.) * f53p +
-      1. / 8. * coeff.t0 * nn_ *
-          (2. * (coeff.x0 + 2.) - (2. * coeff.x0 + 1.) * f2p) +
-      1. / 48. * coeff.t3 * cpow(nn_, coeff.sigma + 1.) *
-          (2. * (coeff.x3 + 2.) - (2. * coeff.x3 + 1.) * f2p) +
-      3. / 40. * cpow(1.5 * PI2, 2. / 3.) * cpow(nn_, 5. / 3.) *
-          ((coeff.t1 * (coeff.x1 + 2.) + coeff.t2 * (coeff.x2 + 2.)) * f53p +
-              0.5 *
-                  (coeff.t2 * (2. * coeff.x2 + 1.) -
-                      coeff.t1 * (2. * coeff.x1 + 1.)) *
-                  f83p);
+      HBARC * HBARC / 4.0 *
+          (cpow(1. + ii_, 2. / 3.) / RMN - cpow(1. - ii_, 2. / 3.) / RMP) * kf *
+          kf -
+      1. / 4. * coeff.t0 * (1. + 2. * coeff.x0) * ii_ * nn_ +
+      1. / 40. * coeff.t1 *
+          (-(10. + 5 * coeff.x1) * f23 + (14. + 13. * coeff.x1) * f53 -
+              (4. + 8. * coeff.x1) * f83) *
+          nn_ * kf * kf / ii_ +
+      1. / 40. * coeff.t2 *
+          (-(10. + 5 * coeff.x2) * f23 + (6. - 3. * coeff.x2) * f53 +
+              (4. + 8. * coeff.x2) * f83) *
+          nn_ * kf * kf / ii_ -
+      1. / 24. * coeff.t3 * (1. + 2. * coeff.x3) * ii_ *
+          pow(nn_, coeff.alpha + 1.) +
+      1. / 40. * coeff.t4 *
+          (-(10. + 5 * coeff.x4) * f23 + (14. + 13. * coeff.x4) * f53 -
+              (4. + 8. * coeff.x4) * f83) *
+          pow(nn_, coeff.beta + 1.) * kf * kf / ii_ +
+      1. / 40. * coeff.t5 *
+          (-(10. + 5 * coeff.x5) * f23 + (6. - 3. * coeff.x5) * f53 +
+              (4. + 8. * coeff.x5) * f83) *
+          pow(nn_, coeff.gamma + 1.) * kf * kf / ii_;
 
-  result.mun =
-      result.enpernuc + nn_ * (denpernucdn + (1. - ii_) / nn_ * denpernucdi);
+  result.mun = result.enpernuc + 1. / nn_ * result.p + (1. - ii_) * denpernucdi;
 
-  result.mup =
-      result.enpernuc + nn_ * (denpernucdn - (1. + ii_) / nn_ * denpernucdi);
+  result.mup = result.enpernuc + 1. / nn_ * result.p - (1. + ii_) * denpernucdi;
 
-  result.fpernuc = result.enpernuc;   // T=0
+  result.jsym = 0.;
 
-  result.p = nn_ * nn_ * denpernucdn;
+  result.lsym = 0.;
 
-  result.jsym =
-      HBARC * HBARC / 2. / RMN / 3. * cpow(1.5 * PI2, 2. / 3.) *
-          cpow(nn_, 2. / 3.) +
-      1. / 8. * coeff.t0 * nn_ * (1. - coeff.x0) +
-      1. / 48. * coeff.t3 * cpow(nn_, coeff.sigma + 1.) * (1. - coeff.x3) +
-      1. / 24. * cpow(1.5 * PI2, 2. / 3.) * cpow(nn_, 5. / 3.) *
-          (coeff.t2 * (5. * coeff.x2 + 4.) - 3. * coeff.t1 * coeff.x1);
-
-  result.lsym =
-      HBARC * HBARC / RMN / 3. * cpow(1.5 * PI2, 2. / 3.) * cpow(nn_, 2. / 3.) +
-      3. / 8. * coeff.t0 * nn_ * (1. - coeff.x0) +
-      1. / 16. * (coeff.sigma + 1.) * coeff.t3 * cpow(nn_, coeff.sigma + 1.) *
-          (1. - coeff.x3) +
-      5. / 24. * cpow(1.5 * PI2, 2. / 3.) * cpow(nn_, 5. / 3.) *
-          (coeff.t2 * (5. * coeff.x2 + 4.) - 3. * coeff.t1 * coeff.x1);
-
-  result.ksym =
-      -HBARC * HBARC / RMN / 3. * cpow(1.5 * PI2, 2. / 3.) *
-          cpow(nn_, 2. / 3.) +
-      3. / 16. * coeff.sigma * (coeff.sigma + 1.) * coeff.t3 *
-          cpow(nn_, coeff.sigma + 1.) * (1. - coeff.x3) +
-      5. / 12. * cpow(1.5 * PI2, 2. / 3.) * cpow(nn_, 5. / 3.) *
-          (coeff.t2 * (5. * coeff.x2 + 4.) - 3. * coeff.t1 * coeff.x1);
+  result.ksym = 0.;
 
   return result;
 }

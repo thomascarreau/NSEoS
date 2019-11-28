@@ -31,11 +31,10 @@ double     calc_squared_nucleon_sound_velocity( // (vs/c)^2
         struct parameters satdata, int max_order, double nn_, double ii_,
         double tt_);
 
-// Skyrme functional, see: Chabanat et al. (1997)
+// Skyrme functional, see: arXiv:1903.04981
 // !! only for T=0 !!
 //===============================================
 double     calc_asymmetry_factor(double m_, double ii_);
-double     calc_asymmetry_factor_derivative(double m_, double ii_);
 struct hnm calc_skyrme_nuclear_matter(
     struct skyrme_parameters coeff, double nn_, double ii_);
 

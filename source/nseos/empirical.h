@@ -24,11 +24,17 @@ struct skyrme_parameters {
   float t1;
   float t2;
   float t3;
-  float sigma;
+  float t4;
+  float t5;
   float x0;
   float x1;
   float x2;
   float x3;
+  float x4;
+  float x5;
+  float alpha;
+  float beta;
+  float gamma;
 };
 
 void eval_barm_and_bardel(float effm, float isosplit, float *ks, float *kv);

@@ -62,13 +62,13 @@ void print_parameters(struct parameters satdata) {
 
 struct skyrme_parameters assign_skyrme_param(struct skyrme_parameters coeff) {
   FILE *fin;
-  float sigmadenom;
 
   fin = fopen("../../input/coeff.in", "r");
-  fscanf(fin, "%f %f %f %f", &coeff.t0, &coeff.t1, &coeff.t2, &coeff.t3);
-  fscanf(fin, "%f", &sigmadenom);
-  fscanf(fin, "%f %f %f %f", &coeff.x0, &coeff.x1, &coeff.x2, &coeff.x3);
-  coeff.sigma = 1 / sigmadenom;
+  fscanf(fin, "%f %f %f %f %f %f", &coeff.t0, &coeff.t1, &coeff.t2, &coeff.t3,
+      &coeff.t4, &coeff.t5);
+  fscanf(fin, "%f %f %f %f %f %f", &coeff.x0, &coeff.x1, &coeff.x2, &coeff.x3,
+      &coeff.x4, &coeff.x5);
+  fscanf(fin, "%f %f %f", &coeff.alpha, &coeff.beta, &coeff.gamma);
   fclose(fin);
 
   return coeff;
