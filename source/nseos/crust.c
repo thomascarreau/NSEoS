@@ -855,7 +855,6 @@ double calc_crust_ws_cell_free_energy_density(struct parameters satdata,
   double     fion;
   struct hnm ngas;
   double     fgdens;
-  double     epsws;
 
   vws = eq.aa * (1. - eq.ng / eq.n0) / (nb_ - eq.ng);
   np  = eq.aa * (1. - eq.del) / 2. / vws;
@@ -869,10 +868,8 @@ double calc_crust_ws_cell_free_energy_density(struct parameters satdata,
       calc_meta_model_nuclear_matter(satdata, TAYLOR_EXP_ORDER, eq.ng, 1., tt_);
   fgdens = eq.ng * ngas.fpernuc;
 
-  epsws = fion / vws + feldenstot + fgdens * (1. - eq.aa / eq.n0 / vws) +
-          np * (RMP - RMN) + nb_ * RMN;
-
-  return epsws;
+  return fion / vws + feldenstot + fgdens * (1. - eq.aa / eq.n0 / vws) +
+         np * (RMP - RMN) + nb_ * RMN;
 }
 
 double calc_ion_pressure(struct parameters satdata, struct sf_params sparams,
