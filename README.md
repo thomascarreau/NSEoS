@@ -27,13 +27,16 @@ Contents
 
 #### Apps
 
-You can find two example apps in `NSEoS/source/apps/`:
+You can find three example apps in `NSEoS/source/apps/`:
 
 * `nseos`, to calculate the composition, the equation of state, and 
     other observables of cold isolated neutron stars for a given nuclear model.
 
 * `crust_crystallization`, to calculate the crust composition and the 
     equation of state at the melting temperature for a given nuclear model.
+
+* `gs_ocrust`, to calculate the ground state of the outer crust for a given 
+    nuclear mass table.
 
 Feel free to write new apps using the functions of the library and to contact 
 carreau@lpccaen.in2p3.fr if you wish to contribute.
@@ -67,6 +70,22 @@ temperature(number density, melting temperature, mass of the cluster, global
 asymmetry in the cluster, number of charges, cluster density, gas density, 
 and radius of the cell). The second output file gives you the EoS at the 
 melting temperature (mass density and pressure).
+
+##### gs_ocrust
+
+In `NSEoS/source/apps/gs_ocrust`:
+
+    make
+    ./gs_ocrust mass_table.data outfile
+
+Nuclear mass tables can be found in `NSEoS/source/input/mass_tables`. The 
+format of the tables is charge number, mass number, mass excess. You can use 
+the script `mergeTables.py` to merge two mass tables. For example, if you want 
+to complete AME2012 with HFB-24 theoretical masses then run:
+
+    python mergeTables.py ame2012.data hfb24.data ame2012_plus_hfb24.data
+
+Note that it requires [NumPy](https://numpy.org).
 
 #### Nuclear models
 
