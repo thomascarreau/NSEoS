@@ -52,7 +52,14 @@ struct compo calc_ocrust3d_composition(double nb_, double tt_, char phase[],
     double *guess, struct parameters satdata, struct sf_params sparams);
 
 // outer-crust composition with a nuclear mass table
-struct compo calc_ocrust_composition_with_mass_table(
+struct gs_ocrust {
+  int aa;
+  int zz;
+  double pres;
+  double mun;
+  double mup;
+};
+struct gs_ocrust calc_ocrust_composition_with_mass_table(
     double nb_, double tt_, char phase[], char mass_table[]);
 
 // inner-crust composition w/o quantum effects

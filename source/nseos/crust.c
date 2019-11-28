@@ -412,63 +412,94 @@ struct compo calc_ocrust3d_composition(double nb_, double tt_, char phase[],
   return eq;
 }
 
-struct compo calc_ocrust_composition_with_mass_table(
+struct gs_ocrust calc_ocrust_composition_with_mass_table(
     double nb_, double tt_, char phase[], char mass_table[]) {
   char path_of_mass_table[128] = "../../input/mass_tables/";
   strcat(path_of_mass_table, mass_table);
 
   FILE *table = fopen(path_of_mass_table, "r");
 
-  struct compo eq;
-
-  eq.n0 = -1.;
-  eq.ng = 0.;
+  struct gs_ocrust gs;
 
   int   nn, zz;
   float deps;
 
   int    aa;
-  double ii;
   double np;
   double vws;
 
   double mi;
+  double fdensel;
+  double presel;
+
   double fdenswsmin = 1.e99;
   double fdensws;
 
+  // ion pressure
+  double dnp;
+  double fion_pp, fion_pm;
+  double dfiondnp;
+  double pion;
+
   while (fscanf(table, "%d %d %f", &zz, &nn, &deps) == 3) {
     aa  = nn + zz;
-    ii  = 1. - 2. * (double)zz / (double)aa;
     vws = aa / nb_;
     np  = zz / vws;
 
-    mi = calc_nuclear_mass_from_mass_excess(aa, zz, deps);
+    // common to both phases
+    mi      = calc_nuclear_mass_from_mass_excess(aa, zz, deps);
+    fdensel = calc_egas_free_energy_density(np, tt_);
+    presel  = calc_egas_pressure(np, tt_);
+
+    dnp = np / 1000.0;
 
     if (strcmp(phase, "sol") == 0 || tt_ == 0.) {
       fdensws = mi / vws + calc_lattice_en_for_tm((double)zz, np) / vws +
                 calc_zp_en((double)zz, np, mi) / vws +
                 calc_harmonic_contrib((double)zz, np, mi, tt_) / vws +
-                calc_egas_free_energy_density(np, tt_);
+                calc_anharmonic_contrib((double)zz, np, tt_) / vws + fdensel;
+
+      fion_pp = calc_lattice_en_for_tm((double)zz, np + dnp) +
+                calc_zp_en((double)zz, np + dnp, mi) +
+                calc_harmonic_contrib((double)zz, np + dnp, mi, tt_) +
+                calc_anharmonic_contrib((double)zz, np + dnp, tt_);
+      fion_pm = calc_lattice_en_for_tm((double)zz, np - dnp) +
+                calc_zp_en((double)zz, np - dnp, mi) +
+                calc_harmonic_contrib((double)zz, np - dnp, mi, tt_) +
+                calc_anharmonic_contrib((double)zz, np - dnp, tt_);
+      dfiondnp = (fion_pp - fion_pm) / 2.0 / dnp;
+      pion     = np * np / (double)zz * dfiondnp;
+
     } else if (strcmp(phase, "liq") == 0) {
       fdensws = mi / vws +
                 calc_translational_free_en((double)zz, np, mi, tt_) / vws +
-                calc_total_coulomb_contrib((double)zz, np, tt_) / vws +
-                calc_egas_free_energy_density(np, tt_);
+                calc_total_coulomb_contrib((double)zz, np, tt_) / vws + fdensel;
+
+      fion_pp = calc_translational_free_en((double)zz, np + dnp, mi, tt_) +
+                calc_total_coulomb_contrib((double)zz, np + dnp, tt_);
+      fion_pp = calc_translational_free_en((double)zz, np - dnp, mi, tt_) +
+                calc_total_coulomb_contrib((double)zz, np - dnp, tt_);
+      dfiondnp = (fion_pp - fion_pm) / 2.0 / dnp;
+      pion     = np * np / (double)zz * dfiondnp;
+
     } else {
       fprintf(stderr, "ERROR: phase must be either 'sol' or 'liq'!\n");
       exit(EXIT_FAILURE);
     }
 
     if (fdensws < fdenswsmin) {
-      eq.aa      = aa;
-      eq.del     = ii;
       fdenswsmin = fdensws;
+      gs.aa      = aa;
+      gs.zz      = zz;
+      gs.pres    = presel + pion;
+      gs.mun     = (fdensws + gs.pres) / nb_;
+      gs.mup     = gs.mun - (fdensel + presel) / np;
     }
   }
 
   fclose(table);
 
-  return eq;
+  return gs;
 }
 
 int assign_icrust_fun_4d(const gsl_vector *x, void *params, gsl_vector *f) {
