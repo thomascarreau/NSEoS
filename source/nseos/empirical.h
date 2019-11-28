@@ -40,9 +40,10 @@ struct skyrme_parameters {
 void eval_barm_and_bardel(float effm, float isosplit, float *ks, float *kv);
 
 struct parameters assign_param(char set[], float b);
-void              print_parameters(struct parameters satdata);
+void print_parameters(struct parameters satdata);
 
-struct skyrme_parameters assign_skyrme_param(struct skyrme_parameters coeff);
+struct skyrme_parameters assign_skyrme_param(char skyrme_params[]);
+void print_skyrme_parameters(struct skyrme_parameters skypars);
 
 int read_table_of_sets(
     FILE *sets, struct parameters *satdata, float *m, float *dm);

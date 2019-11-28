@@ -60,18 +60,41 @@ void print_parameters(struct parameters satdata) {
   fprintf(stderr, "%g\n", satdata.b);
 }
 
-struct skyrme_parameters assign_skyrme_param(struct skyrme_parameters coeff) {
-  FILE *fin;
+struct skyrme_parameters assign_skyrme_param(char skyrme_params[]) {
+  struct skyrme_parameters skypars;
+  FILE *                   fin;
 
-  fin = fopen("../../input/coeff.in", "r");
-  fscanf(fin, "%f %f %f %f %f %f", &coeff.t0, &coeff.t1, &coeff.t2, &coeff.t3,
-      &coeff.t4, &coeff.t5);
-  fscanf(fin, "%f %f %f %f %f %f", &coeff.x0, &coeff.x1, &coeff.x2, &coeff.x3,
-      &coeff.x4, &coeff.x5);
-  fscanf(fin, "%f %f %f", &coeff.alpha, &coeff.beta, &coeff.gamma);
+  char path_of_skyrme_params[50] = "../../input/skyrme_params/";
+  strcat(path_of_skyrme_params, skyrme_params);
+
+  fin = fopen(path_of_skyrme_params, "r");
+
+  fscanf(fin, "%f %f %f %f %f %f", &skypars.t0, &skypars.t1, &skypars.t2,
+      &skypars.t3, &skypars.t4, &skypars.t5);
+  fscanf(fin, "%f %f %f %f %f %f", &skypars.x0, &skypars.x1, &skypars.x2,
+      &skypars.x3, &skypars.x4, &skypars.x5);
+  fscanf(fin, "%f %f %f", &skypars.alpha, &skypars.beta, &skypars.gamma);
   fclose(fin);
 
-  return coeff;
+  return skypars;
+}
+
+void print_skyrme_parameters(struct skyrme_parameters skypars) {
+  fprintf(stderr, "t0    = %12f\t MeV.fm^3\n", skypars.t0);
+  fprintf(stderr, "t1    = %12f\t MeV.fm^5\n", skypars.t1);
+  fprintf(stderr, "t2    = %12f\t MeV.fm^5\n", skypars.t2);
+  fprintf(stderr, "t3    = %12f\t MeV.fm^(3+3*alpha)\n", skypars.t3);
+  fprintf(stderr, "t4    = %12f\t MeV.fm^(5+3*beta)\n", skypars.t4);
+  fprintf(stderr, "t5    = %12f\t MeV.fm^(5+3*gamma)\n", skypars.t5);
+  fprintf(stderr, "x0    = %12f\n", skypars.x0);
+  fprintf(stderr, "x1    = %12f\n", skypars.x1);
+  fprintf(stderr, "x2    = %12f\n", skypars.x2);
+  fprintf(stderr, "x3    = %12f\n", skypars.x3);
+  fprintf(stderr, "x4    = %12f\n", skypars.x4);
+  fprintf(stderr, "x5    = %12f\n", skypars.x5);
+  fprintf(stderr, "alpha = %12f\n", skypars.alpha);
+  fprintf(stderr, "beta  = %12f\n", skypars.beta);
+  fprintf(stderr, "gamma = %12f\n", skypars.gamma);
 }
 
 int read_table_of_sets(
