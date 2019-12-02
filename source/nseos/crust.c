@@ -259,10 +259,10 @@ struct crust_fun_4d calc_crust_fun_zz_fixed(struct parameters satdata,
 
   result.f_beta = 0.;
 
-  result.f_stability =
-      dfiondaa - fion / aa_ -
-      (1. - del_) / 2. * (muel + 2 * np_ / aa_ / (1. - del_) * dfiondnp -
-                             2. / aa_ * dfionddel + RMP - RMN);
+  result.f_stability = dfiondaa - fion / aa_ -
+                       (1. - del_) / 2. *
+                           (muel + 2 * np_ / aa_ / (1. - del_) * dfiondnp -
+                               2. / aa_ * dfionddel + RMP - RMN);
   result.f_muneq = dfiondaa + (1. - del_) / aa_ * dfionddel - (mu - RMN) +
                    ng_ / n0_ * (mu - RMN - ngas.fpernuc);
   result.f_presseq =
@@ -477,11 +477,10 @@ struct gs_ocrust calc_ocrust_composition_with_mass_table(
 
       fion_pp = calc_translational_free_en((double)zz, np + dnp, mi, tt_) +
                 calc_total_coulomb_contrib((double)zz, np + dnp, tt_);
-      fion_pp = calc_translational_free_en((double)zz, np - dnp, mi, tt_) +
+      fion_pm = calc_translational_free_en((double)zz, np - dnp, mi, tt_) +
                 calc_total_coulomb_contrib((double)zz, np - dnp, tt_);
       dfiondnp = (fion_pp - fion_pm) / 2.0 / dnp;
       pion     = np * np / (double)zz * dfiondnp;
-
     } else {
       fprintf(stderr, "ERROR: phase must be either 'sol' or 'liq'!\n");
       exit(EXIT_FAILURE);
