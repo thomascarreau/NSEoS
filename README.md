@@ -83,7 +83,7 @@ format of the tables is Z, N, mass excess. You can use
 the script `mergeTables.py` to merge two mass tables. For example, if you want 
 to complete AME2012 data with HFB-24 theoretical masses then run:
 
-    python mergeTables.py ame2012.data hfb24.data ame2012_plus_hfb24.data
+    python3 mergeTables.py ame2012.data hfb24.data ame2012_plus_hfb24.data
 
 Note that it requires [NumPy](https://numpy.org) library.
 
