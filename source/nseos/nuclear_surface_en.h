@@ -29,9 +29,11 @@ struct data {
   double *          be;
   struct parameters satdata;
   double            p;
+  const size_t      lines;
 };
 int              be_f(const gsl_vector *x, void *data, gsl_vector *f);
-struct sf_params fit_sf_params(struct parameters satdata, double p);
+struct sf_params fit_sf_params(
+    struct parameters satdata, double p, char *table);
 struct sf_params {
   double p;
   double sigma0;

@@ -18,7 +18,7 @@ int main(int argc, char *argv[]) {
   float             b       = 10. * log(2.);
   struct parameters satdata = assign_param(argv[1], b);
   double            p       = 3.0;
-  struct sf_params  sparams = fit_sf_params(satdata, p);
+  struct sf_params  sparams = fit_sf_params(satdata, p, TABLE_FOR_SFPAR);
 
   double       nb = 1.0e-8; // initial baryon density
   double       tm;
@@ -35,8 +35,6 @@ int main(int argc, char *argv[]) {
 
   int nd_checker = 0;
 
-  fprintf(stderr, "n_B [/fm^3]\tT_m [MeV]\n");
-
   while (nd_checker == 0) // up to neutron drip density
   {
     tm = eval_melting_temperature(satdata, sparams, nb, &comp, 0);
@@ -45,7 +43,8 @@ int main(int argc, char *argv[]) {
 
     nb += nb / 20.;
 
-    if (calc_muncl(satdata, sparams, comp, nb, tm, "sol") > 0.) {
+    if (calc_crust_ws_cell_neutron_chemical_potential(
+            satdata, sparams, comp, nb, tm, "sol") > RMN) {
       nd_checker = 1;
     }
   }

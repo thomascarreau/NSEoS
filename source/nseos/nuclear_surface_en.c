@@ -1,4 +1,5 @@
 #include <math.h>
+#include <string.h>
 
 #include <gsl/gsl_blas.h>
 #include <gsl/gsl_integration.h>
@@ -84,9 +85,9 @@ double calc_etf_ana_surface_en(
 
   alphanum = -(satdata.ksat0 + 9. * satdata.lasat0 -
                ckin * pow(satdata.rhosat0, 2. / 3.) * (1. + 4. * satdata.barm));
-  alphadenom = 9. * (satdata.lasat0 -
-                        ckin * pow(satdata.rhosat0, 2. / 3.) *
-                            ((1. + satdata.barm) / 3. - satdata.barm));
+  alphadenom =
+      9. * (satdata.lasat0 - ckin * pow(satdata.rhosat0, 2. / 3.) *
+                                 ((1. + satdata.barm) / 3. - satdata.barm));
   alpha = (alphanum / alphadenom);
 
   c0num = satdata.lasat0 * satdata.ksat0 -
@@ -98,12 +99,12 @@ double calc_etf_ana_surface_en(
   c0denom = satdata.rhosat0 * (satdata.ksat0 + 9. * satdata.lasat0 -
                                   ckin * pow(satdata.rhosat0, 2. / 3.) *
                                       (1. + 4. * satdata.barm));
-  c0 = c0num / c0denom;
+  c0      = c0num / c0denom;
 
-  c3num = 9. * pow((satdata.lasat0 -
-                       ckin * pow(satdata.rhosat0, 2. / 3.) *
-                           ((1. + satdata.barm) / 3. - satdata.barm)),
-                   2.);
+  c3num =
+      9. * pow((satdata.lasat0 - ckin * pow(satdata.rhosat0, 2. / 3.) *
+                                     ((1. + satdata.barm) / 3. - satdata.barm)),
+               2.);
   c3denom = pow(satdata.rhosat0, alpha) * c0denom;
   c3      = c3num / c3denom;
 
@@ -154,18 +155,16 @@ double calc_etf_ana_surface_en(
   for (i = 0; i <= imax; i = i + 1) {
     sum1 = sum1 + pow(-1, i) * pow(delmsat, i + 2) / (i + 3) / (i + 4);
     sum2 = sum2 + pow(-1, i) * pow(delmsat, i) / (i + 3) / (i + 4);
-    sum3 = sum3 +
-           pow(-1, i) * pow(delmsat, i + 2) / (i + 3) / (i + 4) *
-               (eta_function(0, i + 2) + 1.);
-    sum4 = sum4 +
-           pow(-1, i) * pow(delmsat, i) / (i + 3) / (i + 4) *
-               (eta_function(0, i + 3) + 1.);
-    sum5 = sum5 +
-           pow(-1, i) * pow(delmsat, i + 2) / (i + 3) / (i + 4) *
-               (eta_function(1, i + 2) + eta_function(0, i + 2) - PI2 / 3.);
-    sum6 = sum6 +
-           pow(-1, i) * pow(delmsat, i) / (i + 3) / (i + 4) *
-               (eta_function(1, i + 3) + eta_function(0, i + 3) - PI2 / 3.);
+    sum3 = sum3 + pow(-1, i) * pow(delmsat, i + 2) / (i + 3) / (i + 4) *
+                      (eta_function(0, i + 2) + 1.);
+    sum4 = sum4 + pow(-1, i) * pow(delmsat, i) / (i + 3) / (i + 4) *
+                      (eta_function(0, i + 3) + 1.);
+    sum5 =
+        sum5 + pow(-1, i) * pow(delmsat, i + 2) / (i + 3) / (i + 4) *
+                   (eta_function(1, i + 2) + eta_function(0, i + 2) - PI2 / 3.);
+    sum6 =
+        sum6 + pow(-1, i) * pow(delmsat, i) / (i + 3) / (i + 4) *
+                   (eta_function(1, i + 3) + eta_function(0, i + 3) - PI2 / 3.);
     sum7 = sum1 + pow(-1, i) * pow(satdata.barm, i + 2) / (i + 3) / (i + 4);
     sum8 = sum2 + pow(-1, i) * pow(satdata.barm, i) / (i + 3) / (i + 4);
   }
@@ -195,11 +194,11 @@ double calc_etf_ana_surface_en(
 
   aslab = pow((cnlsurf0 / clsurf0), 1. / 2.);
 
-  ais    = pow((cnlsurf / clsurf), 1. / 2.); // in fm
-  agaus2 = ais * ais +
-           pow((PI / (1. - hnm12.ksym / 18. / hnm12.jsym)), 1. / 2.) *
-               satdata.rhosat0 / n0_ * 3. * hnm12.jsym * (ii_ - ii_ * ii_) /
-               clsurf * aslab * drhs;
+  ais = pow((cnlsurf / clsurf), 1. / 2.); // in fm
+  agaus2 =
+      ais * ais + pow((PI / (1. - hnm12.ksym / 18. / hnm12.jsym)), 1. / 2.) *
+                      satdata.rhosat0 / n0_ * 3. * hnm12.jsym *
+                      (ii_ - ii_ * ii_) / clsurf * aslab * drhs;
   agaus  = sqrt(agaus2);
   adif   = agaus;
   aratio = adif / r0;
@@ -233,14 +232,13 @@ double calc_etf_ana_surface_en(
   return esurf;
 }
 
-#define N (2353) // (wc -l AME2012.data)
-
 int be_f(const gsl_vector *x, void *data, gsl_vector *f) {
   int *             zz      = ((struct data *)data)->zz;
   int *             aa      = ((struct data *)data)->aa;
   double *          be      = ((struct data *)data)->be;
   struct parameters satdata = ((struct data *)data)->satdata;
   double            p       = ((struct data *)data)->p;
+  const size_t      lines   = ((struct data *)data)->lines;
 
   struct sf_params prms;
   prms.p       = p;
@@ -252,12 +250,11 @@ int be_f(const gsl_vector *x, void *data, gsl_vector *f) {
 
   size_t i;
 
-  for (i = 0; i < N; i++) {
+  for (i = 0; i < lines; i++) {
     double ii = 1. - 2. * zz[i] / aa[i];
     double n0 =
-        satdata.rhosat0 * (1. -
-                              3. * satdata.lsym0 * ii * ii /
-                                  (satdata.ksat0 + satdata.ksym0 * ii * ii));
+        satdata.rhosat0 * (1. - 3. * satdata.lsym0 * ii * ii /
+                                    (satdata.ksat0 + satdata.ksym0 * ii * ii));
     // bulk
     struct hnm meta;
     meta =
@@ -282,21 +279,37 @@ int be_f(const gsl_vector *x, void *data, gsl_vector *f) {
   return GSL_SUCCESS;
 }
 
-struct sf_params fit_sf_params(struct parameters satdata, double p) {
+struct sf_params fit_sf_params(
+    struct parameters satdata, double p, char *table) {
   struct sf_params prms;
 
   const gsl_multifit_fdfsolver_type *T = gsl_multifit_fdfsolver_lmsder;
   gsl_multifit_fdfsolver *           s;
   int                                status, info;
   size_t                             i;
-  const size_t                       n            = N;
-  const size_t                       nb_of_params = 4;
+  size_t                             lines;
+  if (strcmp(table, "spherical_nuclei.data") == 0)
+    lines = 9;
+  else if (strcmp(table, "AME2012.data") == 0)
+    lines = 2353;
+  else if (strcmp(table, "HFB24.data") == 0)
+    lines = 8392;
+  else if (strcmp(table, "BSk24.data") == 0 ||
+           strcmp(table, "BSk22.data") == 0 ||
+           strcmp(table, "BSk25.data") == 0 || strcmp(table, "BSk26.data") == 0)
+    lines = 9896;
+  else {
+    fprintf(stderr, "ERROR: cannot find table to fit surface parameters!");
+    exit(EXIT_FAILURE);
+  }
+  const size_t n            = lines;
+  const size_t nb_of_params = 4;
 
   gsl_matrix *J     = gsl_matrix_alloc(n, nb_of_params);
   gsl_matrix *covar = gsl_matrix_alloc(nb_of_params, nb_of_params);
   int         zz[n], aa[n];
   double      be[n], weights[n];
-  struct data d = {zz, aa, be, satdata, p};
+  struct data d = {zz, aa, be, satdata, p, lines};
   gsl_multifit_function_fdf f;
   double                    x_init[4] = {1.1, 10., 0.6, 1.0};
   gsl_vector_view           x = gsl_vector_view_array(x_init, nb_of_params);
@@ -315,12 +328,10 @@ struct sf_params fit_sf_params(struct parameters satdata, double p) {
   f.params = &d;
 
   // This is the data to be fitted
-  FILE *data = NULL;
-  /* data       = fopen("../../input/masses/spherical_nuclei.data", "r"); // N=9
-   */
-  data = fopen("../../input/masses/AME2012.data", "r"); // N=2353
-  /* data = fopen("../../input/masses/HFB24.data", "r"); // N=8392 */
-  /* data = fopen("../../input/masses/BSk24.data", "r"); // N=9896 */
+  FILE *data               = NULL;
+  char  path_of_table[128] = "../../input/masses/";
+  strcat(path_of_table, table);
+  data = fopen(path_of_table, "r");
   if (data != NULL) {
     for (i = 0; i < n; i++) {
       fscanf(data, "%d %d %lf", &zz[i], &aa[i], &be[i]);
@@ -328,7 +339,7 @@ struct sf_params fit_sf_params(struct parameters satdata, double p) {
     }
     fclose(data);
   } else {
-    fprintf(stderr, "ERROR: file issue\n");
+    fprintf(stderr, "ERROR: file issue!\n");
     exit(0);
   }
 
@@ -353,6 +364,7 @@ struct sf_params fit_sf_params(struct parameters satdata, double p) {
 #define FIT(i) gsl_vector_get(s->x, i)
 #define ERR(i) sqrt(gsl_matrix_get(covar, i, i))
 
+  fprintf(stderr, "p = %g\n", p);
   fprintf(stderr, "summary from method '%s'\n", gsl_multifit_fdfsolver_name(s));
   fprintf(
       stderr, "number of iterations: %zu\n", gsl_multifit_fdfsolver_niter(s));

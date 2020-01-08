@@ -8,15 +8,13 @@
 #include "nuclear_matter.h"
 #include "phyconst.h"
 
-int calc_zero_temperature_equation_of_state(struct parameters satdata, double p,
-    struct transition_qtt *tqtt, int *hd_checker, FILE *crust, FILE *core,
-    FILE *eos) {
+int calc_zero_temperature_equation_of_state(struct parameters satdata,
+    struct sf_params sparams, struct transition_qtt *tqtt, int *hd_checker,
+    FILE *crust, FILE *core, FILE *eos) {
   int lines = 0;
 
   print_parameters(satdata);
-  fprintf(stderr, "p = %g\n\n", p);
-  fprintf(stderr, "==============================================\n\n");
-  struct sf_params sparams = fit_sf_params(satdata, p);
+  fprintf(stderr, "\n==============================================\n\n");
 
   double     nb      = 1e-10;
   double     tt      = 0.;
@@ -244,9 +242,8 @@ int calc_zero_temperature_equation_of_state(struct parameters satdata, double p,
   return lines;
 }
 
-void eval_transition_qtt(
-    struct parameters satdata, double p, struct transition_qtt *tqtt) {
-  struct sf_params sparams = fit_sf_params(satdata, p);
+void eval_transition_qtt(struct parameters satdata, struct sf_params sparams,
+    struct transition_qtt *tqtt) {
   struct compo     comp;
   // initial guess for the ocrust
   double guess_oc[3] = {60., 0.15, 0.9 * satdata.rhosat0};
