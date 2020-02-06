@@ -114,10 +114,11 @@ struct hnm calc_meta_model_nuclear_matter(struct parameters satdata,
         2. * ii_ * (a02 * u0 + a12 * xx * u1 + 0.5 * a22 * xx * xx * u2 +
                        1. / 6. * a32 * xx * xx * xx * u3);
 
-    result.jsym = 5. / 9. * t0fg * pow(1. + 3. * xx, 2. / 3.) *
-                      (1. + satdata.barm * (1. + 3. * xx)) +
-                  a02 * u0 + a12 * xx * u1 + 0.5 * a22 * xx * xx * u2 +
-                  1. / 6 * a32 * xx * xx * xx * u3;
+    result.jsym =
+        5. / 9. * t0fg * pow(1. + 3. * xx, 2. / 3.) *
+            (1. + (satdata.barm + 3. * satdata.bardel) * (1. + 3. * xx)) +
+        a02 * u0 + a12 * xx * u1 + 0.5 * a22 * xx * xx * u2 +
+        1. / 6 * a32 * xx * xx * xx * u3;
 
     result.lsym = 5. / 9. * t0fg * (1. + 3. * xx) *
                       (2. * pow(1. + 3. * xx, -1. / 3.) *
@@ -176,11 +177,12 @@ struct hnm calc_meta_model_nuclear_matter(struct parameters satdata,
                        1. / 6. * a32 * xx * xx * xx * u3 +
                        1. / 24. * a42 * xx * xx * xx * xx * u4);
 
-    result.jsym = 5. / 9. * t0fg * pow(1. + 3. * xx, 2. / 3.) *
-                      (1. + satdata.barm * (1. + 3. * xx)) +
-                  a02 * u0 + a12 * xx * u1 + 0.5 * a22 * xx * xx * u2 +
-                  1. / 6. * a32 * xx * xx * xx * u3 +
-                  1. / 24. * a42 * xx * xx * xx * xx * u4;
+    result.jsym =
+        5. / 9. * t0fg * pow(1. + 3. * xx, 2. / 3.) *
+            (1. + (satdata.barm + 3. * satdata.bardel) * (1. + 3. * xx)) +
+        a02 * u0 + a12 * xx * u1 + 0.5 * a22 * xx * xx * u2 +
+        1. / 6. * a32 * xx * xx * xx * u3 +
+        1. / 24. * a42 * xx * xx * xx * xx * u4;
 
     result.lsym =
         5. / 9. * t0fg * (1. + 3. * xx) *
@@ -216,9 +218,10 @@ struct hnm calc_meta_model_nuclear_matter(struct parameters satdata,
     depotpernucdi =
         2. * ii_ * (a02 * u0 + a12 * xx * u1 + 0.5 * a22 * xx * xx * u2);
 
-    result.jsym = 5. / 9. * t0fg * pow(1. + 3. * xx, 2. / 3.) *
-                      (1. + satdata.barm * (1. + 3. * xx)) +
-                  a02 * u0 + a12 * xx * u1 + 0.5 * a22 * xx * xx * u2;
+    result.jsym =
+        5. / 9. * t0fg * pow(1. + 3. * xx, 2. / 3.) *
+            (1. + (satdata.barm + 3. * satdata.bardel) * (1. + 3. * xx)) +
+        a02 * u0 + a12 * xx * u1 + 0.5 * a22 * xx * xx * u2;
 
     result.lsym =
         5. / 9. * t0fg * (1. + 3. * xx) *
