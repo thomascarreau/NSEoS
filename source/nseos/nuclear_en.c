@@ -218,7 +218,7 @@ double calc_surface_plus_coulomb_energy_density(double nb_, double ii_,
   rn = evaluate_rn(nb_, ii_, n0_, ng_, d_, sparams, phase);
 
   surface_endens   = u * d_ * sigmas / rn;
-  curvature_endens = u * d_ * (d_ - 1.) * sigmac / rn;
+  curvature_endens = u * d_ * (d_ - 1.) * sigmac / rn / rn;
 
   coulomb_endens = u * 2. * PI * ALPHAFS * HBARC * pow(ypnuc * n0_ * rn, 2.) *
                    calc_fd(u, d_);
