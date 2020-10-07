@@ -35,15 +35,16 @@ You can find five example apps in `NSEoS/source/apps/`:
 * `gs_ocrust`, to calculate the ground state of the outer crust for a given 
     nuclear mass table.
 
-* `bayes`, for the Bayesian inference of neutron star observables. See [Carreau, Thomas, Francesca Gulminelli, and Jérôme Margueron. "Bayesian analysis of the crust-core transition with a compressible liquid-drop model." The European Physical Journal A 55.10 (2019): 188](https://link.springer.com/article/10.1140/epja/i2019-12884-1) and [Carreau, Thomas, Francesca Gulminelli, and Jérôme Margueron. "General predictions for the neutron star crustal moment of inertia." Physical Review C 100.5 (2019): 055803](https://journals.aps.org/prc/abstract/10.1103/PhysRevC.100.055803) for published results.
+* `bayes`, for the Bayesian inference of neutron star observables. For published results, see [Carreau, Thomas, Francesca Gulminelli, and Jérôme Margueron. "Bayesian analysis of the crust-core transition with a compressible liquid-drop model." The European Physical Journal A 55.10 (2019): 188](https://link.springer.com/article/10.1140/epja/i2019-12884-1) and [Carreau, Thomas, Francesca Gulminelli, and Jérôme Margueron. "General predictions for the neutron star crustal moment of inertia." Physical Review C 100.5 (2019): 055803](https://journals.aps.org/prc/abstract/10.1103/PhysRevC.100.055803).
 
 * `crust_crystallization`, to calculate the crust composition and the 
     equation of state at the crystallization temperature for a given nuclear 
-    model. See [Carreau, T., et al. "Crystallization of the inner crust of a neutron star and the influence of shell effects." Astronomy & Astrophysics 635 (2020): A84](https://www.aanda.org/articles/aa/full_html/2020/08/aa38347-20/aa38347-20.html) for published results.
+    model. For published results, see [Carreau, T., et al. "Crystallization of the inner crust of a neutron star and the influence of shell effects." Astronomy & Astrophysics 635 (2020): A84](https://www.aanda.org/articles/aa/full_html/2020/08/aa38347-20/aa38347-20.html).
 
-* `mcp_icrust`, for the multicomponent Coulomb plasma calculation in the free 
-    neutron regime with a perturbative implementation of the nuclear 
-    statistical equilibrium for a given nuclear model. See [Carreau, T., A. F. Fantina, and F. Gulminelli. "Inner crust of a neutron star at the point of crystallization in a multicomponent approach." Astronomy & Astrophysics 640 (2020): A77.](https://www.aanda.org/articles/aa/abs/2020/08/aa38347-20/aa38347-20.html) for published results.
+* `mcp_icrust`, to calculate the composition of the the multicomponent Coulomb 
+    plasma in the free neutron regime with a perturbative implementation of the 
+    nuclear statistical equilibrium for a given nuclear model at a given 
+    temperature. For published results, see [Carreau, T., A. F. Fantina, and F. Gulminelli. "Inner crust of a neutron star at the point of crystallization in a multicomponent approach." Astronomy & Astrophysics 640 (2020): A77](https://www.aanda.org/articles/aa/abs/2020/08/aa38347-20/aa38347-20.html).
 
 Feel free to write new apps using the functions of the library and to contact 
 thomascarreau@protonmail.com if you wish to contribute.
@@ -55,15 +56,16 @@ In `NSEoS/source/apps/nseos`:
     make
     ./nseos set.in crust.out core.out eos.out tov.out
 
-The first output file gives you the crust composition (number density, mass of 
+The first output file gives you the crust composition: number density, mass of 
 the cluster, global asymmetry in the cluster, number of charges, cluster 
-density, gas density, and radius of the cell). The second output file gives you 
-the core composition (number density, fraction of protons, electrons, and 
-muons). The third output file gives you the EoS (mass density and pressure). 
-Finally, the last output file gives you the TOV solution (central density, 
-central pressure, radius, mass, core radius, core mass, normalized moment of 
-inertia, fraction of moment of inertia residing in the crust, tidal love 
-number, and dimensionless tidal deformability).
+density, gas density, and radius of the cell. The second output file gives you 
+the core composition: number density, fraction of protons, electrons, and 
+muons. The third output file gives you the equation of state: mass density and 
+pressure. Finally, the last output file gives you the 
+Tolman-Oppenheimer-Volkoff solution: central density, central pressure, radius, 
+mass, core radius, core mass, normalized moment of inertia, fraction of moment 
+of inertia residing in the crust, tidal love number, and dimensionless tidal 
+deformability.
 
 ##### gs_ocrust
 
@@ -88,6 +90,12 @@ In `NSEoS/source/apps/bayes`:
     make
     ./bayes
 
+The output files give you the posterior distribution of parameters and 
+observables, as well as the equation of state and the 
+Tolman-Oppenheimer-Volkoff solution for each set of empirical parameters of the 
+posterior distribution. You can change the size of the prior distribution by 
+editing the script `priorDistribution.py`.
+
 ##### crust_crystallization
 
 In `NSEoS/source/apps/crust_crystallization`:
@@ -96,10 +104,10 @@ In `NSEoS/source/apps/crust_crystallization`:
     ./crust_crystallization set.in crust.out eos.out
 
 The first output file gives you the crust composition at the melting 
-temperature(number density, melting temperature, mass of the cluster, global 
+temperature: number density, melting temperature, mass of the cluster, global 
 asymmetry in the cluster, number of charges, cluster density, gas density, 
-and radius of the cell). The second output file gives you the EoS at the 
-melting temperature (mass density and pressure).
+and radius of the cell. The second output file gives you the equation of state 
+at the melting temperature: mass density and pressure.
 
 ##### mcp_icrust
 
@@ -107,6 +115,13 @@ In `NSEoS/source/apps/mcp_icrust`:
 
     make
     ./mcp_icrust set.in > icrust.out
+
+The output file gives you the composition of the multicomponent Coulomb plasma 
+at the chosen temperature: pressure, baryon density, temperature, proton 
+density, neutron gas density, neutron/proton chemical potential, average cell 
+volume/cluster mass/cell mass/cluster charge, impurity parameter, most probable 
+cluster mass/cell mass/cluster charge, and cluster mass/cell mass/cluster 
+charge as obtained within the one-component plasma approximation.
 
 #### Nuclear models
 
@@ -138,7 +153,7 @@ In `NSEoS/source/apps/mcp_icrust`:
 
 * SLy4: `sly4.in`
 
-##### RMF models
+##### Relativistic mean-field models
 
 * DDME2: `ddme2.in`
 
