@@ -53,116 +53,77 @@ void get_low_density_posterior(FILE *prior, FILE *posterior) {
 }
 
 void get_high_density_posterior(FILE *prior, FILE *posterior_par,
-    FILE *posterior_spar, FILE *posterior_obs, size_t posterior_size) {
+    FILE *posterior_spar, FILE *posterior_obs, const double mmax_obs,
+    size_t posterior_size) {
   struct parameters satdata;
   float             m, dm;
-
-  double              qsat_ld, zsat_ld;
-  double              qsym_ld, zsym_ld;
-  double              qsat_hd, zsat_hd;
-  double              qsym_hd, zsym_hd;
-  const gsl_rng_type *T;
-  gsl_rng *           r;
-  gsl_rng_env_setup();
-  T = gsl_rng_default;
-  r = gsl_rng_alloc(T);
 
   size_t set_no = 0;
   size_t count  = 0;
   char   eos[128];
   char   tov[128];
 
-  struct sf_params sparams_ld, sparams_hd;
+  double           p = 3.0;
+  struct sf_params sparams;
+
+  fprintf(posterior_par,
+      "nsat,esat,ksat,qsat,zsat,esym,lsym,ksym,qsym,zsym,m,dm,b\n");
+  fprintf(posterior_spar, "sigma0,b,sigma0c,beta,chi2\n");
+  fprintf(posterior_obs,
+      "mmax,rhoc14,pc14,r14,nt,pt,rcore14,mcore14,inorm14,ifrac14,lambda14\n");
 
   while (read_table_of_sets(prior, &satdata, &m, &dm) == 0 &&
          count <= posterior_size) {
     set_no++;
     fprintf(stderr, "- Set no %zu -\n", set_no);
 
-    qsat_ld = satdata.qsat0;
-    zsat_ld = satdata.zsat0;
-    qsym_ld = satdata.qsym0;
-    zsym_ld = satdata.zsym0;
+    // CAUSALITY, STABILITY, SYM EN ===================================
+    sparams = fit_sf_params(satdata, p, TABLE_FOR_SFPAR);
+    struct transition_qtt tqtt;
+    tqtt.nt          = 0.0005;
+    int   hd_checker = 0;
+    FILE *mycrust    = fopen("crust.out", "w+");
+    FILE *mycore     = fopen("core.out", "w+");
+    snprintf(eos, sizeof(eos), "eos/eos%zu.out", count);
+    FILE *myeos = fopen(eos, "w+");
+    int   lines = calc_zero_temperature_equation_of_state(
+        satdata, sparams, &tqtt, &hd_checker, mycrust, mycore, myeos);
+    fclose(mycrust);
+    fclose(mycore);
+    fclose(myeos);
 
-    for (int j = 0; j < 10; j++) {
-      satdata.qsat0 = (1488. + 369.) * gsl_rng_uniform(r) - 369.;
-      satdata.zsat0 = (185. + 4478.) * gsl_rng_uniform(r) - 4478.;
-      satdata.qsym0 = (400. + 1178.) * gsl_rng_uniform(r) - 1178.;
-      satdata.zsym0 = (1298. + 1369.) * gsl_rng_uniform(r) - 1369.;
-
-      // CAUSALITY, STABILITY, SYM EN ===================================
-      sparams_hd     = fit_sf_params(satdata, 3.0, TABLE_FOR_SFPAR);
-      struct transition_qtt tqtt_hd;
-      int                   hd_checker = 0;
-      FILE *                mycrust    = fopen("crust.out", "w+");
-      FILE *                mycore     = fopen("core.out", "w+");
-      snprintf(eos, sizeof(eos), "eos/eos%zu.out", count);
-      FILE *myeos = fopen(eos, "w+");
-      int lines   = calc_zero_temperature_equation_of_state(
-          satdata, sparams_hd, &tqtt_hd, &hd_checker, mycrust, mycore, myeos);
-      fclose(mycrust);
-      fclose(mycore);
+    // TEST MAX MASS, OBSERVABLES =====================================
+    if (hd_checker == 0 && tqtt.nt > 0.01) {
+      myeos = fopen(eos, "r");
+      struct tov_solution tovs14;
+      snprintf(tov, sizeof(tov), "tov/tov%zu.out", count);
+      FILE * mytov = fopen(tov, "w+");
+      double mmax =
+          solve_tov_equation(lines, tqtt.pt, myeos, &tovs14, 1.4, mytov);
       fclose(myeos);
+      fclose(mytov);
+      if (mmax < mmax_obs) {
+        hd_checker = 1;
+        fprintf(stderr, "Mmax = %g Msun < Mmax(obs)\n", mmax);
+      } else {
+        fprintf(posterior_par, "%g,%g,%g,%g,%g,%g,%g,%g,%g,%g,%g,%g,%g\n",
+            satdata.rhosat0, satdata.lasat0, satdata.ksat0, satdata.qsat0,
+            satdata.zsat0, satdata.jsym0, satdata.lsym0, satdata.ksym0,
+            satdata.qsym0, satdata.zsym0, m, dm, satdata.b);
+        fprintf(posterior_spar, "%g,%g,%g,%g,%g\n", sparams.sigma0, sparams.b,
+            sparams.sigma0c, sparams.beta, sparams.chi2);
+        fprintf(posterior_obs, "%g,%g,%g,%g,%g,%g,%g,%g,%g,%g,%g\n", mmax,
+            tovs14.rhoc, tovs14.pc, tovs14.r, tqtt.nt, tqtt.pt, tovs14.rcore,
+            tovs14.mcore, tovs14.i_over_mr2,
+            tovs14.icrust_over_mr2 / tovs14.i_over_mr2, tovs14.lambda_dimless);
 
-      // TEST MAX MASS, OBSERVABLES =====================================
-      if (hd_checker == 0) {
-        qsat_hd = satdata.qsat0;
-        zsat_hd = satdata.zsat0;
-        qsym_hd = satdata.qsym0;
-        zsym_hd = satdata.zsym0;
-
-        satdata.qsat0 = qsat_ld;
-        satdata.zsat0 = zsat_ld;
-        satdata.qsym0 = qsym_ld;
-        satdata.zsym0 = zsym_ld;
-        sparams_ld     = fit_sf_params(satdata, 3.0, TABLE_FOR_SFPAR);
-        struct transition_qtt tqtt_ld;
-        tqtt_ld.nt = 0.0005;
-
-        eval_transition_qtt(satdata, sparams_ld, &tqtt_ld);
-
-        if (tqtt_ld.nt > 0.01) {
-          myeos = fopen(eos, "r");
-          struct tov_solution tovs14;
-          snprintf(tov, sizeof(tov), "tov/tov%zu.out", count);
-          FILE * mytov = fopen(tov, "w+");
-          double mmax =
-              solve_tov_equation(lines, tqtt_ld.pt, myeos, &tovs14, 1.4, mytov);
-          fclose(myeos);
-          fclose(mytov);
-          if (mmax < 1.97) {
-            hd_checker = 1;
-            fprintf(stderr, "Mmax = %g < 1.97 Msun\n", mmax);
-          } else {
-            fprintf(posterior_par,
-                "%g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g\n",
-                satdata.rhosat0, satdata.lasat0, satdata.ksat0, qsat_ld,
-                qsat_hd, zsat_ld, zsat_hd, satdata.jsym0, satdata.lsym0,
-                satdata.ksym0, qsym_ld, qsym_hd, zsym_ld, zsym_hd, m, dm,
-                satdata.b);
-            fprintf(posterior_spar, "%g %g %g %g %g %g %g %g %g %g\n",
-                sparams_ld.sigma0, sparams_hd.sigma0, sparams_ld.b,
-                sparams_hd.b, sparams_ld.sigma0c, sparams_hd.sigma0c,
-                sparams_ld.beta, sparams_hd.beta, sparams_ld.chi2,
-                sparams_hd.chi2);
-            fprintf(posterior_obs, "%g %g %g %g %g %g %g %g %g %g %g\n", mmax,
-                tovs14.rhoc, tovs14.pc, tovs14.r, tqtt_ld.nt, tqtt_ld.pt,
-                tovs14.rcore, tovs14.mcore, tovs14.i_over_mr2,
-                tovs14.icrust_over_mr2 / tovs14.i_over_mr2,
-                tovs14.lambda_dimless);
-
-            count++;
-            if (count == posterior_size) {
-              gsl_rng_free(r);
-              return;
-            }
-          }
+        count++;
+        if (count == posterior_size) {
+          return;
         }
       }
     }
   }
-
-  gsl_rng_free(r);
 }
 
 void calc_observables(
@@ -180,12 +141,12 @@ void calc_observables(
     while (read_table_of_sets(posterior, &satdata, &m, &dm) == 0) {
       prms = fit_sf_params(satdata, 3.0, TABLE_FOR_SFPAR);
       struct transition_qtt tqtt;
-      int   hd_checker = 0;
+      int                   hd_checker = 0;
 
-      FILE *fcrust     = fopen("crust.out", "w+");
-      FILE *fcore      = fopen("core.out", "w+");
-      FILE *feos       = fopen("eos.out", "w+");
-      int   lines      = calc_zero_temperature_equation_of_state(
+      FILE *fcrust = fopen("crust.out", "w+");
+      FILE *fcore  = fopen("core.out", "w+");
+      FILE *feos   = fopen("eos.out", "w+");
+      int   lines  = calc_zero_temperature_equation_of_state(
           satdata, prms, &tqtt, &hd_checker, fcrust, fcore, feos);
       fclose(fcrust);
       fclose(fcore);
@@ -219,12 +180,12 @@ void calc_observables(
       for (int i = 0; i < 3; i++) {
         prms = fit_sf_params(satdata, p[i], TABLE_FOR_SFPAR);
         struct transition_qtt tqtt;
-        int   hd_checker = 0;
+        int                   hd_checker = 0;
 
-        FILE *fcrust     = fopen("crust.out", "w+");
-        FILE *fcore      = fopen("core.out", "w+");
-        FILE *feos       = fopen("eos.out", "w+");
-        int   lines      = calc_zero_temperature_equation_of_state(
+        FILE *fcrust = fopen("crust.out", "w+");
+        FILE *fcore  = fopen("core.out", "w+");
+        FILE *feos   = fopen("eos.out", "w+");
+        int   lines  = calc_zero_temperature_equation_of_state(
             satdata, prms, &tqtt, &hd_checker, fcrust, fcore, feos);
         fclose(fcrust);
         fclose(fcore);

@@ -20,7 +20,8 @@ void get_low_density_posterior(FILE *prior, FILE *posterior);
 //  * maximum mass
 // ====================
 void get_high_density_posterior(FILE *prior, FILE *posterior_par,
-    FILE *posterior_spar, FILE *posterior_obs, size_t posterior_size);
+    FILE *posterior_spar, FILE *posterior_obs, const double mmax_obs,
+    size_t posterior_size);
 
 void calc_observables(
     FILE *posterior, int p_switch, FILE *observables, FILE *new_posterior);
