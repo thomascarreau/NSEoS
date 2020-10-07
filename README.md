@@ -35,7 +35,7 @@ You can find five example apps in `NSEoS/source/apps/`:
 * `gs_ocrust`, to calculate the ground state of the outer crust for a given 
     nuclear mass table.
 
-* `bayes`, for the Bayesian inference of neutron star observables.
+* `bayes`, for the Bayesian inference of neutron star observables. See [Carreau, Thomas, Francesca Gulminelli, and Jérôme Margueron. "Bayesian analysis of the crust-core transition with a compressible liquid-drop model." The European Physical Journal A 55.10 (2019): 188](https://link.springer.com/article/10.1140/epja/i2019-12884-1) and [Carreau, Thomas, Francesca Gulminelli, and Jérôme Margueron. "General predictions for the neutron star crustal moment of inertia." Physical Review C 100.5 (2019): 055803](https://journals.aps.org/prc/abstract/10.1103/PhysRevC.100.055803) for published results.
 
 * `crust_crystallization`, to calculate the crust composition and the 
     equation of state at the crystallization temperature for a given nuclear 
@@ -43,7 +43,7 @@ You can find five example apps in `NSEoS/source/apps/`:
 
 * `mcp_icrust`, for the multicomponent Coulomb plasma calculation in the free 
     neutron regime with a perturbative implementation of the nuclear 
-    statistical equilibrium for a given nuclear model.
+    statistical equilibrium for a given nuclear model. See [Carreau, T., A. F. Fantina, and F. Gulminelli. "Inner crust of a neutron star at the point of crystallization in a multicomponent approach." Astronomy & Astrophysics 640 (2020): A77.](https://www.aanda.org/articles/aa/abs/2020/08/aa38347-20/aa38347-20.html) for published results.
 
 Feel free to write new apps using the functions of the library and to contact 
 thomascarreau@protonmail.com if you wish to contribute.
