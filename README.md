@@ -65,19 +65,6 @@ central pressure, radius, mass, core radius, core mass, normalized moment of
 inertia, fraction of moment of inertia residing in the crust, tidal love 
 number, and dimensionless tidal deformability).
 
-##### crust_crystallization
-
-In `NSEoS/source/apps/crust_crystallization`:
-
-    make
-    ./crust_crystallization set.in crust.out eos.out
-
-The first output file gives you the crust composition at the melting 
-temperature(number density, melting temperature, mass of the cluster, global 
-asymmetry in the cluster, number of charges, cluster density, gas density, 
-and radius of the cell). The second output file gives you the EoS at the 
-melting temperature (mass density and pressure).
-
 ##### gs_ocrust
 
 In `NSEoS/source/apps/gs_ocrust`:
@@ -93,6 +80,33 @@ to complete AME2012 data with HFB-24 theoretical masses then run:
     python3 mergeTables.py ame2012.data hfb24.data ame2012_plus_hfb24.data
 
 Note that it requires [NumPy](https://numpy.org) library.
+
+##### bayes
+
+In `NSEoS/source/apps/bayes`:
+
+    make
+    ./bayes
+
+##### crust_crystallization
+
+In `NSEoS/source/apps/crust_crystallization`:
+
+    make
+    ./crust_crystallization set.in crust.out eos.out
+
+The first output file gives you the crust composition at the melting 
+temperature(number density, melting temperature, mass of the cluster, global 
+asymmetry in the cluster, number of charges, cluster density, gas density, 
+and radius of the cell). The second output file gives you the EoS at the 
+melting temperature (mass density and pressure).
+
+##### mcp_icrust
+
+In `NSEoS/source/apps/mcp_icrust`:
+
+    make
+    ./mcp_icrust set.in > icrust.out
 
 #### Nuclear models
 
