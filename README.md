@@ -4,7 +4,7 @@ NSEoS
 NSEoS (Neutron Star Equation of State) is a library that aims to provide the 
 useful tools to calculate the composition, the equation of state, and 
 observables of neutron stars according to different nuclear models. 
-Please contact carreau@lpccaen.in2p3.fr if you have any questions.
+Please contact thomascarreau@protonmail.com if you have any questions.
 
 Contents
 --------
@@ -27,19 +27,26 @@ Contents
 
 #### Apps
 
-You can find three example apps in `NSEoS/source/apps/`:
+You can find five example apps in `NSEoS/source/apps/`:
 
 * `nseos`, to calculate the composition, the equation of state, and 
     other observables of cold isolated neutron stars for a given nuclear model.
 
-* `crust_crystallization`, to calculate the crust composition and the 
-    equation of state at the melting temperature for a given nuclear model.
-
 * `gs_ocrust`, to calculate the ground state of the outer crust for a given 
     nuclear mass table.
 
+* `bayes`, for the Bayesian inference of neutron star observables.
+
+* `crust_crystallization`, to calculate the crust composition and the 
+    equation of state at the crystallization temperature for a given nuclear 
+    model. See [Carreau, T., et al. "Crystallization of the inner crust of a neutron star and the influence of shell effects." Astronomy & Astrophysics 635 (2020): A84](https://www.aanda.org/articles/aa/full_html/2020/08/aa38347-20/aa38347-20.html) for published results.
+
+* `mcp_icrust`, for the multicomponent Coulomb plasma calculation in the free 
+    neutron regime with a perturbative implementation of the nuclear 
+    statistical equilibrium for a given nuclear model.
+
 Feel free to write new apps using the functions of the library and to contact 
-carreau@lpccaen.in2p3.fr if you wish to contribute.
+thomascarreau@protonmail.com if you wish to contribute.
 
 ##### nseos
 
@@ -133,7 +140,7 @@ Note that it requires [NumPy](https://numpy.org) library.
 
 ##### More
 
-We use the [meta-modeling technique](https://arxiv.org/abs/1708.06894) to 
+We use the [metamodeling technique](https://arxiv.org/abs/1708.06894) to 
 mimic existing nuclear models with very good accuracy. The input parameters are 
 the successive density derivatives of nuclear matter energy (`lasat0`, 
 `ksat0`, `qsat0`, `zsat0`, `jsym0`, `lsym0`, `ksym0`, `qsym0`, and `zsym0`) and 
